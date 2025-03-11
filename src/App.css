@@ -1,4 +1,4 @@
-.App {
+/* .App {
   text-align: center;
 }
 
@@ -35,4 +35,74 @@
   to {
     transform: rotate(360deg);
   }
+} */
+
+/* Header Section Style */
+.haitianLogo{
+width:70% !important;
+}
+
+.header_Service_Text{
+font-size: 22px;
+font-weight: bolder;
+}
+
+/* Submit button style */
+.submitbutton {
+  width: 30%;
+  font-size: 18px !important;
+  color: white !important;
+  background-color: #1364AE !important;
+  border: 2px solid #1364AE !important; /* Ensures border visibility */
+  transition: all 0.3s ease-in-out; /* Smooth transition */
+}
+
+.submitbutton:hover {
+  background-color: white !important;
+  color: #1364AE !important;
+  border: 2px solid #1364AE !important; /* Keeps border on hover */
+}
+
+/* Media Queries  Style */
+
+@media only screen and (max-width: 2560px) {
+  .haitianLogo{
+    width:30% !important;
+    }
+}
+
+@media only screen and (max-width: 1444px) {
+  .haitianLogo{
+    width:30% !important;
+    }
+}
+
+@media only screen and (max-width: 1026px) {
+  .haitianLogo{
+    width:50% !important;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+  .haitianLogo{
+    width:70% !important;
+    }
+}
+
+@media only screen and (max-width: 427px) {
+  .haitianLogo{
+    width:70% !important;
+    }
+}
+
+@media only screen and (max-width: 377px) {
+  .haitianLogo{
+    width:70% !important;
+    }
+}
+
+@media only screen and (max-width: 326px) {
+  .haitianLogo{
+    width:70% !important;
+    }
 }
