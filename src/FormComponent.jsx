@@ -677,32 +677,32 @@ export default function FormComponent() {
         doc.text(line, 20, nextY);
       });
 
-      nextY += 10;
+      // nextY += 10;
 
-      if (nextY + 20 > pageHeight) {
-        doc.addPage(); // Add a new page if there's not enough space
-        nextY = 15; // Reset Y position for new page
-        addPageNumber();
-      }
-      nextY = checkPageLimit(nextY, 30);
+      // if (nextY + 20 > pageHeight) {
+      //   doc.addPage(); // Add a new page if there's not enough space
+      //   nextY = 15; // Reset Y position for new page
+      //   addPageNumber();
+      // }
+      // nextY = checkPageLimit(nextY, 30);
 
-      // Now add the Notes section
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.text("Parts Used", 20, nextY);
+      // // Now add the Notes section
+      // doc.setFontSize(14);
+      // doc.setFont("helvetica", "bold");
+      // doc.text("Parts Used", 20, nextY);
 
-      partsUsed.forEach((part) => {
-        doc.setFontSize(14);
-        doc.setFont("helvetica", "bold");
-        doc.text("Part Number", 20, nextY + 10);
-        doc.setFont("helvetica", "normal");
+      // partsUsed.forEach((part) => {
+      //   doc.setFontSize(14);
+      //   doc.setFont("helvetica", "bold");
+      //   doc.text("Part Number", 20, nextY + 10);
+      //   doc.setFont("helvetica", "normal");
       
-        doc.text(part.partNumber, 20, nextY + 16); // ✅ Fix: Make sure part exists
-        doc.text(part.description, 60, nextY + 16); // Example: Add part description
-        doc.text(part.quantity.toString(), 120, nextY + 16); // Example: Add quantity
+      //   doc.text(part.partNumber, 20, nextY + 16); // ✅ Fix: Make sure part exists
+      //   doc.text(part.description, 60, nextY + 16); // Example: Add part description
+      //   doc.text(part.quantity.toString(), 120, nextY + 16); // Example: Add quantity
       
-        nextY += 10; // Move Y down for the next part
-      });
+      //   nextY += 10; // Move Y down for the next part
+      // });
       
 
       resetHeader();
@@ -821,16 +821,16 @@ export default function FormComponent() {
         message.success("Form submitted successfully!");
         generatePDF(formData, checkboxValues, partsUsed);
 
-        // form.resetFields();
-        // setData([
-        //   {
-        //     key: Date.now(),
-        //     partNumber: "",
-        //     description: "",
-        //     quantity: "",
-        //     note: "",
-        //   },
-        // ]);
+        form.resetFields();
+        setData([
+          {
+            key: Date.now(),
+            partNumber: "",
+            description: "",
+            quantity: "",
+            note: "",
+          },
+        ]);
         sigTechnician.current?.clear();
         sigManager.current?.clear();
         sigCustomer.current?.clear();
