@@ -354,6 +354,9 @@ export default function FormComponent() {
 
   const generatePDF = (formData, checkboxValues, partsUsed) => {
     const doc = new jsPDF();
+    const startX = 20; // Left margin
+    const colWidths = [40, 60, 20, 50]; // Column widths
+    const rowHeight = 8; // Row height
     const pageHeight = doc.internal.pageSize.height; // ✅ Move this to the top
     let pageNumber = 1; // Start page numbering
     const bottomMargin = 30;
@@ -451,10 +454,10 @@ export default function FormComponent() {
 
       doc.setFont("helvetica", "normal");
 
-      const maxWidth = 80;
+      const maxAddressWidth = 80;
       const addressLines = doc.splitTextToSize(
         formData.address?.toString() || "N/A",
-        maxWidth
+        maxAddressWidth
       );
 
       let addressStartY = nextY + 6;
@@ -525,9 +528,8 @@ export default function FormComponent() {
       doc.setFont("helvetica", "normal");
       doc.text(formattedReturnDate, 20, nextY + 6);
 
-      nextY += 15; // Space before Report Type
+      nextY += 15;
 
-      // ✅ Fix Report Type Section (Same Line, Proper Checkmarks)
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
       doc.text("Report Type", 20, nextY);
@@ -578,7 +580,7 @@ export default function FormComponent() {
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
       doc.text("Description of work/of defect/failure mode", 20, nextY);
-
+      nextY -= 1;
       const maxDescriptionWidth = 170;
       doc.setFont("helvetica", "normal");
       const description = doc.splitTextToSize(
@@ -615,6 +617,7 @@ export default function FormComponent() {
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
       doc.text("Notes/Further action required", 20, nextY);
+      nextY -= 1;
 
       // Ensure notes are properly split into lines
       const maxNotesWidth = 170;
@@ -652,6 +655,7 @@ export default function FormComponent() {
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
       doc.text("Cause of Failure", 20, nextY);
+      nextY -= 1;
 
       // Ensure notes are properly split into lines
       const maxcauseOfFailureWidth = 170;
@@ -696,14 +700,616 @@ export default function FormComponent() {
       //   doc.setFont("helvetica", "bold");
       //   doc.text("Part Number", 20, nextY + 10);
       //   doc.setFont("helvetica", "normal");
-      
+
       //   doc.text(part.partNumber, 20, nextY + 16); // ✅ Fix: Make sure part exists
       //   doc.text(part.description, 60, nextY + 16); // Example: Add part description
       //   doc.text(part.quantity.toString(), 120, nextY + 16); // Example: Add quantity
-      
+
       //   nextY += 10; // Move Y down for the next part
       // });
-      
+
+      const addPageNumber = () => {
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+
+        doc.text(
+          `Page ${pageNumber}`,
+          doc.internal.pageSize.width / 2,
+          pageHeight - 10,
+          { align: "center" }
+        );
+        pageNumber++;
+        doc.setFont("helvetica", "normal");
+      };
+
+      // Function to draw table headers
+      const drawTableHeaders = () => {
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+
+        doc.text("Part Number", startX + 2, nextY + 5);
+        doc.text("Description", startX + colWidths[0] + 2, nextY + 5);
+        doc.text(
+          "Quantity",
+          startX + colWidths[0] + colWidths[1] + 2,
+          nextY + 5
+        );
+        doc.text(
+          "Note",
+          startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
+          nextY + 5
+        );
+
+        doc.rect(startX, nextY, colWidths[0], rowHeight);
+        doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
+        doc.rect(
+          startX + colWidths[0] + colWidths[1],
+          nextY,
+          colWidths[2],
+          rowHeight
+        );
+        doc.rect(
+          startX + colWidths[0] + colWidths[1] + colWidths[2],
+          nextY,
+          colWidths[3],
+          rowHeight
+        );
+
+        nextY += rowHeight;
+      };
+
+      // **Ensure space before table starts**
+      if (nextY + 20 > pageHeight) {
+        doc.addPage();
+        doc.setFont("helvetica", "normal");
+        nextY = 25;
+        resetHeader();
+        addPageNumber();
+      }
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Parts Used", startX, nextY + 10);
+      nextY += 13;
+      drawTableHeaders();
+
+      doc.setFont("helvetica", "normal");
+
+      // **Loop Through Parts and Print Rows**
+      // partsUsed.forEach((part) => {
+      //   let partNumberLines = doc.splitTextToSize(
+      //     part.partNumber || "N/A",
+      //     colWidths[0] - 5
+      //   );
+      //   let descriptionLines = doc.splitTextToSize(
+      //     part.description || "N/A",
+      //     colWidths[1] - 5
+      //   );
+      //   let quantityLines = doc.splitTextToSize(
+      //     part.quantity.toString() || "N/A",
+      //     colWidths[2] - 5
+      //   );
+      //   let noteLines = doc.splitTextToSize(
+      //     part.note || "N/A",
+      //     colWidths[3] - 5
+      //   );
+
+      //   let maxLines = Math.max(
+      //     partNumberLines.length,
+      //     descriptionLines.length,
+      //     quantityLines.length,
+      //     noteLines.length
+      //   );
+      //   let rowHeightTotal = maxLines * rowHeight;
+
+      //   // **Ensure the full row fits on the current page**
+      //   if (nextY + rowHeightTotal > pageHeight - 30) {
+      //     addPageNumber(); // Add page number before adding a new page
+      //     doc.setFont("helvetica", "normal");
+      //     doc.addPage();
+      //     nextY = 25;
+      //     resetHeader();
+      //     drawTableHeaders();
+      //   }
+      //   doc.setFont("helvetica", "normal");
+
+      //   // **Print each wrapped line dynamically**
+      //   // for (let i = 0; i < maxLines; i++) {
+      //   //   if (partNumberLines[i])
+      //   //     doc.text(partNumberLines[i], startX + 2, nextY + 5);
+      //   //   if (descriptionLines[i])
+      //   //     doc.text(descriptionLines[i], startX + colWidths[0] + 2, nextY + 5);
+      //   //   if (quantityLines[i])
+      //   //     doc.text(
+      //   //       quantityLines[i],
+      //   //       startX + colWidths[0] + colWidths[1] + 2,
+      //   //       nextY + 5
+      //   //     );
+      //   //   if (noteLines[i])
+      //   //     doc.text(
+      //   //       noteLines[i],
+      //   //       startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
+      //   //       nextY + 5
+      //   //     );
+      //   //   nextY += rowHeight;
+      //   // }
+
+      //   for (let i = 0; i < maxLines; i++) {
+      //     // ✅ **Check if we need to add a new page before printing each line**
+      //     if (nextY + rowHeight > pageHeight - 30) {
+      //       addPageNumber();
+      //       doc.addPage();
+      //       nextY = 25;
+      //       resetHeader();
+      //       drawTableHeaders();
+      //     }
+
+      //     // ✅ **Now print the text in the correct column positions**
+      //     if (partNumberLines[i]) doc.text(partNumberLines[i], startX + 2, nextY + 5);
+      //     if (descriptionLines[i]) doc.text(descriptionLines[i], startX + colWidths[0] + 2, nextY + 5);
+      //     if (quantityLines[i]) doc.text(quantityLines[i], startX + colWidths[0] + colWidths[1] + 2, nextY + 5);
+      //     if (noteLines[i]) doc.text(noteLines[i], startX + colWidths[0] + colWidths[1] + colWidths[2] + 2, nextY + 5);
+
+      //     nextY += rowHeight; // Move Y position down
+      //   }
+
+      //   // **Draw Borders Around Each Row**
+      //   doc.rect(startX, nextY - rowHeightTotal, colWidths[0], rowHeightTotal);
+      //   doc.rect(
+      //     startX + colWidths[0],
+      //     nextY - rowHeightTotal,
+      //     colWidths[1],
+      //     rowHeightTotal
+      //   );
+      //   doc.rect(
+      //     startX + colWidths[0] + colWidths[1],
+      //     nextY - rowHeightTotal,
+      //     colWidths[2],
+      //     rowHeightTotal
+      //   );
+      //   doc.rect(
+      //     startX + colWidths[0] + colWidths[1] + colWidths[2],
+      //     nextY - rowHeightTotal,
+      //     colWidths[3],
+      //     rowHeightTotal
+      //   );
+      // });
+
+      //100% Working code
+
+      partsUsed.forEach((part) => {
+        let partNumberLines = doc.splitTextToSize(
+          part.partNumber || "N/A",
+          colWidths[0] - 5
+        );
+        let descriptionLines = doc.splitTextToSize(
+          part.description || "N/A",
+          colWidths[1] - 5
+        );
+        let quantityLines = doc.splitTextToSize(
+          part.quantity.toString() || "N/A",
+          colWidths[2] - 5
+        );
+        let noteLines = doc.splitTextToSize(
+          part.note || "N/A",
+          colWidths[3] - 5
+        );
+
+        let maxLines = Math.max(
+          partNumberLines.length,
+          descriptionLines.length,
+          quantityLines.length,
+          noteLines.length
+        );
+        let rowHeightTotal = maxLines * rowHeight;
+
+        // **Ensure bottom margin of 30px is maintained**
+        if (nextY + rowHeightTotal > pageHeight - 30) {
+          addPageNumber();
+          doc.addPage();
+          nextY = 25;
+          resetHeader();
+          drawTableHeaders();
+        }
+
+        // **Print each wrapped line dynamically**
+        // for (let i = 0; i < maxLines; i++) {
+        //   // ✅ **Check if we need to add a new page before printing each line**
+        //   if (nextY + rowHeight > pageHeight - 30) {
+        //     addPageNumber();
+        //     doc.addPage();
+        //     nextY = 25;
+        //     resetHeader();
+        //     drawTableHeaders();
+        //   }
+
+        // ✅ **Now print the text in the correct column positions**
+        //   if (partNumberLines[i]) doc.text(partNumberLines[i], startX + 2, nextY + 5);
+        //   if (descriptionLines[i]) doc.text(descriptionLines[i], startX + colWidths[0] + 2, nextY + 5);
+        //   if (quantityLines[i]) doc.text(quantityLines[i], startX + colWidths[0] + colWidths[1] + 2, nextY + 5);
+        //   if (noteLines[i]) doc.text(noteLines[i], startX + colWidths[0] + colWidths[1] + colWidths[2] + 2, nextY + 5);
+
+        //   nextY += rowHeight; // Move Y position down
+        // }
+
+        // ✅ **Draw Borders Around Each Row AFTER ensuring it fits within the page**
+        // doc.rect(startX, nextY - rowHeightTotal, colWidths[0], rowHeightTotal);
+        // doc.rect(startX + colWidths[0], nextY - rowHeightTotal, colWidths[1], rowHeightTotal);
+        // doc.rect(startX + colWidths[0] + colWidths[1], nextY - rowHeightTotal, colWidths[2], rowHeightTotal);
+        // doc.rect(startX + colWidths[0] + colWidths[1] + colWidths[2], nextY - rowHeightTotal, colWidths[3], rowHeightTotal);
+
+        // ✅ Print each wrapped line dynamically with borders
+        for (let i = 0; i < maxLines; i++) {
+          // ✅ Check if we need to add a new page before printing each line
+          if (nextY + rowHeight > pageHeight - 30) {
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "normal");
+            addPageNumber();
+            doc.addPage();
+            nextY = 25;
+            resetHeader();
+            drawTableHeaders();
+          }
+          doc.setFontSize(12);
+          doc.setFont("helvetica", "normal");
+
+          // ✅ Print the text in the correct column positions
+          if (partNumberLines[i])
+            doc.text(partNumberLines[i], startX + 2, nextY + 5);
+          if (descriptionLines[i])
+            doc.text(descriptionLines[i], startX + colWidths[0] + 2, nextY + 5);
+          if (quantityLines[i])
+            doc.text(
+              quantityLines[i],
+              startX + colWidths[0] + colWidths[1] + 2,
+              nextY + 5
+            );
+          if (noteLines[i])
+            doc.text(
+              noteLines[i],
+              startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
+              nextY + 5
+            );
+
+          // ✅ Draw borders for the current line
+          doc.rect(startX, nextY, colWidths[0], rowHeight);
+          doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
+          doc.rect(
+            startX + colWidths[0] + colWidths[1],
+            nextY,
+            colWidths[2],
+            rowHeight
+          );
+          doc.rect(
+            startX + colWidths[0] + colWidths[1] + colWidths[2],
+            nextY,
+            colWidths[3],
+            rowHeight
+          );
+
+          nextY += rowHeight; // Move Y position down
+        }
+      });
+
+      // nextY += 9;
+      // if (nextY + 20 > pageHeight) {
+      //   doc.addPage(); // Add a new page if there's not enough space
+      //   nextY = 15; // Reset Y position for new page
+      //   addPageNumber();
+      // }
+      // nextY = checkPageLimit(nextY, 30);
+
+      // doc.setFontSize(14);
+      // doc.setFont("helvetica", "bold");
+      // doc.text("Service Type", 20, nextY);
+      // nextY -= 2;
+
+      // doc.setFontSize(12);
+      // doc.setFont("helvetica", "normal");
+
+      // const serviceOptions = [
+      //   "F.O.C Commissioning",
+      //   "F.O.C Maintenance",
+      //   "Guarantee",
+      //   "Chargeable Commissioning",
+      //   "Customer Visit",
+      //   "Service contract",
+      //   "Goodwill",
+      // ];
+
+      // let optionServiceX = 20;
+      // const spaceBetweenServiceOptions = 65; // ✅ Adjusted for better spacing
+      // const checkboxSize = 4.5; // ✅ Standardized checkbox size
+
+      // serviceOptions.forEach((option, index) => {
+      //   if (index % 3 === 0 && index !== 0) {
+      //     nextY += 8; // ✅ Move to the next line after 3 checkboxes
+      //     optionServiceX = 20; // Reset X position
+      //   }
+
+      //   const isChecked = checkboxValues[option] || false; // ✅ Ensure it handles undefined values
+
+      //   // Draw the checkbox border
+      //   doc.rect(optionServiceX + 1, nextY + 4.5, checkboxSize, checkboxSize);
+
+      //   // Draw the checkmark inside the box (if selected)
+      //   if (isChecked) {
+      //     doc.setFont("Zapfdingbats"); // ✅ Ensures proper checkmark rendering
+      //     doc.text("4", optionServiceX + 1.5, nextY + 8);
+      //     doc.setFont("helvetica", "normal"); // Reset font after checkmark
+      //   }
+
+      //   // Draw the text next to the checkbox
+      //   doc.text(option, optionServiceX + checkboxSize + 2, nextY + 8);
+
+      //   optionServiceX += spaceBetweenServiceOptions; // Move to the next option position
+      // });
+
+      // Move down for spacing before the section
+      //
+
+      // Service Options Array (Defined Early)
+      const serviceOptions = [
+        "F.O.C Commissioning",
+        "F.O.C Maintenance",
+        "Guarantee",
+        "Chargeable Commissioning",
+        "Customer Visit",
+        "Service contract",
+        "Goodwill",
+      ];
+
+      // Move down for spacing before the section
+      nextY += 12;
+
+      // Calculate total height for the Service Type section
+      const serviceTypeTitleHeight = 14; // Title height
+      const checkboxLineHeight = 7; // Height for each line of checkboxes
+      const numberOfLines = Math.ceil(serviceOptions.length / 3); // Calculate how many lines of checkboxes are needed
+      const estimatedHeight =
+        serviceTypeTitleHeight + numberOfLines * checkboxLineHeight + 5; // Extra space
+
+      // Check if the entire "Service Type" section will fit on the current page
+      if (nextY + estimatedHeight > pageHeight - 30) {
+        addPageNumber(); // ✅ Add page number before a new page
+        doc.addPage(); // ✅ Add a new page if there's not enough space
+        nextY = 25; // ✅ Reset Y position for new page
+        resetHeader(); // ✅ Reset the header on the new page
+      }
+
+      // Service Type Section
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Service Type", 20, nextY + 5);
+      nextY += 4; // Space after the title
+
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+
+      let optionServiceX = 20;
+      const spaceBetweenServiceOptions = 65;
+      const checkboxSize = 4.5;
+
+      serviceOptions.forEach((option, index) => {
+        // Check for line break after every 3 options
+        if (index % 3 === 0 && index !== 0) {
+          nextY += 7; // Move down for the next line of options
+          optionServiceX = 20;
+
+          // Ensure the entire line fits within the page
+          if (nextY + 20 > pageHeight - 30) {
+            addPageNumber(); // ✅ Add page number before a new page
+            doc.addPage(); // ✅ Add a new page if there's not enough space
+            nextY = 25; // ✅ Reset Y position for new page
+            resetHeader(); // ✅ Reset the header on the new page
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.text("Service Type (Continued)", 20, nextY); // ✅ Continued title
+            nextY += 4;
+          }
+        }
+
+        // Draw the checkbox border
+        doc.rect(optionServiceX + 1, nextY + 4.5, checkboxSize, checkboxSize);
+
+        // Draw the checkmark inside the box (if selected)
+        const isChecked = checkboxValues[option] || false;
+        if (isChecked) {
+          doc.setFont("Zapfdingbats");
+          doc.text("4", optionServiceX + 1.5, nextY + 8);
+          doc.setFont("helvetica", "normal");
+        }
+
+        // Draw the text next to the checkbox
+        doc.text(option, optionServiceX + checkboxSize + 2, nextY + 8);
+
+        optionServiceX += spaceBetweenServiceOptions;
+      });
+
+      // Add Signatures Section
+      nextY += 9;
+      if (nextY + 20 > pageHeight) {
+        doc.addPage(); // Add a new page if there's not enough space
+        nextY = 15; // Reset Y position for new page
+        addPageNumber();
+      }
+      nextY = checkPageLimit(nextY, 10);
+
+      // const addSignatures = (signatures, nextY) => {
+      //   doc.setFontSize(12);
+      //   doc.setFont("helvetica", "bold");
+      //   // doc.text("Signatures:", 20, nextY);
+      //   nextY += 0; // Adjust spacing
+
+      //   let signatureHeight = 20; // Signature box height
+      //   let signatureWidth = 50; // Signature box width
+      //   let signatureSpacing = 65; // Space between signatures
+      //   let baseY = nextY + 5; // Adjusted position for images
+
+      //   // Column positions
+      //   let col1X = 20;   // Left column (Technician)
+      //   let col2X = 90;   // Center column (Manager)
+      //   let col3X = 160;  // Right column (Customer)
+
+      //   // Technician Signature
+      //   if (signatures.technician) {
+      //     doc.text("Service Technician:", col1X, nextY);
+      //     doc.addImage(signatures.technician, "PNG", col1X, baseY, signatureWidth, signatureHeight);
+      //   }
+
+      //   // Manager Signature
+      //   if (signatures.manager) {
+      //     doc.text("Service Manager:", col2X, nextY);
+      //     doc.addImage(signatures.manager, "PNG", col2X, baseY, signatureWidth, signatureHeight);
+      //   }
+
+      //   // Customer Signature
+      //   if (signatures.customer) {
+      //     doc.text("Customer Signature:", col3X, nextY);
+      //     doc.addImage(signatures.customer, "PNG", col3X, baseY, signatureWidth, signatureHeight);
+      //   }
+
+      //   return baseY + signatureHeight + 10; // Ensure next section is correctly positioned
+      // };
+
+      // const addSignatures = (signatures, nextY) => {
+      //   doc.setFontSize(12);
+      //   doc.setFont("helvetica", "bold");
+      //   // doc.text("Signatures:", 20, nextY);
+      //   nextY += 10; // Adjust spacing
+
+      //   let signatureHeight = 30; // Default signature height
+      //   let signatureWidth = 60; // Signature width
+      //   let baseY = nextY + 5; // Adjusted Y position for images
+
+      //   // Column positions
+      //   let col1X = 20; // Left column (Technician)
+      //   let col2X = 110; // Right column (Manager)
+      //   let col3X = 65; // Centered for Customer in the next row
+
+      //   let maxHeightRow1 = signatureHeight; // Track tallest signature in row 1
+
+      //   // Row 1: Technician and Manager Signatures
+      //   if (signatures.technician) {
+      //     doc.text("Signature of service technician:", col1X, nextY);
+      //     doc.addImage(
+      //       signatures.technician,
+      //       "PNG",
+      //       col1X,
+      //       baseY,
+      //       signatureWidth,
+      //       signatureHeight
+      //     );
+      //   }
+
+      //   if (signatures.manager) {
+      //     doc.text("Signature of service manager:", col2X, nextY);
+      //     doc.addImage(
+      //       signatures.manager,
+      //       "PNG",
+      //       col2X,
+      //       baseY,
+      //       signatureWidth,
+      //       signatureHeight
+      //     );
+      //   }
+
+      //   // Dynamically adjust height for row 1 (whichever signature is taller)
+      //   let technicianHeight = signatures.technician ? signatureHeight : 0;
+      //   let managerHeight = signatures.manager ? signatureHeight : 0;
+      //   maxHeightRow1 = Math.max(technicianHeight, managerHeight);
+
+      //   nextY = baseY + maxHeightRow1 + 10; // Move to the next row with extra spacing
+
+      //   // Row 2: Customer Signature
+      //   if (signatures.customer) {
+      //     doc.text("Customer signature:", col3X, nextY);
+      //     doc.addImage(
+      //       signatures.customer,
+      //       "PNG",
+      //       col3X,
+      //       nextY + 5,
+      //       signatureWidth,
+      //       signatureHeight
+      //     );
+      //     nextY += signatureHeight + 10; // Move down for the next section
+      //   }
+
+      //   return nextY; // Return updated Y position for further content
+      // };
+
+      // // Before saving the PDF, call addSignatures()
+      // nextY = addSignatures(formData.signatures, nextY);
+
+
+      const addSignatures = (signatures, nextY) => {
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+    
+        // Title for Signatures Section
+        const signatureHeight = 30; // Signature height
+        const signatureWidth = 60;  // Signature width
+        const spacing = 5;         // Space between rows and signatures
+        const titleHeight = 14;     // Height for the title
+    
+        // Estimate the total height needed for the signature section
+        const estimatedHeight = titleHeight + signatureHeight * 2 + spacing * 3;
+    
+        // Check if the entire signature section fits on the current page
+        if (nextY + estimatedHeight > pageHeight - 30) {
+            addPageNumber(); // Add page number before creating a new page
+            doc.addPage();   // Create a new page
+            nextY = 25;      // Reset Y position for new page
+            resetHeader();   // Reset header for the new page
+        }
+    
+        // Print the Signatures title
+        nextY += spacing;
+    
+        // Column positions for the signatures
+        const col1X = 20;   // Technician signature position
+        const col2X = 110;  // Manager signature position
+        const col3X = 20;   // Customer signature position (centered below)
+    
+        let baseY = nextY + 5; // Adjusted Y position for images
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        // Row 1: Technician and Manager Signatures
+        if (signatures.technician) {
+            doc.text("Signature of service technician:", col1X, nextY);
+            doc.addImage(signatures.technician, "PNG", col1X, baseY, signatureWidth, signatureHeight);
+        }
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        if (signatures.manager) {
+            doc.text("Signature of service manager:", col2X, nextY);
+            doc.addImage(signatures.manager, "PNG", col2X, baseY, signatureWidth, signatureHeight);
+        }
+    
+        // Adjust Y for the next row based on the tallest signature in Row 1
+        nextY = baseY + signatureHeight + spacing;
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        // Row 2: Customer Signature
+        if (signatures.customer) {
+            // Check if the customer signature fits on the current page
+            if (nextY + signatureHeight + spacing > pageHeight - 30) {
+                addPageNumber(); // Add page number before breaking
+                doc.addPage();   // Add new page if space is insufficient
+                nextY = 25;      // Reset Y position for new page
+                resetHeader();   // Reset header for the new page
+            }
+    
+            doc.text("Customer signature:", col3X, nextY);
+            doc.addImage(signatures.customer, "PNG", col3X, nextY + 5, signatureWidth, signatureHeight);
+            nextY += signatureHeight + spacing;
+        }
+    
+        return nextY; // Return updated Y position for further content
+    };
+    
+    // Call the function to add signatures
+    nextY = addSignatures(formData.signatures, nextY);
+    
 
       resetHeader();
       addPageNumber();
@@ -821,16 +1427,16 @@ export default function FormComponent() {
         message.success("Form submitted successfully!");
         generatePDF(formData, checkboxValues, partsUsed);
 
-        form.resetFields();
-        setData([
-          {
-            key: Date.now(),
-            partNumber: "",
-            description: "",
-            quantity: "",
-            note: "",
-          },
-        ]);
+        // form.resetFields();
+        // setData([
+        //   {
+        //     key: Date.now(),
+        //     partNumber: "",
+        //     description: "",
+        //     quantity: "",
+        //     note: "",
+        //   },
+        // ]);
         sigTechnician.current?.clear();
         sigManager.current?.clear();
         sigCustomer.current?.clear();
