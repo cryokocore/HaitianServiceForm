@@ -1427,16 +1427,16 @@ export default function FormComponent() {
         message.success("Form submitted successfully!");
         generatePDF(formData, checkboxValues, partsUsed);
 
-        // form.resetFields();
-        // setData([
-        //   {
-        //     key: Date.now(),
-        //     partNumber: "",
-        //     description: "",
-        //     quantity: "",
-        //     note: "",
-        //   },
-        // ]);
+        form.resetFields();
+        setData([
+          {
+            key: Date.now(),
+            partNumber: "",
+            description: "",
+            quantity: "",
+            note: "",
+          },
+        ]);
         sigTechnician.current?.clear();
         sigManager.current?.clear();
         sigCustomer.current?.clear();
