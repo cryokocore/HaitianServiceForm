@@ -65,6 +65,16 @@ export default function FormComponent() {
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
   //   const sigCanvas = useRef();
   //   const [signatureData, setSignatureData] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [descriptionText, setDescriptionText] = useState(""); 
+  const [causeOfFailure, setcauseOfFailure] = useState(""); 
+  const [notes, setNotes] = useState(""); 
+  const [address, setAddress] = useState("");
+  const [serialNumber, setSerialNumber] = useState(""); 
+  const [srn, setSRN] = useState(null);
+  
+
+
 
   const [data, setData] = useState([
     {
@@ -76,12 +86,207 @@ export default function FormComponent() {
     },
   ]);
 
+  // const handleInputChange = (key, field, value) => {
+  //   const updatedData = data.map((row) =>
+  //     row.key === key ? { ...row, [field]: value } : row
+  //   );
+  //   setData(updatedData);
+  // };
+
+  // const handleDescriptionTextChange = (e) => {
+  //   let value = e.target.value;
+  //   let lines = value.split("\n");
+
+  //   // Strictly limit to 4 lines
+  //   if (lines.length > 5) {
+  //     message.warning("Input is limited to 5 rows. Any text beyond the 5th row will not be added.");
+  //     return;
+  //   }
+
+  //   // Strictly limit to 200 characters
+  //   if (value.length > 200) {
+  //     message.warning("Maximum 200 characters allowed!");
+  //     return;
+  //   }
+
+  //   setDescriptionText(value); // Update state only if within limits
+  // };
+
+  
+  const handleSerialNumberChange = (e) => {
+    let value = e.target.value;
+    let lines = value.split("\n");
+  
+    // Limit strictly to 5 rows
+    if (lines.length > 3 || value.length > 100) {
+      message.warning("Input limited to 3 lines, 100 characters. Excess text won't be included.");
+      value = lines.slice(0, 5).join("\n"); // Trim excess lines
+    }
+  
+    // Limit strictly to 200 characters
+    // if (value.length > 200) {
+    //   message.warning("Maximum 200 characters allowed!");
+    //   value = value.substring(0, 200); // Trim excess characters
+    // }
+  
+    setSerialNumber(value); // Update state only if within limits
+  };
+
+  const handleAddressChange = (e) => {
+    let value = e.target.value;
+    let lines = value.split("\n");
+  
+    // Limit strictly to 5 rows
+    if (lines.length > 4 || value.length > 120) {
+      message.warning("Input limited to 4 lines, 120 characters. Excess text won't be included.");
+      value = lines.slice(0, 4).join("\n"); // Trim excess lines
+    }
+  
+    // Limit strictly to 200 characters
+    // if (value.length > 200) {
+    //   message.warning("Maximum 200 characters allowed!");
+    //   value = value.substring(0, 200); // Trim excess characters
+    // }
+  
+    setAddress(value); // Update state only if within limits
+  };
+
+const handleDescriptionTextChange = (e) => {
+  let value = e.target.value;
+  let lines = value.split("\n");
+
+  // Limit strictly to 5 rows
+  if (lines.length > 5 || value.length > 200) {
+    message.warning("Input limited to 5 lines, 200 characters. Excess text won't be included.");
+    value = lines.slice(0, 5).join("\n"); // Trim excess lines
+  }
+
+  // Limit strictly to 200 characters
+  // if (value.length > 200) {
+  //   message.warning("Maximum 200 characters allowed!");
+  //   value = value.substring(0, 200); // Trim excess characters
+  // }
+
+  setDescriptionText(value); // Update state only if within limits
+};
+
+const handleCauseTextChange = (e) => {
+  let value = e.target.value;
+  let lines = value.split("\n");
+
+  // Limit strictly to 5 rows
+  if (lines.length > 3 || value.length >100) {
+    message.warning("Input limited to 3 lines, 100 characters. Excess text won't be included.");
+    value = lines.slice(0, 3).join("\n"); // Trim excess lines
+  }
+
+  // Limit strictly to 200 characters
+  // if (value.length > 200) {
+  //   message.warning("Maximum 200 characters allowed!");
+  //   value = value.substring(0, 200); // Trim excess characters
+  // }
+
+  setcauseOfFailure(value); // Update state only if within limits
+};
+
+const handleNotesChange = (e) => {
+  let value = e.target.value;
+  let lines = value.split("\n");
+
+  // Limit strictly to 5 rows
+  if (lines.length > 3 || value.length >100) {
+    message.warning("Input limited to 3 lines, 100 characters. Excess text won't be included.");
+    value = lines.slice(0, 3).join("\n"); // Trim excess lines
+  }
+
+  // Limit strictly to 200 characters
+  // if (value.length > 200) {
+  //   message.warning("Maximum 200 characters allowed!");  
+  //   value = value.substring(0, 200); // Trim excess characters
+  // }
+
+  setNotes(value); // Update state only if within limits
+};
+
+  // const handleInputChange = (key, field, value) => {
+  //   const maxLengths = {
+  //     partNumber: 50,
+  //     description: 70,
+  //     note: 70,
+  //   };
+  //   const fieldNames = {
+  //     partNumber: "Part Number",
+  //     description: "Description",
+  //     note: "Note",
+  //   };
+
+  //   // Check if value exceeds the limit
+  //   if (value.length >= maxLengths[field]) {
+  //     message.warning(
+  //       `${fieldNames[field]} cannot exceed more than ${maxLengths[field]} characters.`
+  //     );
+  //   }
+
+  //   // Update the state
+  //   const updatedData = data.map((row) =>
+  //     row.key === key ? { ...row, [field]: value } : row
+  //   );
+  //   setData(updatedData);
+  // };
+
   const handleInputChange = (key, field, value) => {
+    // Directly update numeric values (e.g., Quantity)
+    if (field === "quantity") {
+      const updatedData = data.map((row) =>
+        row.key === key ? { ...row, [field]: value } : row
+      );
+      setData(updatedData);
+      return; // Exit function early for numeric inputs
+    }
+  
+    // Ensure text inputs are handled correctly
+    let stringValue = typeof value === "string" ? value : value?.toString() || "";
+  
+    const maxLengths = {
+      partNumber: 30,
+      description: 60,
+      note: 60,
+    };
+  
+    const maxRows = {
+      partNumber: 1,
+      description: 1,
+      note: 1,
+    };
+  
+    const fieldMessages = {
+      partNumber: "Input limited to 1 line, 30 characters. Excess text won't be included.",
+      description: "Input limited to 1 line, 60 characters. Excess text won't be included.",
+      note: "Input limited to 1 line, 60 characters. Excess text won't be included.",
+    };
+  
+    let lines = stringValue.split("\n");
+  
+    // Enforce row limits
+    if (lines.length > maxRows[field]) {
+      message.warning(fieldMessages[field]);
+      stringValue = lines.slice(0, maxRows[field]).join("\n");
+    }
+  
+    // Enforce character limits
+    if (stringValue.length > maxLengths[field]) {
+      message.warning(fieldMessages[field]);
+      stringValue = stringValue.substring(0, maxLengths[field]);
+    }
+  
+    // Update the state
     const updatedData = data.map((row) =>
-      row.key === key ? { ...row, [field]: value } : row
+      row.key === key ? { ...row, [field]: stringValue } : row
     );
     setData(updatedData);
   };
+  
+  
 
   // const handleAddRow = () => {
   //   setData([
@@ -102,12 +307,11 @@ export default function FormComponent() {
         key: (data.length + 1).toString(),
         partNumber: "",
         description: "",
-        quantity: 1,
+        quantity: "",
         note: "",
       };
       setData([...data, newRow]);
-    }
-    else {
+    } else {
       message.warning("Rows cannot exceed more than 4!");
     }
   };
@@ -133,17 +337,95 @@ export default function FormComponent() {
     return true;
   };
 
+  // const columns = [
+  //   {
+  //     title: "Part Number",
+  //     dataIndex: "partNumber",
+  //     key: "partNumber",
+  //     render: (_, record) => (
+  //       <Input
+  //         value={record.partNumber}
+  //         onChange={(e) =>
+  //           handleInputChange(record.key, "partNumber", e.target.value)
+  //         }
+  //       />
+  //     ),
+  //   },
+  //   {
+  //     title: "Description",
+  //     dataIndex: "description",
+  //     key: "description",
+  //     render: (_, record) => (
+  //       <Input
+  //         value={record.description}
+  //         onChange={(e) =>
+  //           handleInputChange(record.key, "description", e.target.value)
+  //         }
+  //       />
+  //     ),
+  //   },
+  //   {
+  //     title: "Quantity",
+  //     dataIndex: "quantity",
+  //     key: "quantity",
+  //     render: (_, record) => (
+  //       <InputNumber
+  //         min={1} // Prevents negative or zero values
+  //         value={record.quantity}
+  //         onChange={(value) => handleInputChange(record.key, "quantity", value)}
+  //         style={{ width: "100%" }}
+  //       />
+  //     ),
+  //   },
+  //   {
+  //     title: "Note",
+  //     dataIndex: "note",
+  //     key: "note",
+  //     render: (_, record) => (
+  //       <Input
+  //         value={record.note}
+  //         onChange={(e) =>
+  //           handleInputChange(record.key, "note", e.target.value)
+  //         }
+  //       />
+  //     ),
+  //   },
+  //   {
+  //     title: "Action",
+  //     key: "action",
+  //     render: (_, record) => (
+  //       <Space size="middle">
+  //         <Button type="primary" onClick={handleAddRow}>
+  //           Add
+  //         </Button>
+  //         <Button
+  //           type="primary"
+  //           danger
+  //           onClick={() => handleDeleteRow(record.key)}
+  //           disabled={data.length === 1} // Disables delete button if only one row exists
+  //         >
+  //           Delete
+  //         </Button>
+  //       </Space>
+  //     ),
+  //   },
+  // ];
+
   const columns = [
     {
       title: "Part Number",
       dataIndex: "partNumber",
       key: "partNumber",
+      width: "25%", // Adjust as needed
       render: (_, record) => (
         <Input
           value={record.partNumber}
           onChange={(e) =>
             handleInputChange(record.key, "partNumber", e.target.value)
           }
+          placeholder="Enter the part number"
+          maxLength={50}
+          // showCount
         />
       ),
     },
@@ -151,12 +433,17 @@ export default function FormComponent() {
       title: "Description",
       dataIndex: "description",
       key: "description",
+      width: "35%", // Increased size
       render: (_, record) => (
-        <Input
+        <TextArea
           value={record.description}
           onChange={(e) =>
             handleInputChange(record.key, "description", e.target.value)
           }
+          rows={1}
+          placeholder="Enter the description"
+          maxLength={100}
+          // showCount
         />
       ),
     },
@@ -164,12 +451,14 @@ export default function FormComponent() {
       title: "Quantity",
       dataIndex: "quantity",
       key: "quantity",
+      width: "10%", // Reduced size
       render: (_, record) => (
         <InputNumber
-          min={1} // Prevents negative or zero values
+          min={1}
           value={record.quantity}
           onChange={(value) => handleInputChange(record.key, "quantity", value)}
           style={{ width: "100%" }}
+          placeholder="Qty"
         />
       ),
     },
@@ -177,28 +466,34 @@ export default function FormComponent() {
       title: "Note",
       dataIndex: "note",
       key: "note",
+      width: "30%", // Increased size
       render: (_, record) => (
-        <Input
+        <TextArea
           value={record.note}
           onChange={(e) =>
             handleInputChange(record.key, "note", e.target.value)
           }
+          placeholder="Enter the note"
+          maxLength={100}
+          // showCount
+          rows={1}
         />
       ),
     },
     {
       title: "Action",
       key: "action",
+      width: "15%", // Reduced size
       render: (_, record) => (
         <Space size="middle">
-          <Button type="primary" onClick={handleAddRow}>
+          <Button type="primary" onClick={handleAddRow} disabled={isSubmitting}>
             Add
           </Button>
           <Button
             type="primary"
             danger
             onClick={() => handleDeleteRow(record.key)}
-            disabled={data.length === 1} // Disables delete button if only one row exists
+            disabled={isSubmitting || data.length === 1}
           >
             Delete
           </Button>
@@ -206,6 +501,13 @@ export default function FormComponent() {
       ),
     },
   ];
+
+
+  // const fetchSRN = async () => {
+  //   const response = await fetch("https://script.google.com/macros/s/AKfycbxXxFiz19o9ZcIoZQJzOdmTfzPlmmnoSJKwtpztPclLm68221hH0KgJk2FBrYqHHc8G/exec");
+  //   const result = await response.json();
+  //   setSRN(result.srn || 1); // Set SRN in the UI
+  // };
 
   const sigTechnician = useRef();
   const sigManager = useRef();
@@ -2141,7 +2443,7 @@ export default function FormComponent() {
       doc.setFont("Zapfdingbats");
 
       const symbol = isChecked ? "4" : ""; // '4' for tick, 'o' for empty
-      doc.text(`${symbol}`, optionX + 0.9, nextY + 4.5);
+      doc.text(`${symbol}`, optionX + 0.6, nextY + 4.5);
 
       doc.setFont("helvetica", "normal");
 
@@ -2195,7 +2497,7 @@ export default function FormComponent() {
     //   nextY += 5;
     // });
 
-    const colWidths = [50, 65, 18, 57]; // Column widths
+    const colWidths = [40, 65, 18, 65]; // Column widths
     const rowHeight = 8; // Row height
 
     const drawTableHeaders = () => {
@@ -2329,7 +2631,7 @@ export default function FormComponent() {
     //   }
     // });
 
-    const maxRows = 5; // Limit to 5 rows
+    const maxRows = 12; // Limit to 12 rows
     let rowCount = 0; // Track number of printed rows
 
     for (let i = 0; i < partsUsed.length; i++) {
@@ -2405,207 +2707,199 @@ export default function FormComponent() {
     }
 
     // Service Type Section
-// doc.setFont("helvetica", "bold");
-// doc.text("Service Type", 10, nextY + 5);
-// nextY += 6; // Space after the title
+    // doc.setFont("helvetica", "bold");
+    // doc.text("Service Type", 10, nextY + 5);
+    // nextY += 6; // Space after the title
 
-// doc.setFont("helvetica", "normal");
-// doc.setFontSize(9);
+    // doc.setFont("helvetica", "normal");
+    // doc.setFontSize(9);
 
-// const serviceStartX = 10;
-// const checkboxSize = 4;
-// let optionServiceX = serviceStartX;
-// const spaceBetweenOptions = 29; // Space between each option
-// const serviceRowHeight = 10; // Height per row (for 2-line text)
-// let maxServiceRowHeight = serviceRowHeight; // Track max row height
+    // const serviceStartX = 10;
+    // const checkboxSize = 4;
+    // let optionServiceX = serviceStartX;
+    // const spaceBetweenOptions = 29; // Space between each option
+    // const serviceRowHeight = 10; // Height per row (for 2-line text)
+    // let maxServiceRowHeight = serviceRowHeight; // Track max row height
 
-// // Function to split service options into two lines
-// const splitServiceText = (option) => {
-//     const words = option.split(" ");
-//     if (words.length > 1) {
-//         return [words[0], words.slice(1).join(" ")]; // First word on one line, rest on second
-//     } else {
-//         return [option]; // Single-word options remain single-line
-//     }
-// };
+    // // Function to split service options into two lines
+    // const splitServiceText = (option) => {
+    //     const words = option.split(" ");
+    //     if (words.length > 1) {
+    //         return [words[0], words.slice(1).join(" ")]; // First word on one line, rest on second
+    //     } else {
+    //         return [option]; // Single-word options remain single-line
+    //     }
+    // };
 
-// // **Now, draw checkboxes and text in a single row**
-// serviceOptions.forEach((option) => {
-//     const wrappedText = splitServiceText(option); // Split into two lines
+    // // **Now, draw checkboxes and text in a single row**
+    // serviceOptions.forEach((option) => {
+    //     const wrappedText = splitServiceText(option); // Split into two lines
 
-//     // **Draw checkbox centered to row height**
-//     let checkboxY = nextY + (maxServiceRowHeight / 2 - checkboxSize / 2);
-//     doc.rect(optionServiceX, checkboxY, checkboxSize, checkboxSize);
+    //     // **Draw checkbox centered to row height**
+    //     let checkboxY = nextY + (maxServiceRowHeight / 2 - checkboxSize / 2);
+    //     doc.rect(optionServiceX, checkboxY, checkboxSize, checkboxSize);
 
-//     // **Check if the option is selected**
-//     const isChecked = checkboxValues[option] || false;
-//     if (isChecked) {
-//         doc.setFont("Zapfdingbats");
-//         doc.text("4", optionServiceX + 0.8, checkboxY + 3);
-//         doc.setFont("helvetica", "normal");
-//     }
+    //     // **Check if the option is selected**
+    //     const isChecked = checkboxValues[option] || false;
+    //     if (isChecked) {
+    //         doc.setFont("Zapfdingbats");
+    //         doc.text("4", optionServiceX + 0.8, checkboxY + 3);
+    //         doc.setFont("helvetica", "normal");
+    //     }
 
-//     // **Draw text below the checkbox**
-//     let textY = checkboxY + 2;
-//     wrappedText.forEach((line, index) => {
-//         doc.text(line, optionServiceX + checkboxSize+1, textY + index * 3);
-//     });
+    //     // **Draw text below the checkbox**
+    //     let textY = checkboxY + 2;
+    //     wrappedText.forEach((line, index) => {
+    //         doc.text(line, optionServiceX + checkboxSize+1, textY + index * 3);
+    //     });
 
-//     // **Move X position for the next checkbox**
-//     optionServiceX += spaceBetweenOptions;
-// });
+    //     // **Move X position for the next checkbox**
+    //     optionServiceX += spaceBetweenOptions;
+    // });
 
-// // Move Y to the next section after full row
-// nextY += maxServiceRowHeight + 5;
+    // // Move Y to the next section after full row
+    // nextY += maxServiceRowHeight + 5;
 
+    doc.setFont("helvetica", "bold");
+    doc.text("Service Type", 10, nextY + 5);
+    nextY += 6; // Space after the title
 
-doc.setFont("helvetica", "bold");
-doc.text("Service Type", 10, nextY + 5);
-nextY += 6; // Space after the title
+    doc.setFont("helvetica", "normal");
 
-doc.setFont("helvetica", "normal");
+    const serviceStartX = 10;
+    const checkboxSize = 4;
+    let optionServiceX = serviceStartX;
+    const serviceRowHeight = 10; // Height per row (for 2-line text)
+    let maxServiceRowHeight = serviceRowHeight; // Track max row height
 
-const serviceStartX = 10;
-const checkboxSize = 4;
-let optionServiceX = serviceStartX;
-const serviceRowHeight = 10; // Height per row (for 2-line text)
-let maxServiceRowHeight = serviceRowHeight; // Track max row height
+    // Define manual spacing for each option
+    const serviceOptionSpacing = {
+      "F.O.C Commissioning": 33,
+      "F.O.C Maintenance": 28,
+      Guarantee: 26,
+      "Chargeable Commissioning": 33,
+      "Customer Visit": 25,
+      "Service contract": 25,
+      Goodwill: 25,
+    };
 
-// Define manual spacing for each option
-const serviceOptionSpacing = {
-    "F.O.C Commissioning": 33,
-    "F.O.C Maintenance": 28,
-    "Guarantee": 26,
-    "Chargeable Commissioning": 33,
-    "Customer Visit": 25,
-    "Service contract": 25,
-    "Goodwill": 25
-};
-
-// Function to split service options into two lines
-const splitServiceText = (option) => {
-    const words = option.split(" ");
-    if (words.length > 1) {
+    // Function to split service options into two lines
+    const splitServiceText = (option) => {
+      const words = option.split(" ");
+      if (words.length > 1) {
         return [words[0], words.slice(1).join(" ")]; // First word on one line, rest on second
-    } else {
+      } else {
         return [option]; // Single-word options remain single-line
-    }
-};
+      }
+    };
 
-// Now, draw checkboxes and text in a single row
-serviceOptions.forEach((option) => {
-    const wrappedText = splitServiceText(option); // Split into two lines
-    let optionSpacing = serviceOptionSpacing[option] || 30; // Get manual spacing
+    // Now, draw checkboxes and text in a single row
+    serviceOptions.forEach((option) => {
+      const wrappedText = splitServiceText(option); // Split into two lines
+      let optionSpacing = serviceOptionSpacing[option] || 30; // Get manual spacing
 
-    // Center "Guarantee" & "Goodwill" inside the checkbox
-    let textX = optionServiceX + checkboxSize +1;
- 
+      // Center "Guarantee" & "Goodwill" inside the checkbox
+      let textX = optionServiceX + checkboxSize + 1;
 
-    // Draw checkbox centered to row height
-    let checkboxY = nextY + (maxServiceRowHeight / 2 - checkboxSize / 1.5);
-    doc.rect(optionServiceX, checkboxY-1, checkboxSize, checkboxSize);
+      // Draw checkbox centered to row height
+      let checkboxY = nextY + (maxServiceRowHeight / 2 - checkboxSize / 1.5);
+      doc.rect(optionServiceX, checkboxY - 1, checkboxSize, checkboxSize);
 
-    // Check if the option is selected
-    const isChecked = checkboxValues[option] || false;
-    if (isChecked) {
+      // Check if the option is selected
+      const isChecked = checkboxValues[option] || false;
+      if (isChecked) {
         doc.setFont("Zapfdingbats");
-        doc.text("4", optionServiceX + 0.6, checkboxY+2);
+        doc.text("4", optionServiceX + 0.6, checkboxY + 2);
         doc.setFont("helvetica", "normal");
-    }
+      }
 
-    // Draw text below the checkbox
-    let textY = checkboxY+1;
-    if (option === "Guarantee" || option === "Goodwill") {
-      textY += 1; // Adjust to center text manually
-  }
-    wrappedText.forEach((line, index) => {
+      // Draw text below the checkbox
+      let textY = checkboxY + 1;
+      if (option === "Guarantee" || option === "Goodwill") {
+        textY += 1; // Adjust to center text manually
+      }
+      wrappedText.forEach((line, index) => {
         doc.text(line, textX, textY + index * 3.3);
+      });
+
+      // Move X position for the next checkbox
+      optionServiceX += optionSpacing;
     });
 
-    // Move X position for the next checkbox
-    optionServiceX += optionSpacing;
-});
+    // Move Y to the next section after full row
+    nextY += maxServiceRowHeight + 3;
 
-// Move Y to the next section after full row
-nextY += maxServiceRowHeight +3;
+    const addSignatures = (signatures, nextY) => {
+      doc.setFont("helvetica", "bold");
 
-  
+      // Title for Signatures Section
+      const signatureHeight = 30; // Signature height
+      const signatureWidth = 55; // Signature width
+      const spacing = 5; // Space between rows and signatures
+      const titleHeight = 14; // Height for the title
 
-      const addSignatures = (signatures, nextY) => {
-        doc.setFont("helvetica", "bold");
+      const estimatedHeight = titleHeight + signatureHeight * 2 + spacing * 3;
 
-        // Title for Signatures Section
-        const signatureHeight = 30; // Signature height
-        const signatureWidth = 55; // Signature width
-        const spacing = 5; // Space between rows and signatures
-        const titleHeight = 14; // Height for the title
+      // Check if the entire signature section fits on the current page
 
-        const estimatedHeight = titleHeight + signatureHeight * 2 + spacing * 3;
+      // Print the Signatures title
 
-        // Check if the entire signature section fits on the current page
-    
+      // Column positions for the signatures
+      const col1X = 10; // Technician signature position
+      const col2X = 78; // Manager signature position
+      const col3X = 145; // Customer signature position (centered below)
 
-        // Print the Signatures title
-     
+      let baseY = nextY + 1; // Adjusted Y position for images
+      doc.setFont("helvetica", "bold");
+      // Row 1: Technician and Manager Signatures
+      if (signatures.technician) {
+        doc.text("Signature of service technician:", col1X, nextY);
+        doc.addImage(
+          signatures.technician,
+          "PNG",
+          col1X,
+          baseY + 1,
+          signatureWidth,
+          signatureHeight
+        );
+      }
+      doc.setFont("helvetica", "bold");
+      if (signatures.manager) {
+        doc.text("Signature of service manager:", col2X, nextY);
+        doc.addImage(
+          signatures.manager,
+          "PNG",
+          col2X,
+          baseY + 1,
+          signatureWidth,
+          signatureHeight
+        );
+      }
 
-        // Column positions for the signatures
-        const col1X = 10; // Technician signature position
-        const col2X = 78; // Manager signature position
-        const col3X = 145; // Customer signature position (centered below)
+      // Adjust Y for the next row based on the tallest signature in Row 1
+      nextY = baseY;
+      doc.setFont("helvetica", "bold");
+      // Row 2: Customer Signature
+      if (signatures.customer) {
+        // Check if the customer signature fits on the current page
 
-        let baseY = nextY + 1 // Adjusted Y position for images
-        doc.setFont("helvetica", "bold");
-        // Row 1: Technician and Manager Signatures
-        if (signatures.technician) {
-          doc.text("Signature of service technician:", col1X, nextY);
-          doc.addImage(
-            signatures.technician,
-            "PNG",
-            col1X,
-            baseY+1,
-            signatureWidth,
-            signatureHeight
-          );
-        }
-        doc.setFont("helvetica", "bold");
-        if (signatures.manager) {
-          doc.text("Signature of service manager:", col2X, nextY);
-          doc.addImage(
-            signatures.manager,
-            "PNG",
-            col2X,
-            baseY+1,
-            signatureWidth,
-            signatureHeight
-          );
-        }
+        doc.text("Customer signature:", col3X, nextY);
+        doc.addImage(
+          signatures.customer,
+          "PNG",
+          col3X,
+          nextY + 2,
+          signatureWidth,
+          signatureHeight
+        );
+        nextY += signatureHeight + spacing;
+      }
 
-        // Adjust Y for the next row based on the tallest signature in Row 1
-        nextY = baseY;
-        doc.setFont("helvetica", "bold");
-        // Row 2: Customer Signature
-        if (signatures.customer) {
-          // Check if the customer signature fits on the current page
-        
+      return nextY; // Return updated Y position for further content
+    };
 
-          doc.text("Customer signature:", col3X, nextY);
-          doc.addImage(
-            signatures.customer,
-            "PNG",
-            col3X,
-            nextY+2,
-            signatureWidth,
-            signatureHeight
-          );
-          nextY += signatureHeight + spacing;
-        }
-
-        return nextY; // Return updated Y position for further content
-      };
-
-      // Call the function to add signatures
-      nextY = addSignatures(formData.signatures, nextY);
-
+    // Call the function to add signatures
+    nextY = addSignatures(formData.signatures, nextY);
 
     // addField("Work Time", formData.workTime, rightX, nextY);
     // nextY += 8;
@@ -2658,86 +2952,84 @@ nextY += maxServiceRowHeight +3;
     // doc.line(pageWidth / 3, nextY + 5, pageWidth / 3 + 50, nextY + 5);
     // doc.line((2 * pageWidth) / 3, nextY + 5, (2 * pageWidth) / 3 + 50, nextY + 5);
 
-
     // nextY = addSignatures(formData.signatures, nextY);
 
-// doc.setFont("helvetica", "bold");
-// doc.setFontSize(11); // Set font size for company name
-// doc.text("Haitian Middle East F2E", doc.internal.pageSize.width / 2, nextY + 10, { align: "center" });
+    // doc.setFont("helvetica", "bold");
+    // doc.setFontSize(11); // Set font size for company name
+    // doc.text("Haitian Middle East F2E", doc.internal.pageSize.width / 2, nextY + 10, { align: "center" });
 
-// doc.setFontSize(9);
-// doc.text("Sharjah - U.A.E", doc.internal.pageSize.width / 2, nextY + 16, { align: "center" });
+    // doc.setFontSize(9);
+    // doc.text("Sharjah - U.A.E", doc.internal.pageSize.width / 2, nextY + 16, { align: "center" });
 
-// doc.setFontSize(10);
-// doc.text("+971 65 622 238", doc.internal.pageSize.width / 2, nextY + 22, { align: "center" });
+    // doc.setFontSize(10);
+    // doc.text("+971 65 622 238", doc.internal.pageSize.width / 2, nextY + 22, { align: "center" });
 
-// doc.setFontSize(9);
-// doc.text("Email: cso@haitianme.com", doc.internal.pageSize.width / 2, nextY + 28, { align: "center" });
-// doc.text("Web: www.haitianme.com", doc.internal.pageSize.width / 2, nextY + 34, { align: "center" });
+    // doc.setFontSize(9);
+    // doc.text("Email: cso@haitianme.com", doc.internal.pageSize.width / 2, nextY + 28, { align: "center" });
+    // doc.text("Web: www.haitianme.com", doc.internal.pageSize.width / 2, nextY + 34, { align: "center" });
 
+    // const centerX = doc.internal.pageSize.width / 2; // Get center alignment
 
+    // doc.setFont("helvetica", "bold");
+    // doc.setFontSize(10);
+    // doc.text("Haitian Middle East F2E", centerX, nextY + 5, { align: "center" });
 
-// const centerX = doc.internal.pageSize.width / 2; // Get center alignment
+    // doc.setFontSize(9);
+    // doc.text("Sharjah - U.A.E", centerX, nextY + 10, { align: "center" });
 
-// doc.setFont("helvetica", "bold");
-// doc.setFontSize(10);
-// doc.text("Haitian Middle East F2E", centerX, nextY + 5, { align: "center" });
+    // doc.setFontSize(10);
+    // doc.text("+971 65 622 238", centerX, nextY + 14, { align: "center" });
 
-// doc.setFontSize(9);
-// doc.text("Sharjah - U.A.E", centerX, nextY + 10, { align: "center" });
+    // doc.setFontSize(9);
+    // doc.text("Email: cso@haitianme.com", centerX, nextY + 18, { align: "center" });
+    // doc.text("Web: www.haitianme.com", centerX, nextY + 22, { align: "center" });
 
-// doc.setFontSize(10);
-// doc.text("+971 65 622 238", centerX, nextY + 14, { align: "center" });
+    // const centerX = doc.internal.pageSize.width / 2; // Get center alignment
+    // const leftAlignX = 80;  // Adjust for left-side text
+    // const rightAlignX = doc.internal.pageSize.width - 50;  // Adjust for right-side text
 
-// doc.setFontSize(9);
-// doc.text("Email: cso@haitianme.com", centerX, nextY + 18, { align: "center" });
-// doc.text("Web: www.haitianme.com", centerX, nextY + 22, { align: "center" });
+    // // **Company Name - Centered**
+    // doc.setFont("helvetica", "bold");
+    // doc.setFontSize(10);
+    // doc.text("Haitian Middle East F2E", centerX, nextY + 5, { align: "center" });
 
-// const centerX = doc.internal.pageSize.width / 2; // Get center alignment
-// const leftAlignX = 80;  // Adjust for left-side text
-// const rightAlignX = doc.internal.pageSize.width - 50;  // Adjust for right-side text
+    // // **Second Row: "Sharjah - U.A.E" (left) and "+971 65 622 238" (right)**
+    // doc.setFontSize(9);
+    // doc.text("Sharjah - U.A.E", leftAlignX, nextY + 10);
+    // doc.text("+971 65 622 238", rightAlignX-43, nextY + 10, { align: "center" });
 
-// // **Company Name - Centered**
-// doc.setFont("helvetica", "bold");
-// doc.setFontSize(10);
-// doc.text("Haitian Middle East F2E", centerX, nextY + 5, { align: "center" });
+    // // **Third Row: "Email" (left) and "Web" (right)**
+    // doc.text("Email: cso@haitianme.com", leftAlignX-10, nextY + 15);
+    // doc.text("Web: www.haitianme.com", rightAlignX-7, nextY + 15, { align: "right" });
 
-// // **Second Row: "Sharjah - U.A.E" (left) and "+971 65 622 238" (right)**
-// doc.setFontSize(9);
-// doc.text("Sharjah - U.A.E", leftAlignX, nextY + 10);
-// doc.text("+971 65 622 238", rightAlignX-43, nextY + 10, { align: "center" });
+    // const pageHeight = doc.internal.pageSize.height; // Get page height
+    const footerY = pageHeight - 20; // Adjust footer position from bottom
+    const centerX = doc.internal.pageSize.width / 2; // Get center alignment
+    const leftAlignX = 40; // Adjust for left-side text
+    const rightAlignX = doc.internal.pageSize.width - 80; // Adjust for right-side text
 
-// // **Third Row: "Email" (left) and "Web" (right)**
-// doc.text("Email: cso@haitianme.com", leftAlignX-10, nextY + 15);
-// doc.text("Web: www.haitianme.com", rightAlignX-7, nextY + 15, { align: "right" });
+    // **Company Name - Centered**
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("Haitian Middle East F2E", centerX, footerY, { align: "center" });
 
-// const pageHeight = doc.internal.pageSize.height; // Get page height
-const footerY = pageHeight - 20; // Adjust footer position from bottom
-const centerX = doc.internal.pageSize.width / 2; // Get center alignment
-const leftAlignX = 40;  // Adjust for left-side text
-const rightAlignX = doc.internal.pageSize.width - 80;  // Adjust for right-side text
+    // **Second Row: "Sharjah - U.A.E" (left) and "+971 65 622 238" (right)**
+    doc.setFontSize(9);
+    doc.text("Sharjah - U.A.E", leftAlignX + 40, footerY + 6);
+    doc.text("+971 65 622 238", rightAlignX, footerY + 6, { align: "right" });
 
-// **Company Name - Centered**
-doc.setFont("helvetica", "bold");
-doc.setFontSize(10);
-doc.text("Haitian Middle East F2E", centerX, footerY, { align: "center" });
-
-// **Second Row: "Sharjah - U.A.E" (left) and "+971 65 622 238" (right)**
-doc.setFontSize(9);
-doc.text("Sharjah - U.A.E", leftAlignX+40, footerY + 6);
-doc.text("+971 65 622 238", rightAlignX, footerY + 6, { align: "right" });
-
-// **Third Row: "Email" (left) and "Web" (right)**
-doc.text("Email: cso@haitianme.com", leftAlignX+20, footerY + 12);
-doc.text("Web: www.haitianme.com", rightAlignX+15, footerY + 12, { align: "right" });
-
-
+    // **Third Row: "Email" (left) and "Web" (right)**
+    doc.text("Email: cso@haitianme.com", leftAlignX + 20, footerY + 12);
+    doc.text("Web: www.haitianme.com", rightAlignX + 15, footerY + 12, {
+      align: "right",
+    });
 
     doc.save("Service_Report.pdf");
   };
 
   const handleSubmit = async (values) => {
     try {
+      setIsSubmitting(true);
       await form.validateFields();
       const emptyRows = data.some(
         (row) =>
@@ -2803,9 +3095,13 @@ doc.text("Web: www.haitianme.com", rightAlignX+15, footerY + 12, { align: "right
 
       // ✅ Prepare final form data
       const formData = {
+        // srn,// ✅ Include SRN
+
         customerName: values.customerName,
         machineType: values.machineType,
-        address: values.address,
+        // address: values.address,
+        address: address,
+
         serialNumber: values.serialNumber,
         contact: values.contact,
         installationDate: values.installationDate,
@@ -2814,9 +3110,12 @@ doc.text("Web: www.haitianme.com", rightAlignX+15, footerY + 12, { align: "right
         serviceTechnician: values.serviceTechnician,
         departureDate: values.departureDate,
         returnDate: values.returnDate,
-        description: values["description of work/of defect/failure mode"],
-        notes: values["notes/further action required"],
-        causeOfFailure: values["cause of failure"],
+        // description: values["description of work/of defect/failure mode"],
+        description: descriptionText,
+        // notes: values["notes/further action required"],
+        notes: notes,
+        // causeOfFailure: values["cause of failure"],
+        causeOfFailure: causeOfFailure,
         partsUsed: partsUsed,
         signatures: {
           technician: sigTechnician.current?.toDataURL(),
@@ -2831,7 +3130,7 @@ doc.text("Web: www.haitianme.com", rightAlignX+15, footerY + 12, { align: "right
       setLoading(true);
 
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbz4NDitu_BrIShQABbstm4vf9sA4FkREwoj-rbGT4COQ68bfpCkeM5qe28oY22jC3JU1A/exec",
+        "https://script.google.com/macros/s/AKfycbxOGdSLswUFmDuQ-o8CRx_IuOv7FRb2pasitK2hugDbEjvf9AQkjMImEbjFfofpCsg/exec",
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -2845,19 +3144,25 @@ doc.text("Web: www.haitianme.com", rightAlignX+15, footerY + 12, { align: "right
         message.success("Form submitted successfully!");
         generatePDF(formData, checkboxValues, partsUsed);
 
-        form.resetFields();
-        setData([
-          {
-            key: Date.now(),
-            partNumber: "",
-            description: "",
-            quantity: "",
-            note: "",
-          },
-        ]);
-        sigTechnician.current?.clear();
-        sigManager.current?.clear();
-        sigCustomer.current?.clear();
+        // form.resetFields();
+        // setAddress("");
+        // setSerialNumber("");
+        // setDescriptionText("");
+        // setcauseOfFailure("");
+        // setNotes("");
+        
+          // setData([
+          //   {
+          //     key: Date.now(),
+          //     partNumber: "",
+          //     description: "",
+          //     quantity: "",
+          //     note: "",
+          //   },
+          // ]);
+          // sigTechnician.current?.clear();
+          // sigManager.current?.clear();
+          // sigCustomer.current?.clear();
       } else {
         throw new Error(result.message);
       }
@@ -2866,269 +3171,312 @@ doc.text("Web: www.haitianme.com", rightAlignX+15, footerY + 12, { align: "right
       message.error("Submission failed. Please try again.");
     } finally {
       setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
     <>
-          <div className="container pb-1">
-
-      <div className="container border shadow rounded-5  mt-3 pt-3 mb-3 pb-3">
-        <div className="container">
-          <div className="row d-flex align-items-center">
-            <div className="col-12 col-lg-6">
-              <img
-                src={HaitianLogo}
-                alt="HaitianLogo"
-                className="img-fluid haitianLogo"
-              />
-            </div>
-            <div className="col-12 col-lg-6 d-flex justify-content-lg-end">
-              <p className="header_Service_Text">Service No</p>
+      <div className="container pb-1">
+        <div className="container border shadow rounded-5  mt-3 pt-3 mb-3 pb-3">
+          <div className="container">
+            <div className="row d-flex align-items-center">
+              <div className="col-12 col-lg-6">
+                <img
+                  src={HaitianLogo}
+                  alt="HaitianLogo"
+                  className="img-fluid haitianLogo"
+                />
+              </div>
+              <div className="col-12 col-lg-6 d-flex justify-content-lg-end">
+                <p className="header_Service_Text">Service No</p>
+                <p><strong>{srn}</strong></p>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="container  mt-3">
-          <div className="row">
-            <div className="col-12">
-              <Form form={form} layout="vertical" onFinish={handleSubmit}>
-                <div className="row ">
-                  <div className="col-12 col-md-6">
+          <div className="container  mt-3">
+            <div className="row">
+              <div className="col-12">
+                <Form form={form} layout="vertical" onFinish={handleSubmit}>
+                  <div className="row ">
+                    <div className="col-12 col-md-6">
+                      <Form.Item
+                        label="Customer Name"
+                        name="customerName"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please enter customer name",
+                          },
+                          {
+                            pattern: /^[A-Za-z. ]+$/,
+                            message:
+                              "Only letters, spaces, and '.' are allowed",
+                          },
+                        ]}
+                      >
+                        <Input placeholder="Enter customer name" />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Address"
+                        name="address"
+                        rules={[
+                          { required: true, message: "Please enter address" },
+                        ]}
+                      >
+                        {/* <TextArea placeholder="Enter address" 
+                       /> */}
+                          <TextArea
+                        placeholder="Enter address"
+                        value={address}
+                        onChange={handleAddressChange}
+                        autoSize={{ minRows: 3, maxRows: 3 }}
+                        maxLength={120}
+                        showCount 
+                      />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Contact"
+                        name="contact"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please enter contact name",
+                          },
+                          {
+                            pattern: /^[A-Za-z. ]+$/,
+                            message:
+                              "Only letters, spaces, and '.' are allowed",
+                          },
+                        ]}
+                      >
+                        <Input placeholder="Enter contact name" />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Telephone"
+                        name="telephone"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please enter telephone number",
+                          },
+                          {
+                            pattern: /^[0-9+-]+$/,
+                            message: "Only numbers, +, and - are allowed",
+                          },
+                        ]}
+                      >
+                        <Input placeholder="Enter telephone number" />
+                      </Form.Item>
+                    </div>
+
+                    <div className="col-12 col-md-6">
+                      <Form.Item
+                        label="Machine Type"
+                        name="machineType"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please enter machine type",
+                          },
+                        ]}
+                      >
+                        <Input placeholder="Enter machine type" />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Serial Number"
+                        name="serialNumber"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please enter serial number",
+                          },
+                        ]}
+                      >
+                        {/* <TextArea placeholder="Enter serial number" /> */}
+                        <TextArea
+                        placeholder="Enter serial number"
+                        value={serialNumber}
+                        onChange={handleSerialNumberChange}
+                        autoSize={{ minRows: 3, maxRows: 3 }}
+                        maxLength={100}
+                        showCount 
+                      />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Installation Date"
+                        name="installationDate"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please select the installation date",
+                          },
+                        ]}
+                      >
+                        <DatePicker className="w-100" />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Work Time"
+                        name="workTime"
+                        rules={[
+                          { required: true, message: "Please enter work time" },
+                        ]}
+                      >
+                        <Input placeholder="Enter work time" />
+                      </Form.Item>
+                    </div>
+
+                    <div className="col-12 col-lg-4">
+                      <Form.Item
+                        label="Service Technician"
+                        name="serviceTechnician"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please enter service technician",
+                          },
+                          {
+                            pattern: /^[A-Za-z. ]+$/,
+                            message:
+                              "Only letters, spaces, and '.' are allowed",
+                          },
+                        ]}
+                      >
+                        <Input placeholder="Enter service technician name" />
+                      </Form.Item>
+                    </div>
+
+                    <div className="col-12 col-lg-4">
+                      <Form.Item
+                        label="Departure Date"
+                        name="departureDate"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please select the departure date",
+                          },
+                        ]}
+                      >
+                        <DatePicker className="w-100" />
+                      </Form.Item>
+                    </div>
+
+                    <div className="col-12 col-lg-4">
+                      <Form.Item
+                        label="Return Date"
+                        name="returnDate"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please select the return date",
+                          },
+                        ]}
+                      >
+                        <DatePicker className="w-100" />
+                      </Form.Item>
+                    </div>
+
+                    <div className="col-12">
+                      <Form.Item
+                        label="Report"
+                        name="report"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please select at least one report type",
+                          },
+                        ]}
+                      >
+                        <Checkbox.Group options={reportOptions} />
+                      </Form.Item>
+                    </div>
+
                     <Form.Item
-                      label="Customer Name"
-                      name="customerName"
+                      label="Description of work/of defect/failure mode"
+                      name="description of work/of defect/failure mode"
                       rules={[
                         {
                           required: true,
-                          message: "Please enter customer name",
-                        },
-                        {
-                          pattern: /^[A-Za-z. ]+$/,
-                          message: "Only letters, spaces, and '.' are allowed",
+                          message:
+                            "Please enter the description of work/of defect/failure mode",
                         },
                       ]}
                     >
-                      <Input placeholder="Enter customer name" />
-                    </Form.Item>
-
-                    <Form.Item
-                      label="Address"
-                      name="address"
-                      rules={[
-                        { required: true, message: "Please enter address" },
-                      ]}
-                    >
-                      <TextArea placeholder="Enter address" />
-                    </Form.Item>
-
-                    <Form.Item
-                      label="Contact"
-                      name="contact"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please enter contact name",
-                        },
-                        {
-                          pattern: /^[A-Za-z. ]+$/,
-                          message: "Only letters, spaces, and '.' are allowed",
-                        },
-                      ]}
-                    >
-                      <Input placeholder="Enter contact name" />
-                    </Form.Item>
-
-                    <Form.Item
-                      label="Telephone"
-                      name="telephone"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please enter telephone number",
-                        },
-                        {
-                          pattern: /^[0-9+-]+$/,
-                          message: "Only numbers, +, and - are allowed",
-                        },
-                      ]}
-                    >
-                      <Input placeholder="Enter telephone number" />
-                    </Form.Item>
-                  </div>
-
-                  <div className="col-12 col-md-6">
-                    <Form.Item
-                      label="Machine Type"
-                      name="machineType"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please enter machine type",
-                        },
-                      ]}
-                    >
-                      <Input placeholder="Enter machine type" />
-                    </Form.Item>
-
-                    <Form.Item
-                      label="Serial Number"
-                      name="serialNumber"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please enter serial number",
-                        },
-                      ]}
-                    >
-                      <TextArea placeholder="Enter serial number" />
-                    </Form.Item>
-
-                    <Form.Item
-                      label="Installation Date"
-                      name="installationDate"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please select the installation date",
-                        },
-                      ]}
-                    >
-                      <DatePicker className="w-100" />
-                    </Form.Item>
-
-                    <Form.Item
-                      label="Work Time"
-                      name="workTime"
-                      rules={[
-                        { required: true, message: "Please enter work time" },
-                      ]}
-                    >
-                      <Input placeholder="Enter work time" />
-                    </Form.Item>
-                  </div>
-
-                  <div className="col-12 col-lg-4">
-                    <Form.Item
-                      label="Service Technician"
-                      name="serviceTechnician"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please enter service technician",
-                        },
-                        {
-                          pattern: /^[A-Za-z. ]+$/,
-                          message: "Only letters, spaces, and '.' are allowed",
-                        },
-                      ]}
-                    >
-                      <Input placeholder="Enter service technician name" />
-                    </Form.Item>
-                  </div>
-
-                  <div className="col-12 col-lg-4">
-                    <Form.Item
-                      label="Departure Date"
-                      name="departureDate"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please select the departure date",
-                        },
-                      ]}
-                    >
-                      <DatePicker className="w-100" />
-                    </Form.Item>
-                  </div>
-
-                  <div className="col-12 col-lg-4">
-                    <Form.Item
-                      label="Return Date"
-                      name="returnDate"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please select the return date",
-                        },
-                      ]}
-                    >
-                      <DatePicker className="w-100" />
-                    </Form.Item>
-                  </div>
-
-                  <div className="col-12">
-                    <Form.Item
-                      label="Report"
-                      name="report"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please select at least one report type",
-                        },
-                      ]}
-                    >
-                      <Checkbox.Group options={reportOptions} />
-                    </Form.Item>
-                  </div>
-
-                  <Form.Item
-                    label="Description of work/of defect/failure mode"
-                    name="description of work/of defect/failure mode"
-                    rules={[
-                      {
-                        required: true,
-                        message:
-                          "Please enter the description of work/of defect/failure mode",
-                      },
-                    ]}
-                  >
-                    <TextArea
-                      rows={4}
+                      {/* <TextArea
+                      rows={3}
                       placeholder="Enter the description of work/of defect/failure mode"
                       maxLength={200} 
                       showCount 
-                    />
-                  </Form.Item>
+                    /> */}
+                      <TextArea
+                        placeholder="Enter the description of work/of defect/failure mode"
+                        value={descriptionText}
+                        onChange={handleDescriptionTextChange}
+                        autoSize={{ minRows: 5, maxRows: 5 }}
+                        maxLength={200}
+                        showCount 
+                      />
+                    </Form.Item>
 
-                 
-                  <Form.Item
-                    label="Cause of Failure"
-                    name="cause of failure"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Please enter the cause of failure",
-                      },
-                    ]}
-                  >
-                    <TextArea
-                      rows={4}
-                      placeholder="Enter the cause of failure"
-                      maxLength={100} 
-                      showCount 
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    label="Notes/Further action required"
-                    name="notes/further action required"
-                    rules={[
-                      {
-                        required: true,
-                        message:
-                          "Please enter the notes/further action required",
-                      },
-                    ]}
-                  >
-                    <TextArea
-                      rows={4}
-                      placeholder="Enter the notes/further action required"
-                      maxLength={100} 
-                      showCount 
-                    />
-                  </Form.Item>
+                    <Form.Item
+                      label="Cause of Failure"
+                      name="cause of failure"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter the cause of failure",
+                        },
+                      ]}
+                    >
+                      {/* <TextArea
+                        rows={3}
+                        placeholder="Enter the cause of failure"
+                        maxLength={100}
+                        showCount
+                      /> */}
+                      <TextArea
+                        placeholder="Enter the cause of failure"
+                        value={causeOfFailure}
+                        onChange={handleCauseTextChange}
+                        autoSize={{ minRows: 3, maxRows: 3 }}
+                        maxLength={100}
+                        showCount 
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label="Notes/Further action required"
+                      name="notes/further action required"
+                      rules={[
+                        {
+                          required: true,
+                          message:
+                            "Please enter the notes/further action required",
+                        },
+                      ]}
+                    >
+                      {/* <TextArea
+                        rows={3}
+                        placeholder="Enter the notes/further action required"
+                        maxLength={100}
+                        showCount
+                      /> */}
+                        <TextArea
+                        placeholder="Enter the notes/further action required"
+                        value={notes}
+                        onChange={handleNotesChange}
+                        autoSize={{ minRows: 3, maxRows: 3 }}
+                        maxLength={100}
+                        showCount 
+                      />
+                    </Form.Item>
 
-
-                  {/* <div className="col-12">
+                    {/* <div className="col-12">
                     <h6>Parts Used</h6>
                     <Table
                       columns={columns}
@@ -3136,137 +3484,151 @@ doc.text("Web: www.haitianme.com", rightAlignX+15, footerY + 12, { align: "right
                       pagination={false}
                     />
                   </div> */}
-                  <div className="col-12">
-                    <h6>Parts Used</h6>
-                    <Table
-                      columns={columns}
-                      dataSource={data}
-                      pagination={false}
-                    />
-                  </div>
+                    <div className="col-12">
+                      <h6>Parts Used</h6>
+                      <Table
+                        columns={columns}
+                        dataSource={data}
+                        pagination={false}
+                      />
+                    </div>
 
-                  {/* <div className="col-12 mt-4">
+                    {/* <div className="col-12 mt-4">
                     <Form.Item>
                       <Checkbox.Group options={serviceOptions} />
                     </Form.Item>
                   </div> */}
 
-                  <div className="col-12 mt-4">
-                    <Form.Item
-                      label="Service Type"
-                      name="serviceType" // This is the field name
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please select at least one report type",
-                        },
-                      ]}
-                    >
-                      <Checkbox.Group options={serviceOptions} />
-                    </Form.Item>
-                  </div>
+                    <div className="col-12 mt-4">
+                      <Form.Item
+                        label="Service Type"
+                        name="serviceType" // This is the field name
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please select at least one report type",
+                          },
+                        ]}
+                      >
+                        <Checkbox.Group options={serviceOptions} />
+                      </Form.Item>
+                    </div>
 
-                  <div className="col-12 col-lg-4 mt-2">
-                    <Form.Item label="Signature of service technician" required>
-                      <SignatureCanvas
-                        ref={sigTechnician}
-                        penColor="black"
-                        canvasProps={{
-                          width: canvasSize.width,
-                          height: canvasSize.height,
-                          className: "border rounded border-3",
-                        }}
-                      />
-                      <div className="d-flex justify-content-start gap-2 mt-1">
-                        <Button
-                          type="primary"
-                          onClick={saveTechnicianSignature}
-                        >
-                          Save Signature
-                        </Button>
-                        <Button
-                          type="primary"
-                          danger
-                          onClick={clearTechnicianSignature}
-                        >
-                          Clear
-                        </Button>
-                      </div>
-                    </Form.Item>
-                  </div>
+                    <div className="col-12 col-lg-6 col-xl-4 mt-2">
+                      <Form.Item
+                        label="Signature of service technician"
+                        required
+                      >
+                        <SignatureCanvas
+                          ref={sigTechnician}
+                          penColor="black"
+                          canvasProps={{
+                            width: canvasSize.width,
+                            height: canvasSize.height,
+                            className: "border rounded border-3",
+                          }}
+                        />
+                        <div className="d-flex justify-content-start gap-2 mt-1">
+                          <Button
+                            type="primary"
+                            onClick={saveTechnicianSignature}
+                            disabled={isSubmitting}
+                          >
+                            Save Signature
+                          </Button>
+                          <Button
+                            type="primary"
+                            danger
+                            onClick={clearTechnicianSignature}
+                            disabled={isSubmitting}
+                          >
+                            Clear
+                          </Button>
+                        </div>
+                      </Form.Item>
+                    </div>
 
-                  {/* Service Manager Signature */}
-                  <div className="col-12 col-lg-4 mt-2">
-                    <Form.Item label="Signature of service manager" required>
-                      <SignatureCanvas
-                        ref={sigManager}
-                        penColor="black"
-                        canvasProps={{
-                          width: canvasSize.width,
-                          height: canvasSize.height,
-                          className: "border rounded border-3",
-                        }}
-                      />
-                      <div className="d-flex justify-content-start gap-2 mt-1">
-                        <Button type="primary" onClick={saveManagerSignature}>
-                          Save Signature
-                        </Button>
-                        <Button
-                          type="primary"
-                          danger
-                          onClick={clearManagerSignature}
-                        >
-                          Clear
-                        </Button>
-                      </div>
-                    </Form.Item>
-                  </div>
+                    {/* Service Manager Signature */}
+                    <div className="col-12 col-lg-6 col-xl-4  mt-2">
+                      <Form.Item label="Signature of service manager" required>
+                        <SignatureCanvas
+                          ref={sigManager}
+                          penColor="black"
+                          canvasProps={{
+                            width: canvasSize.width,
+                            height: canvasSize.height,
+                            className: "border rounded border-3",
+                          }}
+                        />
+                        <div className="d-flex justify-content-start gap-2 mt-1">
+                          <Button
+                            type="primary"
+                            onClick={saveManagerSignature}
+                            disabled={isSubmitting}
+                          >
+                            Save Signature
+                          </Button>
+                          <Button
+                            type="primary"
+                            danger
+                            onClick={clearManagerSignature}
+                            disabled={isSubmitting}
+                          >
+                            Clear
+                          </Button>
+                        </div>
+                      </Form.Item>
+                    </div>
 
-                  {/* Customer Signature */}
-                  <div className="col-12 col-lg-4 mt-2">
-                    <Form.Item label="Customer signature" required>
-                      <SignatureCanvas
-                        ref={sigCustomer}
-                        penColor="black"
-                        canvasProps={{
-                          width: canvasSize.width,
-                          height: canvasSize.height,
-                          className: "border rounded border-3",
-                        }}
-                      />
-                      <div className="d-flex justify-content-start gap-2 mt-1">
-                        <Button type="primary" onClick={saveCustomerSignature}>
-                          Save Signature
-                        </Button>
-                        <Button
-                          type="primary"
-                          danger
-                          onClick={clearCustomerSignature}
-                        >
-                          Clear
-                        </Button>
-                      </div>
-                    </Form.Item>
+                    {/* Customer Signature */}
+                    <div className="col-12 col-lg-6 col-xl-4  mt-2">
+                      <Form.Item label="Customer signature" required>
+                        <SignatureCanvas
+                          ref={sigCustomer}
+                          penColor="black"
+                          canvasProps={{
+                            width: canvasSize.width,
+                            height: canvasSize.height,
+                            className: "border rounded border-3",
+                          }}
+                        />
+                        <div className="d-flex justify-content-start gap-2 mt-1">
+                          <Button
+                            type="primary"
+                            onClick={saveCustomerSignature}
+                            disabled={isSubmitting}
+                          >
+                            Save Signature
+                          </Button>
+                          <Button
+                            type="primary"
+                            danger
+                            onClick={clearCustomerSignature}
+                            disabled={isSubmitting}
+                          >
+                            Clear
+                          </Button>
+                        </div>
+                      </Form.Item>
+                    </div>
+                    <div className="text-center mt-4 ">
+                      <Button
+                        htmlType="submit"
+                        className="submitbutton p-3"
+                        style={{ fontSize: "1.2rem" }}
+                        loading={loading}
+                        disabled={loading}
+                      >
+                        {loading ? "Submitting..." : "Submit"}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="text-center mt-4 ">
-                    <Button
-                      htmlType="submit"
-                      className="submitbutton p-3"
-                      style={{ fontSize: "1.2rem" }}
-                      loading={loading}
-                      disabled={loading}
-                    >
-                      {loading ? "Submitting..." : "Submit"}
-                    </Button>
-                  </div>
-                </div>
-              </Form>
+                </Form>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      </div>
-
     </>
   );
 }
