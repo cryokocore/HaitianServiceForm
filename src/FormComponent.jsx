@@ -3172,25 +3172,25 @@ export default function FormComponent() {
         setSRN(result.srn);
         generatePDF(formData, checkboxValues, partsUsed);
 
-        // form.resetFields();
-        // setAddress("");
-        // setSerialNumber("");
-        // setDescriptionText("");
-        // setcauseOfFailure("");
-        // setNotes("");
+        form.resetFields();
+        setAddress("");
+        setSerialNumber("");
+        setDescriptionText("");
+        setcauseOfFailure("");
+        setNotes("");
 
-        // setData([
-        //   {
-        //     key: Date.now(),
-        //     partNumber: "",
-        //     description: "",
-        //     quantity: "",
-        //     note: "",
-        //   },
-        // ]);
-        // sigTechnician.current?.clear();
-        // sigManager.current?.clear();
-        // sigCustomer.current?.clear();
+        setData([
+          {
+            key: Date.now(),
+            partNumber: "",
+            description: "",
+            quantity: "",
+            note: "",
+          },
+        ]);
+        sigTechnician.current?.clear();
+        sigManager.current?.clear();
+        sigCustomer.current?.clear();
       } else {
         throw new Error(result.message);
       }
