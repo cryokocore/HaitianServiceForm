@@ -66,15 +66,12 @@ export default function FormComponent() {
   //   const sigCanvas = useRef();
   //   const [signatureData, setSignatureData] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [descriptionText, setDescriptionText] = useState(""); 
-  const [causeOfFailure, setcauseOfFailure] = useState(""); 
-  const [notes, setNotes] = useState(""); 
+  const [descriptionText, setDescriptionText] = useState("");
+  const [causeOfFailure, setcauseOfFailure] = useState("");
+  const [notes, setNotes] = useState("");
   const [address, setAddress] = useState("");
-  const [serialNumber, setSerialNumber] = useState(""); 
+  const [serialNumber, setSerialNumber] = useState("");
   const [srn, setSRN] = useState(null);
-  
-
-
 
   const [data, setData] = useState([
     {
@@ -86,127 +83,133 @@ export default function FormComponent() {
     },
   ]);
 
-  // const handleInputChange = (key, field, value) => {
-  //   const updatedData = data.map((row) =>
-  //     row.key === key ? { ...row, [field]: value } : row
-  //   );
-  //   setData(updatedData);
-  // };
+  useEffect(() => {
+    const fetchSRN = async () => {
+      try {
+        const response = await fetch(
+          "https://script.google.com/macros/s/AKfycbycFkj6tmyj16PexbIg07F0HVj6pG5nV5jXmVzjkYnlP28a5ELwh5B56xjfL0y1pRPR/exec"
+        );
+        const data = await response.json(); // ✅ Parse JSON directly
 
-  // const handleDescriptionTextChange = (e) => {
-  //   let value = e.target.value;
-  //   let lines = value.split("\n");
+        console.log("Fetched SRN:", data.srn); // ✅ Log SRN in console
 
-  //   // Strictly limit to 4 lines
-  //   if (lines.length > 5) {
-  //     message.warning("Input is limited to 5 rows. Any text beyond the 5th row will not be added.");
-  //     return;
-  //   }
+        if (data.success) {
+          setSRN(data.srn); // ✅ Set state with fetched SRN
+        } else {
+          console.error("Error fetching SRN:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching SRN:", error);
+      }
+    };
 
-  //   // Strictly limit to 200 characters
-  //   if (value.length > 200) {
-  //     message.warning("Maximum 200 characters allowed!");
-  //     return;
-  //   }
+    fetchSRN();
+  }, []);
 
-  //   setDescriptionText(value); // Update state only if within limits
-  // };
-
-  
   const handleSerialNumberChange = (e) => {
     let value = e.target.value;
     let lines = value.split("\n");
-  
+
     // Limit strictly to 5 rows
     if (lines.length > 3 || value.length > 100) {
-      message.warning("Input limited to 3 lines, 100 characters. Excess text won't be included.");
+      message.warning(
+        "Input limited to 3 lines, 100 characters. Excess text won't be included."
+      );
       value = lines.slice(0, 5).join("\n"); // Trim excess lines
     }
-  
+
     // Limit strictly to 200 characters
     // if (value.length > 200) {
     //   message.warning("Maximum 200 characters allowed!");
     //   value = value.substring(0, 200); // Trim excess characters
     // }
-  
+
     setSerialNumber(value); // Update state only if within limits
   };
 
   const handleAddressChange = (e) => {
     let value = e.target.value;
     let lines = value.split("\n");
-  
+
     // Limit strictly to 5 rows
     if (lines.length > 4 || value.length > 120) {
-      message.warning("Input limited to 4 lines, 120 characters. Excess text won't be included.");
+      message.warning(
+        "Input limited to 4 lines, 120 characters. Excess text won't be included."
+      );
       value = lines.slice(0, 4).join("\n"); // Trim excess lines
     }
-  
+
     // Limit strictly to 200 characters
     // if (value.length > 200) {
     //   message.warning("Maximum 200 characters allowed!");
     //   value = value.substring(0, 200); // Trim excess characters
     // }
-  
+
     setAddress(value); // Update state only if within limits
   };
 
-const handleDescriptionTextChange = (e) => {
-  let value = e.target.value;
-  let lines = value.split("\n");
+  const handleDescriptionTextChange = (e) => {
+    let value = e.target.value;
+    let lines = value.split("\n");
 
-  // Limit strictly to 5 rows
-  if (lines.length > 5 || value.length > 200) {
-    message.warning("Input limited to 5 lines, 200 characters. Excess text won't be included.");
-    value = lines.slice(0, 5).join("\n"); // Trim excess lines
-  }
+    // Limit strictly to 5 rows
+    if (lines.length > 5 || value.length > 200) {
+      message.warning(
+        "Input limited to 5 lines, 200 characters. Excess text won't be included."
+      );
+      value = lines.slice(0, 5).join("\n"); // Trim excess lines
+    }
 
-  // Limit strictly to 200 characters
-  // if (value.length > 200) {
-  //   message.warning("Maximum 200 characters allowed!");
-  //   value = value.substring(0, 200); // Trim excess characters
-  // }
+    // Limit strictly to 200 characters
+    // if (value.length > 200) {
+    //   message.warning("Maximum 200 characters allowed!");
+    //   value = value.substring(0, 200); // Trim excess characters
+    // }
 
-  setDescriptionText(value); // Update state only if within limits
-};
+    setDescriptionText(value); // Update state only if within limits
+  };
 
-const handleCauseTextChange = (e) => {
-  let value = e.target.value;
-  let lines = value.split("\n");
+  const handleCauseTextChange = (e) => {
+    let value = e.target.value;
+    let lines = value.split("\n");
 
-  // Limit strictly to 5 rows
-  if (lines.length > 3 || value.length >100) {
-    message.warning("Input limited to 3 lines, 100 characters. Excess text won't be included.");
-    value = lines.slice(0, 3).join("\n"); // Trim excess lines
-  }
+    // Limit strictly to 5 rows
+    if (lines.length > 3 || value.length > 100) {
+      message.warning(
+        "Input limited to 3 lines, 100 characters. Excess text won't be included."
+      );
+      value = lines.slice(0, 3).join("\n"); // Trim excess lines
+    }
 
-  // Limit strictly to 200 characters
-  // if (value.length > 200) {
-  //   message.warning("Maximum 200 characters allowed!");
-  //   value = value.substring(0, 200); // Trim excess characters
-  // }
+    // Limit strictly to 200 characters
+    // if (value.length > 200) {
+    //   message.warning("Maximum 200 characters allowed!");
+    //   value = value.substring(0, 200); // Trim excess characters
+    // }
 
-  setcauseOfFailure(value); // Update state only if within limits
-};
+    setcauseOfFailure(value); // Update state only if within limits
+  };
 
-const handleNotesChange = (e) => {
-  let value = e.target.value;
-  let lines = value.split("\n");
+  const handleNotesChange = (e) => {
+    let value = e.target.value;
+    let lines = value.split("\n");
 
-  // Limit strictly to 5 rows
-  if (lines.length > 3 || value.length >100) {
-    message.warning("Input limited to 3 lines, 100 characters. Excess text won't be included.");
-    value = lines.slice(0, 3).join("\n"); // Trim excess lines
-  }
+    // Limit strictly to 5 rows
+    if (lines.length > 3 || value.length > 100) {
+      message.warning(
+        "Input limited to 3 lines, 100 characters. Excess text won't be included."
+      );
+      value = lines.slice(0, 3).join("\n"); // Trim excess lines
+    }
 
-  // Limit strictly to 200 characters
-  // if (value.length > 200) {
-  //   message.warning("Maximum 200 characters allowed!");  
-  //   value = value.substring(0, 200); // Trim excess characters
-  // }
+    // Limit strictly to 200 characters
+    // if (value.length > 200) {
+    //   message.warning("Maximum 200 characters allowed!");
+    //   value = value.substring(0, 200); // Trim excess characters
+    // }
 
-  setNotes(value); // Update state only if within limits
-};
+    setNotes(value); // Update state only if within limits
+  };
 
   // const handleInputChange = (key, field, value) => {
   //   const maxLengths = {
@@ -243,50 +246,51 @@ const handleNotesChange = (e) => {
       setData(updatedData);
       return; // Exit function early for numeric inputs
     }
-  
+
     // Ensure text inputs are handled correctly
-    let stringValue = typeof value === "string" ? value : value?.toString() || "";
-  
+    let stringValue =
+      typeof value === "string" ? value : value?.toString() || "";
+
     const maxLengths = {
       partNumber: 30,
       description: 60,
       note: 60,
     };
-  
+
     const maxRows = {
       partNumber: 1,
       description: 1,
       note: 1,
     };
-  
+
     const fieldMessages = {
-      partNumber: "Input limited to 1 line, 30 characters. Excess text won't be included.",
-      description: "Input limited to 1 line, 60 characters. Excess text won't be included.",
+      partNumber:
+        "Input limited to 1 line, 30 characters. Excess text won't be included.",
+      description:
+        "Input limited to 1 line, 60 characters. Excess text won't be included.",
       note: "Input limited to 1 line, 60 characters. Excess text won't be included.",
     };
-  
+
     let lines = stringValue.split("\n");
-  
+
     // Enforce row limits
     if (lines.length > maxRows[field]) {
       message.warning(fieldMessages[field]);
       stringValue = lines.slice(0, maxRows[field]).join("\n");
     }
-  
+
     // Enforce character limits
     if (stringValue.length > maxLengths[field]) {
       message.warning(fieldMessages[field]);
       stringValue = stringValue.substring(0, maxLengths[field]);
     }
-  
+
     // Update the state
     const updatedData = data.map((row) =>
       row.key === key ? { ...row, [field]: stringValue } : row
     );
     setData(updatedData);
   };
-  
-  
 
   // const handleAddRow = () => {
   //   setData([
@@ -501,13 +505,6 @@ const handleNotesChange = (e) => {
       ),
     },
   ];
-
-
-  // const fetchSRN = async () => {
-  //   const response = await fetch("https://script.google.com/macros/s/AKfycbxXxFiz19o9ZcIoZQJzOdmTfzPlmmnoSJKwtpztPclLm68221hH0KgJk2FBrYqHHc8G/exec");
-  //   const result = await response.json();
-  //   setSRN(result.srn || 1); // Set SRN in the UI
-  // };
 
   const sigTechnician = useRef();
   const sigManager = useRef();
@@ -2357,7 +2354,7 @@ const handleNotesChange = (e) => {
     doc.setFontSize(11);
     doc.text("Service Report", pageWidth - 60, 12);
     doc.setFontSize(11);
-    doc.text(`No. ${formData.reportNumber || "N/A"}`, pageWidth - 60, 18);
+    doc.text(`No. ${srn  || "N/A"}`, pageWidth - 60, 18);
     doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.5);
     doc.line(0, 22, 210, 22);
@@ -3019,18 +3016,46 @@ const handleNotesChange = (e) => {
     doc.text("+971 65 622 238", rightAlignX, footerY + 6, { align: "right" });
 
     // **Third Row: "Email" (left) and "Web" (right)**
-    doc.text("Email: cso@haitianme.com", leftAlignX + 20, footerY + 12);
+    doc.text("Email: cso@haitianme.com", leftAlignX + 22, footerY + 12);
     doc.text("Web: www.haitianme.com", rightAlignX + 15, footerY + 12, {
       align: "right",
     });
 
-    doc.save("Service_Report.pdf");
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = String(now.getUTCMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    const day = String(now.getUTCDate()).padStart(2, "0");
+  
+    let hours = now.getUTCHours();
+    const minutes = String(now.getUTCMinutes()).padStart(2, "0");
+    const seconds = String(now.getUTCSeconds()).padStart(2, "0");
+  
+    // Convert to 12-hour format with AM/PM
+    const amPm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12; // Convert 0 (midnight) and 12 (noon) properly
+  
+    // Format: YYYY-MM-DD_HH-MM-SS_AMPM (UTC)
+    // const dateTimeUTC = `${year}-${month}-${day}_${hours}:${minutes}:${seconds}_${amPm}`;
+    const dateTimeUTC = `${year}-${month}-${day}_${hours}`;
+
+  
+    // Construct filename: "2025-03-14_02-30-45_PM_Service_Report_1001.pdf"
+    const fileName = `${dateTimeUTC}_Service_Report_${srn || "N/A"}.pdf`;
+
+    // doc.save("Service_Report.pdf");
+    doc.save(fileName);
   };
 
   const handleSubmit = async (values) => {
     try {
       setIsSubmitting(true);
       await form.validateFields();
+      if (!srn) {
+        message.error(
+          "Service Request Number (SRN) is missing. Please try again."
+        );
+        return;
+      }
       const emptyRows = data.some(
         (row) =>
           !row.partNumber?.trim() || !row.description?.trim() || !row.quantity
@@ -3095,7 +3120,7 @@ const handleNotesChange = (e) => {
 
       // ✅ Prepare final form data
       const formData = {
-        // srn,// ✅ Include SRN
+        srn, // ✅ Include SRN
 
         customerName: values.customerName,
         machineType: values.machineType,
@@ -3130,10 +3155,12 @@ const handleNotesChange = (e) => {
       setLoading(true);
 
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbxOGdSLswUFmDuQ-o8CRx_IuOv7FRb2pasitK2hugDbEjvf9AQkjMImEbjFfofpCsg/exec",
+        "https://script.google.com/macros/s/AKfycbycFkj6tmyj16PexbIg07F0HVj6pG5nV5jXmVzjkYnlP28a5ELwh5B56xjfL0y1pRPR/exec",
         {
           method: "POST",
+          // headers: { "Content-Type": "application/x-www-form-urlencoded" },
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
+
           body: JSON.stringify(formData),
         }
       );
@@ -3142,6 +3169,7 @@ const handleNotesChange = (e) => {
 
       if (result.success) {
         message.success("Form submitted successfully!");
+        setSRN(result.srn);
         generatePDF(formData, checkboxValues, partsUsed);
 
         // form.resetFields();
@@ -3150,19 +3178,19 @@ const handleNotesChange = (e) => {
         // setDescriptionText("");
         // setcauseOfFailure("");
         // setNotes("");
-        
-          // setData([
-          //   {
-          //     key: Date.now(),
-          //     partNumber: "",
-          //     description: "",
-          //     quantity: "",
-          //     note: "",
-          //   },
-          // ]);
-          // sigTechnician.current?.clear();
-          // sigManager.current?.clear();
-          // sigCustomer.current?.clear();
+
+        // setData([
+        //   {
+        //     key: Date.now(),
+        //     partNumber: "",
+        //     description: "",
+        //     quantity: "",
+        //     note: "",
+        //   },
+        // ]);
+        // sigTechnician.current?.clear();
+        // sigManager.current?.clear();
+        // sigCustomer.current?.clear();
       } else {
         throw new Error(result.message);
       }
@@ -3180,7 +3208,7 @@ const handleNotesChange = (e) => {
       <div className="container pb-1">
         <div className="container border shadow rounded-5  mt-3 pt-3 mb-3 pb-3">
           <div className="container">
-            <div className="row d-flex align-items-center">
+            <div className="row d-flex align-items-center justify-content-between">
               <div className="col-12 col-lg-6">
                 <img
                   src={HaitianLogo}
@@ -3188,9 +3216,12 @@ const handleNotesChange = (e) => {
                   className="img-fluid haitianLogo"
                 />
               </div>
-              <div className="col-12 col-lg-6 d-flex justify-content-lg-end">
-                <p className="header_Service_Text">Service No</p>
-                <p><strong>{srn}</strong></p>
+              {/* <div className="col-12 col-lg-3"></div> */}
+              <div className="col-12 col-lg-2 d-flex flex-column align-items-lg-start ">
+                <p className="header_Service_Text m-0 p-0 ms-xl-4">Service Report</p>
+                <span className="ms-xl-4">
+                  <strong>No: {srn || "Loading..."}</strong>
+                </span>
               </div>
             </div>
           </div>
@@ -3227,14 +3258,14 @@ const handleNotesChange = (e) => {
                       >
                         {/* <TextArea placeholder="Enter address" 
                        /> */}
-                          <TextArea
-                        placeholder="Enter address"
-                        value={address}
-                        onChange={handleAddressChange}
-                        autoSize={{ minRows: 3, maxRows: 3 }}
-                        maxLength={120}
-                        showCount 
-                      />
+                        <TextArea
+                          placeholder="Enter address"
+                          value={address}
+                          onChange={handleAddressChange}
+                          autoSize={{ minRows: 3, maxRows: 3 }}
+                          maxLength={120}
+                          showCount
+                        />
                       </Form.Item>
 
                       <Form.Item
@@ -3299,13 +3330,13 @@ const handleNotesChange = (e) => {
                       >
                         {/* <TextArea placeholder="Enter serial number" /> */}
                         <TextArea
-                        placeholder="Enter serial number"
-                        value={serialNumber}
-                        onChange={handleSerialNumberChange}
-                        autoSize={{ minRows: 3, maxRows: 3 }}
-                        maxLength={100}
-                        showCount 
-                      />
+                          placeholder="Enter serial number"
+                          value={serialNumber}
+                          onChange={handleSerialNumberChange}
+                          autoSize={{ minRows: 3, maxRows: 3 }}
+                          maxLength={100}
+                          showCount
+                        />
                       </Form.Item>
 
                       <Form.Item
@@ -3420,7 +3451,7 @@ const handleNotesChange = (e) => {
                         onChange={handleDescriptionTextChange}
                         autoSize={{ minRows: 5, maxRows: 5 }}
                         maxLength={200}
-                        showCount 
+                        showCount
                       />
                     </Form.Item>
 
@@ -3446,7 +3477,7 @@ const handleNotesChange = (e) => {
                         onChange={handleCauseTextChange}
                         autoSize={{ minRows: 3, maxRows: 3 }}
                         maxLength={100}
-                        showCount 
+                        showCount
                       />
                     </Form.Item>
                     <Form.Item
@@ -3466,13 +3497,13 @@ const handleNotesChange = (e) => {
                         maxLength={100}
                         showCount
                       /> */}
-                        <TextArea
+                      <TextArea
                         placeholder="Enter the notes/further action required"
                         value={notes}
                         onChange={handleNotesChange}
                         autoSize={{ minRows: 3, maxRows: 3 }}
                         maxLength={100}
-                        showCount 
+                        showCount
                       />
                     </Form.Item>
 
