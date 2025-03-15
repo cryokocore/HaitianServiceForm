@@ -42,10 +42,11 @@ message.config({
 // ];
 
 const reportOptions = [
-  "Installation",
+  "Installation/Commission",
   "Maintenance",
   "Defect",
   "Customer Visit",
+  "Other"
 ];
 
 const serviceOptions = [
@@ -87,7 +88,7 @@ export default function FormComponent() {
     const fetchSRN = async () => {
       try {
         const response = await fetch(
-          "https://script.google.com/macros/s/AKfycbycFkj6tmyj16PexbIg07F0HVj6pG5nV5jXmVzjkYnlP28a5ELwh5B56xjfL0y1pRPR/exec"
+          "https://script.google.com/macros/s/AKfycbyfU0S4cSJuuN0qvHuFfaytNT_2G78SnoRAJQiLCK3s8HQKRg7wQTB-on35gwHSilAn/exec"
         );
         const data = await response.json(); // ✅ Parse JSON directly
 
@@ -111,11 +112,11 @@ export default function FormComponent() {
     let lines = value.split("\n");
 
     // Limit strictly to 5 rows
-    if (lines.length > 3 || value.length > 100) {
+    if (lines.length > 2 || value.length > 60) {
       message.warning(
-        "Input limited to 3 lines, 100 characters. Excess text won't be included."
+        "Input limited to 2 lines, 60 characters. Excess text won't be included."
       );
-      value = lines.slice(0, 5).join("\n"); // Trim excess lines
+      value = lines.slice(0, 2).join("\n"); // Trim excess lines
     }
 
     // Limit strictly to 200 characters
@@ -132,11 +133,11 @@ export default function FormComponent() {
     let lines = value.split("\n");
 
     // Limit strictly to 5 rows
-    if (lines.length > 4 || value.length > 120) {
+    if (lines.length > 3 || value.length > 100) {
       message.warning(
-        "Input limited to 4 lines, 120 characters. Excess text won't be included."
+        "Input limited to 3 lines, 100 characters. Excess text won't be included."
       );
-      value = lines.slice(0, 4).join("\n"); // Trim excess lines
+      value = lines.slice(0, 3).join("\n"); // Trim excess lines
     }
 
     // Limit strictly to 200 characters
@@ -153,11 +154,11 @@ export default function FormComponent() {
     let lines = value.split("\n");
 
     // Limit strictly to 5 rows
-    if (lines.length > 5 || value.length > 200) {
+    if (lines.length > 3 || value.length > 150) {
       message.warning(
-        "Input limited to 5 lines, 200 characters. Excess text won't be included."
+        "Input limited to 3 lines, 150 characters. Excess text won't be included."
       );
-      value = lines.slice(0, 5).join("\n"); // Trim excess lines
+      value = lines.slice(0, 3).join("\n"); // Trim excess lines
     }
 
     // Limit strictly to 200 characters
@@ -174,11 +175,11 @@ export default function FormComponent() {
     let lines = value.split("\n");
 
     // Limit strictly to 5 rows
-    if (lines.length > 3 || value.length > 100) {
+    if (lines.length > 1 || value.length > 100) {
       message.warning(
-        "Input limited to 3 lines, 100 characters. Excess text won't be included."
+        "Input limited to 1 line, 100 characters. Excess text won't be included."
       );
-      value = lines.slice(0, 3).join("\n"); // Trim excess lines
+      value = lines.slice(0, 1).join("\n"); // Trim excess lines
     }
 
     // Limit strictly to 200 characters
@@ -195,11 +196,11 @@ export default function FormComponent() {
     let lines = value.split("\n");
 
     // Limit strictly to 5 rows
-    if (lines.length > 3 || value.length > 100) {
+    if (lines.length > 1 || value.length > 100) {
       message.warning(
-        "Input limited to 3 lines, 100 characters. Excess text won't be included."
+        "Input limited to 1 line, 100 characters. Excess text won't be included."
       );
-      value = lines.slice(0, 3).join("\n"); // Trim excess lines
+      value = lines.slice(0, 1).join("\n"); // Trim excess lines
     }
 
     // Limit strictly to 200 characters
@@ -306,7 +307,7 @@ export default function FormComponent() {
   // };
 
   const handleAddRow = () => {
-    if (data.length < 4) {
+    if (data.length < 3) {
       const newRow = {
         key: (data.length + 1).toString(),
         partNumber: "",
@@ -316,7 +317,7 @@ export default function FormComponent() {
       };
       setData([...data, newRow]);
     } else {
-      message.warning("Rows cannot exceed more than 4!");
+      message.warning("Rows cannot exceed more than 3!");
     }
   };
 
@@ -487,7 +488,7 @@ export default function FormComponent() {
     {
       title: "Action",
       key: "action",
-      width: "15%", // Reduced size
+      width: "13%", // Reduced size
       render: (_, record) => (
         <Space size="middle">
           <Button type="primary" onClick={handleAddRow} disabled={isSubmitting}>
@@ -2363,7 +2364,7 @@ export default function FormComponent() {
     // Left Side: Customer Details
     addField("Customer", formData.customerName, startX, nextY);
     addField("Machine Type", formData.machineType, rightX, nextY);
-    nextY += 1;
+    nextY += 5;
 
     // addField("Address", formData.address, startX, nextY + 5);
     let addressSpaceUsed = addField(
@@ -2385,18 +2386,18 @@ export default function FormComponent() {
       60
     );
     // nextY += serialSpaceUsed + 3; // Move down based on space used
-    nextY += Math.max(addressSpaceUsed, serialSpaceUsed) + 3;
+    nextY += Math.max(addressSpaceUsed, serialSpaceUsed) + 6;
 
     addField("Contact", formData.contact, startX, nextY + 4);
-    nextY += 3;
-    addField("Installation Date", formData.installationDate, rightX, nextY + 7);
-    nextY += 3;
+    nextY += 5;
+    addField("Installation Date", formData.installationDate, rightX, nextY + 8);
+    nextY += 5;
 
     addField("Telephone", formData.telephone, startX, nextY + 4);
-    nextY += 4;
+    nextY += 6;
 
-    addField("Work Time", formData.workTime, rightX, nextY + 6);
-    nextY += 4;
+    addField("Work Time", formData.workTime, rightX, nextY + 7);
+    nextY += 6;
 
     addField(
       "Service Technician",
@@ -2404,51 +2405,53 @@ export default function FormComponent() {
       startX,
       nextY + 2
     );
-    nextY += 5;
-    addField("Departure Date", formData.departureDate, startX, nextY + 3);
-    nextY += 3;
+    nextY += 6;
+    addField("Departure Date", formData.departureDate, startX, nextY + 5);
+    nextY += 6;
     addField("Return Date", formData.returnDate, rightX, nextY);
 
-    nextY += 6.5;
+    nextY += 9;
 
     doc.setFont("helvetica", "bold");
     doc.text("Report Type", startX, nextY);
     doc.setFont("helvetica", "normal");
 
     const reportOptions = [
-      "Installation",
+      "Installation/Commission",
       "Maintenance",
       "Defect",
       "Customer Visit",
+      "Other"
     ];
+    const spacing = [48, 33, 25, 35, 10]; 
     let optionX = startX;
-    reportOptions.forEach((option) => {
+    reportOptions.forEach((option,index) => {
       // doc.rect(optionX, nextY + 2, 4, 4);
       // if (checkboxValues[option])
       //   doc.setFont("Zapfdingbats");
       //   doc.text("✔", optionX + 1, nextY + 5);
       // doc.text(option, optionX + 5, nextY + 5);
       // optionX += 40;
-      const spaceBetweenOptions = 38;
+      const spaceBetweenOptions = spacing[index]; ;
       const isChecked = checkboxValues[option];
       if (isChecked) {
         // Draw a border around the checkbox
-        doc.rect(optionX, nextY + 1.5, 4, 4); // Adjust values as needed
+        doc.rect(optionX, nextY + 2.5, 4, 4); // Adjust values as needed
       } else {
-        doc.rect(optionX, nextY + 1.5, 4, 4); // Adjust values as needed
+        doc.rect(optionX, nextY + 2.5, 4, 4); // Adjust values as needed
       }
       doc.setFont("Zapfdingbats");
 
       const symbol = isChecked ? "4" : ""; // '4' for tick, 'o' for empty
-      doc.text(`${symbol}`, optionX + 0.6, nextY + 4.5);
+      doc.text(`${symbol}`, optionX + 0.6, nextY + 5.5);
 
       doc.setFont("helvetica", "normal");
 
-      doc.text(option, optionX + 4.5, nextY + 4.5);
+      doc.text(option, optionX + 4.5, nextY + 5.5);
       optionX += spaceBetweenOptions;
     });
 
-    nextY += 12;
+    nextY += 15;
     doc.setFont("helvetica", "bold");
     doc.text("Description of Work / Defect / Failure Mode:", startX, nextY);
     doc.setFont("helvetica", "normal");
@@ -2458,9 +2461,9 @@ export default function FormComponent() {
       maxWidth
     );
     doc.text(description, startX, nextY);
-    nextY += description.length * 4;
+    nextY += description.length * 2;
 
-    nextY += 1.5;
+    nextY += 18;
     doc.setFont("helvetica", "bold");
     doc.text("Cause of failure:", startX, nextY);
     doc.setFont("helvetica", "normal");
@@ -2470,16 +2473,16 @@ export default function FormComponent() {
       maxWidth
     );
     doc.text(causeOfFailure, startX, nextY);
-    nextY += causeOfFailure.length * 4;
+    nextY += causeOfFailure.length * 2;
 
-    nextY += 1.5;
+    nextY += 10;
     doc.setFont("helvetica", "bold");
     doc.text("Notes/Further action required:", startX, nextY);
     doc.setFont("helvetica", "normal");
     nextY += 4;
     const notes = doc.splitTextToSize(formData.notes || "N/A", maxWidth);
     doc.text(notes, startX, nextY);
-    nextY += notes.length * 4;
+    nextY += notes.length * 2;
 
     // doc.setFont("helvetica", "bold");
     // doc.text("Parts Used:", startX, nextY);
@@ -2536,8 +2539,8 @@ export default function FormComponent() {
     //   addPageNumber();
     // }
     doc.setFont("helvetica", "bold");
-    doc.text("Parts Used", startX, nextY + 1.5);
-    nextY += 3;
+    doc.text("Parts Used", startX, nextY + 10);
+    nextY += 12;
     drawTableHeaders();
 
     doc.setFont("helvetica", "normal");
@@ -2758,8 +2761,9 @@ export default function FormComponent() {
     // nextY += maxServiceRowHeight + 5;
 
     doc.setFont("helvetica", "bold");
-    doc.text("Service Type", 10, nextY + 5);
-    nextY += 6; // Space after the title
+    nextY = 220;
+    doc.text("Service Type", 10, nextY);
+    nextY-= 2; // Space after the title
 
     doc.setFont("helvetica", "normal");
 
@@ -2800,18 +2804,18 @@ export default function FormComponent() {
 
       // Draw checkbox centered to row height
       let checkboxY = nextY + (maxServiceRowHeight / 2 - checkboxSize / 1.5);
-      doc.rect(optionServiceX, checkboxY - 1, checkboxSize, checkboxSize);
+      doc.rect(optionServiceX, checkboxY+3, checkboxSize, checkboxSize);
 
       // Check if the option is selected
       const isChecked = checkboxValues[option] || false;
       if (isChecked) {
         doc.setFont("Zapfdingbats");
-        doc.text("4", optionServiceX + 0.6, checkboxY + 2);
+        doc.text("4", optionServiceX + 0.6, checkboxY + 6);
         doc.setFont("helvetica", "normal");
       }
 
       // Draw text below the checkbox
-      let textY = checkboxY + 1;
+      let textY = checkboxY + 5;
       if (option === "Guarantee" || option === "Goodwill") {
         textY += 1; // Adjust to center text manually
       }
@@ -2824,7 +2828,7 @@ export default function FormComponent() {
     });
 
     // Move Y to the next section after full row
-    nextY += maxServiceRowHeight + 3;
+    nextY += maxServiceRowHeight + 10;
 
     const addSignatures = (signatures, nextY) => {
       doc.setFont("helvetica", "bold");
@@ -3155,7 +3159,7 @@ export default function FormComponent() {
       setLoading(true);
 
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbycFkj6tmyj16PexbIg07F0HVj6pG5nV5jXmVzjkYnlP28a5ELwh5B56xjfL0y1pRPR/exec",
+        "https://script.google.com/macros/s/AKfycbyfU0S4cSJuuN0qvHuFfaytNT_2G78SnoRAJQiLCK3s8HQKRg7wQTB-on35gwHSilAn/exec",
         {
           method: "POST",
           // headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -3172,25 +3176,25 @@ export default function FormComponent() {
         setSRN(result.srn);
         generatePDF(formData, checkboxValues, partsUsed);
 
-        form.resetFields();
-        setAddress("");
-        setSerialNumber("");
-        setDescriptionText("");
-        setcauseOfFailure("");
-        setNotes("");
+        // form.resetFields();
+        // setAddress("");
+        // setSerialNumber("");
+        // setDescriptionText("");
+        // setcauseOfFailure("");
+        // setNotes("");
 
-        setData([
-          {
-            key: Date.now(),
-            partNumber: "",
-            description: "",
-            quantity: "",
-            note: "",
-          },
-        ]);
-        sigTechnician.current?.clear();
-        sigManager.current?.clear();
-        sigCustomer.current?.clear();
+        // setData([
+        //   {
+        //     key: Date.now(),
+        //     partNumber: "",
+        //     description: "",
+        //     quantity: "",
+        //     note: "",
+        //   },
+        // ]);
+        // sigTechnician.current?.clear();
+        // sigManager.current?.clear();
+        // sigCustomer.current?.clear();
       } else {
         throw new Error(result.message);
       }
@@ -3203,10 +3207,13 @@ export default function FormComponent() {
     }
   };
 
+
+
+
   return (
     <>
-      <div className="container pb-1">
-        <div className="container border shadow rounded-5  mt-3 pt-3 mb-3 pb-3">
+      <div className="container-fluid pb-1">
+        <div className="container-fluid border shadow rounded-5  mt-3 pt-3 mb-3 pb-3">
           <div className="container">
             <div className="row d-flex align-items-center justify-content-between">
               <div className="col-12 col-lg-6">
