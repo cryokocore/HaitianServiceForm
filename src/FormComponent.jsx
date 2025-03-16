@@ -133,11 +133,11 @@ export default function FormComponent() {
     let lines = value.split("\n");
 
     // Limit strictly to 5 rows
-    if (lines.length > 3 || value.length > 100) {
+    if (lines.length > 2 || value.length > 100) {
       message.warning(
-        "Input limited to 3 lines, 100 characters. Excess text won't be included."
+        "Input limited to 2 lines, 100 characters. Excess text won't be included."
       );
-      value = lines.slice(0, 3).join("\n"); // Trim excess lines
+      value = lines.slice(0, 2).join("\n"); // Trim excess lines
     }
 
     // Limit strictly to 200 characters
@@ -154,11 +154,11 @@ export default function FormComponent() {
     let lines = value.split("\n");
 
     // Limit strictly to 5 rows
-    if (lines.length > 3 || value.length > 150) {
+    if (lines.length > 2 || value.length > 150) {
       message.warning(
-        "Input limited to 3 lines, 150 characters. Excess text won't be included."
+        "Input limited to 2 lines, 150 characters. Excess text won't be included."
       );
-      value = lines.slice(0, 3).join("\n"); // Trim excess lines
+      value = lines.slice(0, 2).join("\n"); // Trim excess lines
     }
 
     // Limit strictly to 200 characters
@@ -2255,6 +2255,802 @@ export default function FormComponent() {
   //   });
   // };
 
+  //Code changed for extra space and single page
+  // const generatePDF = (formData, checkboxValues, partsUsed) => {
+  //   const doc = new jsPDF();
+  //   // const startX = 10;
+  //   const pageWidth = doc.internal.pageSize.width;
+  //   const pageHeight = doc.internal.pageSize.height;
+  //   const maxWidth = pageWidth - 20;
+  //   // let nextY = 20;
+
+  //   const labelWidths = {
+  //     Customer: 35,
+  //     Address: 35,
+  //     Contact: 35,
+  //     Telephone: 35,
+  //     "Service Technician": 35,
+  //     "Machine Type": 30,
+  //     "Serial No.": 30,
+  //     "Work Time": 30,
+  //     "Departure Date": 35,
+  //     "Return Date": 30,
+  //     "Installation Date": 30,
+  //   };
+
+  //   // const addField = (label, value, x, y) => {
+  //   //   // const labelWidth = 25; // Adjust spacing for consistent alignment
+  //   //   const labelWidth = labelWidths[label] || 30; // Default width if not defined
+
+  //   //   doc.setFontSize(10);
+
+  //   //   doc.setFont("helvetica", "bold");
+  //   //   doc.text(`${label}:`, x, y);
+  //   //   doc.setFontSize(10);
+
+  //   //   doc.setFont("helvetica", "normal");
+  //   //   doc.text(value?.toString() || "N/A", x + labelWidth, y);
+  //   //   const wrappedText = doc.splitTextToSize(
+  //   //     value?.toString() || "N/A",
+  //   //     maxWidth
+  //   //   );
+  //   //   doc.text(wrappedText, x + labelWidth, y);
+
+  //   //   return wrappedText.length * 5;
+  //   // };
+
+  //   // const addField = (label, value, x, y, maxWidth = 80) => {
+  //   //   const labelWidth = labelWidths[label] || 30; // Label width based on field type
+  //   //   const wrappedText = doc.splitTextToSize(
+  //   //     value?.toString() || "N/A",
+  //   //     maxWidth
+  //   //   ); // Wrap text
+
+  //   //   doc.setFontSize(11);
+  //   //   doc.setFont("helvetica", "bold");
+  //   //   doc.text(`${label}:`, x, y);
+  //   //   doc.setFont("helvetica", "normal");
+  //   //   doc.text(wrappedText, x + labelWidth, y); // Print text
+
+  //   //   return wrappedText.length * 4; // Return space occupied for dynamic adjustments
+  //   // };
+
+  //   const addField = (
+  //     label,
+  //     value,
+  //     x,
+  //     y,
+  //     maxWidth = 80,
+  //     sameLine = false,
+  //     nextColumnX = null
+  //   ) => {
+  //     const labelWidth = labelWidths[label] || 30; // Label width
+  //     const wrappedText = doc.splitTextToSize(
+  //       value?.toString() || "N/A",
+  //       maxWidth
+  //     ); // Wrap text
+
+  //     doc.setFontSize(10);
+  //     doc.setFont("helvetica", "bold");
+  //     doc.text(`${label}:`, x, y);
+
+  //     doc.setFont("helvetica", "normal");
+
+  //     if (sameLine && nextColumnX) {
+  //       doc.text(wrappedText, nextColumnX, y); // Print in the same row (for Telephone & Installation Date)
+  //     } else {
+  //       doc.text(wrappedText, x + labelWidth, y); // Print in the normal format
+  //     }
+
+  //     return wrappedText.length * 4; // Return space occupied for dynamic adjustments
+  //   };
+
+  //   // Define positions
+  //   const startX = 10; // Left side
+  //   const rightX = 110; // Right side for machine details
+  //   let nextY = 25; // Starting Y position
+
+  //   // Header
+  //   doc.addImage(HaitianLogo, "PNG", startX, 5, 40, 15);
+  //   doc.setFont("helvetica", "bold");
+  //   doc.setFontSize(11);
+  //   doc.text("Service Report", pageWidth - 60, 12);
+  //   doc.setFontSize(11);
+  //   doc.text(`No. ${srn  || "N/A"}`, pageWidth - 60, 18);
+  //   doc.setDrawColor(0, 0, 0);
+  //   doc.setLineWidth(0.5);
+  //   doc.line(0, 22, 210, 22);
+
+  //   nextY += 1;
+  //   // Left Side: Customer Details
+  //   addField("Customer", formData.customerName, startX, nextY);
+  //   addField("Machine Type", formData.machineType, rightX, nextY);
+  //   nextY += 5;
+
+  //   // addField("Address", formData.address, startX, nextY + 5);
+  //   let addressSpaceUsed = addField(
+  //     "Address",
+  //     formData.address,
+  //     startX,
+  //     nextY + 5,
+  //     60
+  //   );
+  //   // nextY += addressSpaceUsed;
+
+  //   // addField("Serial No.", formData.serialNumber, rightX, nextY+5);
+  //   // nextY += 6;
+  //   let serialSpaceUsed = addField(
+  //     "Serial No.",
+  //     formData.serialNumber,
+  //     rightX,
+  //     nextY + 5,
+  //     60
+  //   );
+  //   // nextY += serialSpaceUsed + 3; // Move down based on space used
+  //   nextY += Math.max(addressSpaceUsed, serialSpaceUsed) + 6;
+
+  //   addField("Contact", formData.contact, startX, nextY + 4);
+  //   nextY += 5;
+  //   addField("Installation Date", formData.installationDate, rightX, nextY + 8);
+  //   nextY += 5;
+
+  //   addField("Telephone", formData.telephone, startX, nextY + 4);
+  //   nextY += 6;
+
+  //   addField("Work Time", formData.workTime, rightX, nextY + 7);
+  //   nextY += 6;
+
+  //   addField(
+  //     "Service Technician",
+  //     formData.serviceTechnician,
+  //     startX,
+  //     nextY + 2
+  //   );
+  //   nextY += 6;
+  //   addField("Departure Date", formData.departureDate, startX, nextY + 5);
+  //   nextY += 6;
+  //   addField("Return Date", formData.returnDate, rightX, nextY);
+
+  //   nextY += 9;
+
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text("Report Type", startX, nextY);
+  //   doc.setFont("helvetica", "normal");
+
+  //   const reportOptions = [
+  //     "Installation/Commission",
+  //     "Maintenance",
+  //     "Defect",
+  //     "Customer Visit",
+  //     "Other"
+  //   ];
+  //   const spacing = [48, 33, 25, 35, 10]; 
+  //   let optionX = startX;
+  //   reportOptions.forEach((option,index) => {
+  //     // doc.rect(optionX, nextY + 2, 4, 4);
+  //     // if (checkboxValues[option])
+  //     //   doc.setFont("Zapfdingbats");
+  //     //   doc.text("✔", optionX + 1, nextY + 5);
+  //     // doc.text(option, optionX + 5, nextY + 5);
+  //     // optionX += 40;
+  //     const spaceBetweenOptions = spacing[index]; ;
+  //     const isChecked = checkboxValues[option];
+  //     if (isChecked) {
+  //       // Draw a border around the checkbox
+  //       doc.rect(optionX, nextY + 2.5, 4, 4); // Adjust values as needed
+  //     } else {
+  //       doc.rect(optionX, nextY + 2.5, 4, 4); // Adjust values as needed
+  //     }
+  //     doc.setFont("Zapfdingbats");
+
+  //     const symbol = isChecked ? "4" : ""; // '4' for tick, 'o' for empty
+  //     doc.text(`${symbol}`, optionX + 0.6, nextY + 5.5);
+
+  //     doc.setFont("helvetica", "normal");
+
+  //     doc.text(option, optionX + 4.5, nextY + 5.5);
+  //     optionX += spaceBetweenOptions;
+  //   });
+
+  //   nextY += 15;
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text("Description of Work / Defect / Failure Mode:", startX, nextY);
+  //   doc.setFont("helvetica", "normal");
+  //   nextY += 4;
+  //   const description = doc.splitTextToSize(
+  //     formData.description || "N/A",
+  //     maxWidth
+  //   );
+  //   doc.text(description, startX, nextY);
+  //   nextY += description.length * 2;
+
+  //   nextY += 18;
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text("Cause of failure:", startX, nextY);
+  //   doc.setFont("helvetica", "normal");
+  //   nextY += 4;
+  //   const causeOfFailure = doc.splitTextToSize(
+  //     formData.causeOfFailure || "N/A",
+  //     maxWidth
+  //   );
+  //   doc.text(causeOfFailure, startX, nextY);
+  //   nextY += causeOfFailure.length * 2;
+
+  //   nextY += 10;
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text("Notes/Further action required:", startX, nextY);
+  //   doc.setFont("helvetica", "normal");
+  //   nextY += 4;
+  //   const notes = doc.splitTextToSize(formData.notes || "N/A", maxWidth);
+  //   doc.text(notes, startX, nextY);
+  //   nextY += notes.length * 2;
+
+  //   // doc.setFont("helvetica", "bold");
+  //   // doc.text("Parts Used:", startX, nextY);
+  //   // doc.setFont("helvetica", "normal");
+  //   // nextY += 5;
+  //   // partsUsed.forEach((part, index) => {
+  //   //   doc.text(
+  //   //     `${part.partNumber} - ${part.description} (Qty: ${part.qty})`,
+  //   //     startX,
+  //   //     nextY
+  //   //   );
+  //   //   nextY += 5;
+  //   // });
+
+  //   const colWidths = [40, 65, 18, 65]; // Column widths
+  //   const rowHeight = 8; // Row height
+
+  //   const drawTableHeaders = () => {
+  //     doc.setFont("helvetica", "bold");
+
+  //     doc.text("Part Number", startX + 2, nextY + 5);
+  //     doc.text("Description", startX + colWidths[0] + 2, nextY + 5);
+  //     doc.text("Quantity", startX + colWidths[0] + colWidths[1] + 2, nextY + 5);
+  //     doc.text(
+  //       "Note",
+  //       startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
+  //       nextY + 5
+  //     );
+
+  //     doc.rect(startX, nextY, colWidths[0], rowHeight);
+  //     doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
+  //     doc.rect(
+  //       startX + colWidths[0] + colWidths[1],
+  //       nextY,
+  //       colWidths[2],
+  //       rowHeight
+  //     );
+  //     doc.rect(
+  //       startX + colWidths[0] + colWidths[1] + colWidths[2],
+  //       nextY,
+  //       colWidths[3],
+  //       rowHeight
+  //     );
+
+  //     nextY += rowHeight;
+  //   };
+
+  //   // **Ensure space before table starts**
+  //   // if (nextY + 20 > pageHeight) {
+  //   //   doc.addPage();
+  //   //   doc.setFont("helvetica", "normal");
+  //   //   nextY = 25;
+  //   //   resetHeader();
+  //   //   addPageNumber();
+  //   // }
+  //   doc.setFont("helvetica", "bold");
+  //   doc.text("Parts Used", startX, nextY + 10);
+  //   nextY += 12;
+  //   drawTableHeaders();
+
+  //   doc.setFont("helvetica", "normal");
+
+  //   //100% Working code
+
+  //   // partsUsed.forEach((part) => {
+  //   //   let partNumberLines = doc.splitTextToSize(
+  //   //     part.partNumber || "N/A",
+  //   //     colWidths[0] - 5
+  //   //   );
+  //   //   let descriptionLines = doc.splitTextToSize(
+  //   //     part.description || "N/A",
+  //   //     colWidths[1] - 5
+  //   //   );
+  //   //   let quantityLines = doc.splitTextToSize(
+  //   //     part.quantity.toString() || "N/A",
+  //   //     colWidths[2] - 5
+  //   //   );
+  //   //   let noteLines = doc.splitTextToSize(part.note || "N/A", colWidths[3] - 5);
+
+  //   //   let maxLines = Math.max(
+  //   //     partNumberLines.length,
+  //   //     descriptionLines.length,
+  //   //     quantityLines.length,
+  //   //     noteLines.length
+  //   //   );
+  //   //   let rowHeightTotal = maxLines * rowHeight;
+
+  //   //   // **Ensure bottom margin of 30px is maintained**
+  //   //   // if (nextY + rowHeightTotal > pageHeight - 30) {
+  //   //   //   addPageNumber();
+  //   //   //   doc.addPage();
+  //   //   //   nextY = 25;
+  //   //   //   resetHeader();
+  //   //   //   drawTableHeaders();
+  //   //   // }
+
+  //   //   // ✅ Print each wrapped line dynamically with borders
+  //   //   for (let i = 0; i < maxLines; i++) {
+  //   //     // ✅ Check if we need to add a new page before printing each line
+  //   //     // if (nextY + rowHeight > pageHeight - 30) {
+  //   //     //   doc.setFontSize(12);
+  //   //     //   doc.setFont("helvetica", "normal");
+  //   //     //   addPageNumber();
+  //   //     //   doc.addPage();
+  //   //     //   nextY = 25;
+  //   //     //   resetHeader();
+  //   //     //   drawTableHeaders();
+  //   //     // }
+  //   //     doc.setFont("helvetica", "normal");
+
+  //   //     // ✅ Print the text in the correct column positions
+  //   //     if (partNumberLines[i])
+  //   //       doc.text(partNumberLines[i], startX + 2, nextY + 5);
+  //   //     if (descriptionLines[i])
+  //   //       doc.text(descriptionLines[i], startX + colWidths[0] + 2, nextY + 5);
+  //   //     if (quantityLines[i])
+  //   //       doc.text(
+  //   //         quantityLines[i],
+  //   //         startX + colWidths[0] + colWidths[1] + 2,
+  //   //         nextY + 5
+  //   //       );
+  //   //     if (noteLines[i])
+  //   //       doc.text(
+  //   //         noteLines[i],
+  //   //         startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
+  //   //         nextY + 5
+  //   //       );
+
+  //   //     // ✅ Draw borders for the current line
+  //   //     doc.rect(startX, nextY, colWidths[0], rowHeight);
+  //   //     doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
+  //   //     doc.rect(
+  //   //       startX + colWidths[0] + colWidths[1],
+  //   //       nextY,
+  //   //       colWidths[2],
+  //   //       rowHeight
+  //   //     );
+  //   //     doc.rect(
+  //   //       startX + colWidths[0] + colWidths[1] + colWidths[2],
+  //   //       nextY,
+  //   //       colWidths[3],
+  //   //       rowHeight
+  //   //     );
+
+  //   //     nextY += rowHeight; // Move Y position down
+  //   //   }
+  //   // });
+
+  //   const maxRows = 12; // Limit to 12 rows
+  //   let rowCount = 0; // Track number of printed rows
+
+  //   for (let i = 0; i < partsUsed.length; i++) {
+  //     if (rowCount >= maxRows) break; // Stop adding rows after 5
+
+  //     let part = partsUsed[i];
+
+  //     let partNumberLines = doc.splitTextToSize(
+  //       part.partNumber || "N/A",
+  //       colWidths[0] - 5
+  //     );
+  //     let descriptionLines = doc.splitTextToSize(
+  //       part.description || "N/A",
+  //       colWidths[1] - 5
+  //     );
+  //     let quantityLines = doc.splitTextToSize(
+  //       part.quantity?.toString() || "N/A",
+  //       colWidths[2] - 5
+  //     );
+  //     let noteLines = doc.splitTextToSize(part.note || "N/A", colWidths[3] - 5);
+
+  //     let maxLines = Math.max(
+  //       partNumberLines.length,
+  //       descriptionLines.length,
+  //       quantityLines.length,
+  //       noteLines.length
+  //     );
+
+  //     // Ensure total rows do not exceed 5
+  //     if (rowCount + maxLines > maxRows) break;
+
+  //     for (let j = 0; j < maxLines; j++) {
+  //       if (rowCount >= maxRows) break; // Stop adding rows after 5
+
+  //       doc.setFont("helvetica", "normal");
+
+  //       if (partNumberLines[j])
+  //         doc.text(partNumberLines[j], startX + 2, nextY + 5);
+  //       if (descriptionLines[j])
+  //         doc.text(descriptionLines[j], startX + colWidths[0] + 2, nextY + 5);
+  //       if (quantityLines[j])
+  //         doc.text(
+  //           quantityLines[j],
+  //           startX + colWidths[0] + colWidths[1] + 2,
+  //           nextY + 5
+  //         );
+  //       if (noteLines[j])
+  //         doc.text(
+  //           noteLines[j],
+  //           startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
+  //           nextY + 5
+  //         );
+
+  //       // ✅ Draw borders for each row
+  //       doc.rect(startX, nextY, colWidths[0], rowHeight);
+  //       doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
+  //       doc.rect(
+  //         startX + colWidths[0] + colWidths[1],
+  //         nextY,
+  //         colWidths[2],
+  //         rowHeight
+  //       );
+  //       doc.rect(
+  //         startX + colWidths[0] + colWidths[1] + colWidths[2],
+  //         nextY,
+  //         colWidths[3],
+  //         rowHeight
+  //       );
+
+  //       nextY += rowHeight; // Move Y position down
+  //       rowCount++; // Increment row count
+  //     }
+  //   }
+
+  //   // Service Type Section
+  //   // doc.setFont("helvetica", "bold");
+  //   // doc.text("Service Type", 10, nextY + 5);
+  //   // nextY += 6; // Space after the title
+
+  //   // doc.setFont("helvetica", "normal");
+  //   // doc.setFontSize(9);
+
+  //   // const serviceStartX = 10;
+  //   // const checkboxSize = 4;
+  //   // let optionServiceX = serviceStartX;
+  //   // const spaceBetweenOptions = 29; // Space between each option
+  //   // const serviceRowHeight = 10; // Height per row (for 2-line text)
+  //   // let maxServiceRowHeight = serviceRowHeight; // Track max row height
+
+  //   // // Function to split service options into two lines
+  //   // const splitServiceText = (option) => {
+  //   //     const words = option.split(" ");
+  //   //     if (words.length > 1) {
+  //   //         return [words[0], words.slice(1).join(" ")]; // First word on one line, rest on second
+  //   //     } else {
+  //   //         return [option]; // Single-word options remain single-line
+  //   //     }
+  //   // };
+
+  //   // // **Now, draw checkboxes and text in a single row**
+  //   // serviceOptions.forEach((option) => {
+  //   //     const wrappedText = splitServiceText(option); // Split into two lines
+
+  //   //     // **Draw checkbox centered to row height**
+  //   //     let checkboxY = nextY + (maxServiceRowHeight / 2 - checkboxSize / 2);
+  //   //     doc.rect(optionServiceX, checkboxY, checkboxSize, checkboxSize);
+
+  //   //     // **Check if the option is selected**
+  //   //     const isChecked = checkboxValues[option] || false;
+  //   //     if (isChecked) {
+  //   //         doc.setFont("Zapfdingbats");
+  //   //         doc.text("4", optionServiceX + 0.8, checkboxY + 3);
+  //   //         doc.setFont("helvetica", "normal");
+  //   //     }
+
+  //   //     // **Draw text below the checkbox**
+  //   //     let textY = checkboxY + 2;
+  //   //     wrappedText.forEach((line, index) => {
+  //   //         doc.text(line, optionServiceX + checkboxSize+1, textY + index * 3);
+  //   //     });
+
+  //   //     // **Move X position for the next checkbox**
+  //   //     optionServiceX += spaceBetweenOptions;
+  //   // });
+
+  //   // // Move Y to the next section after full row
+  //   // nextY += maxServiceRowHeight + 5;
+
+  //   doc.setFont("helvetica", "bold");
+  //   nextY = 220;
+  //   doc.text("Service Type", 10, nextY);
+  //   nextY-= 2; // Space after the title
+
+  //   doc.setFont("helvetica", "normal");
+
+  //   const serviceStartX = 10;
+  //   const checkboxSize = 4;
+  //   let optionServiceX = serviceStartX;
+  //   const serviceRowHeight = 10; // Height per row (for 2-line text)
+  //   let maxServiceRowHeight = serviceRowHeight; // Track max row height
+
+  //   // Define manual spacing for each option
+  //   const serviceOptionSpacing = {
+  //     "F.O.C Commissioning": 33,
+  //     "F.O.C Maintenance": 28,
+  //     Guarantee: 26,
+  //     "Chargeable Commissioning": 33,
+  //     "Customer Visit": 25,
+  //     "Service contract": 25,
+  //     Goodwill: 25,
+  //   };
+
+  //   // Function to split service options into two lines
+  //   const splitServiceText = (option) => {
+  //     const words = option.split(" ");
+  //     if (words.length > 1) {
+  //       return [words[0], words.slice(1).join(" ")]; // First word on one line, rest on second
+  //     } else {
+  //       return [option]; // Single-word options remain single-line
+  //     }
+  //   };
+
+  //   // Now, draw checkboxes and text in a single row
+  //   serviceOptions.forEach((option) => {
+  //     const wrappedText = splitServiceText(option); // Split into two lines
+  //     let optionSpacing = serviceOptionSpacing[option] || 30; // Get manual spacing
+
+  //     // Center "Guarantee" & "Goodwill" inside the checkbox
+  //     let textX = optionServiceX + checkboxSize + 1;
+
+  //     // Draw checkbox centered to row height
+  //     let checkboxY = nextY + (maxServiceRowHeight / 2 - checkboxSize / 1.5);
+  //     doc.rect(optionServiceX, checkboxY+3, checkboxSize, checkboxSize);
+
+  //     // Check if the option is selected
+  //     const isChecked = checkboxValues[option] || false;
+  //     if (isChecked) {
+  //       doc.setFont("Zapfdingbats");
+  //       doc.text("4", optionServiceX + 0.6, checkboxY + 6);
+  //       doc.setFont("helvetica", "normal");
+  //     }
+
+  //     // Draw text below the checkbox
+  //     let textY = checkboxY + 5;
+  //     if (option === "Guarantee" || option === "Goodwill") {
+  //       textY += 1; // Adjust to center text manually
+  //     }
+  //     wrappedText.forEach((line, index) => {
+  //       doc.text(line, textX, textY + index * 3.3);
+  //     });
+
+  //     // Move X position for the next checkbox
+  //     optionServiceX += optionSpacing;
+  //   });
+
+  //   // Move Y to the next section after full row
+  //   nextY += maxServiceRowHeight + 10;
+
+  //   const addSignatures = (signatures, nextY) => {
+  //     doc.setFont("helvetica", "bold");
+
+  //     // Title for Signatures Section
+  //     const signatureHeight = 30; // Signature height
+  //     const signatureWidth = 55; // Signature width
+  //     const spacing = 5; // Space between rows and signatures
+  //     const titleHeight = 14; // Height for the title
+
+  //     const estimatedHeight = titleHeight + signatureHeight * 2 + spacing * 3;
+
+  //     // Check if the entire signature section fits on the current page
+
+  //     // Print the Signatures title
+
+  //     // Column positions for the signatures
+  //     const col1X = 10; // Technician signature position
+  //     const col2X = 78; // Manager signature position
+  //     const col3X = 145; // Customer signature position (centered below)
+
+  //     let baseY = nextY + 1; // Adjusted Y position for images
+  //     doc.setFont("helvetica", "bold");
+  //     // Row 1: Technician and Manager Signatures
+  //     if (signatures.technician) {
+  //       doc.text("Signature of service technician:", col1X, nextY);
+  //       doc.addImage(
+  //         signatures.technician,
+  //         "PNG",
+  //         col1X,
+  //         baseY + 1,
+  //         signatureWidth,
+  //         signatureHeight
+  //       );
+  //     }
+  //     doc.setFont("helvetica", "bold");
+  //     if (signatures.manager) {
+  //       doc.text("Signature of service manager:", col2X, nextY);
+  //       doc.addImage(
+  //         signatures.manager,
+  //         "PNG",
+  //         col2X,
+  //         baseY + 1,
+  //         signatureWidth,
+  //         signatureHeight
+  //       );
+  //     }
+
+  //     // Adjust Y for the next row based on the tallest signature in Row 1
+  //     nextY = baseY;
+  //     doc.setFont("helvetica", "bold");
+  //     // Row 2: Customer Signature
+  //     if (signatures.customer) {
+  //       // Check if the customer signature fits on the current page
+
+  //       doc.text("Customer signature:", col3X, nextY);
+  //       doc.addImage(
+  //         signatures.customer,
+  //         "PNG",
+  //         col3X,
+  //         nextY + 2,
+  //         signatureWidth,
+  //         signatureHeight
+  //       );
+  //       nextY += signatureHeight + spacing;
+  //     }
+
+  //     return nextY; // Return updated Y position for further content
+  //   };
+
+  //   // Call the function to add signatures
+  //   nextY = addSignatures(formData.signatures, nextY);
+
+  //   // addField("Work Time", formData.workTime, rightX, nextY);
+  //   // nextY += 8;
+
+  //   // addField("Departure Date", formData.departureDate, startX, nextY);
+  //   // addField("Return Date", formData.returnDate, rightX, nextY);
+
+  //   // Report Type
+  //   // doc.setFontSize(11);
+  //   // doc.setFont("helvetica", "bold");
+  //   // doc.text("Report Type", startX, nextY);
+  //   // doc.setFont("helvetica", "normal");
+
+  //   // const reportOptions = ["Installation", "Maintenance", "Defect", "Customer Visit"];
+  //   // let optionX = startX;
+  //   // reportOptions.forEach((option) => {
+  //   //     doc.rect(optionX, nextY + 2, 4, 4);
+  //   //     if (checkboxValues[option]) doc.text("✔", optionX + 1, nextY + 5);
+  //   //     doc.text(option, optionX + 6, nextY + 5);
+  //   //     optionX += 40;
+  //   // });
+  //   // nextY += 10;
+
+  //   // Work Description
+  //   // doc.setFont("helvetica", "bold");
+  //   // doc.text("Description of Work / Defect / Failure Mode:", startX, nextY);
+  //   // doc.setFont("helvetica", "normal");
+  //   // nextY += 5;
+  //   // const description = doc.splitTextToSize(formData.description || "N/A", maxWidth);
+  //   // doc.text(description, startX, nextY);
+  //   // nextY += description.length * 5;
+
+  //   // Parts Used
+  //   // doc.setFont("helvetica", "bold");
+  //   // doc.text("Parts Used:", startX, nextY);
+  //   // doc.setFont("helvetica", "normal");
+  //   // nextY += 5;
+  //   // partsUsed.forEach((part, index) => {
+  //   //     doc.text(`${part.partNumber} - ${part.description} (Qty: ${part.qty})`, startX, nextY);
+  //   //     nextY += 5;
+  //   // });
+
+  //   // Signatures
+  //   // nextY += 10;
+  //   // doc.text("Signature of Service Technician:", startX, nextY);
+  //   // doc.text("Signature of Service Manager:", pageWidth / 3, nextY);
+  //   // doc.text("Customer Signature:", (2 * pageWidth) / 3, nextY);
+
+  //   // doc.line(startX, nextY + 5, startX + 50, nextY + 5);
+  //   // doc.line(pageWidth / 3, nextY + 5, pageWidth / 3 + 50, nextY + 5);
+  //   // doc.line((2 * pageWidth) / 3, nextY + 5, (2 * pageWidth) / 3 + 50, nextY + 5);
+
+  //   // nextY = addSignatures(formData.signatures, nextY);
+
+  //   // doc.setFont("helvetica", "bold");
+  //   // doc.setFontSize(11); // Set font size for company name
+  //   // doc.text("Haitian Middle East F2E", doc.internal.pageSize.width / 2, nextY + 10, { align: "center" });
+
+  //   // doc.setFontSize(9);
+  //   // doc.text("Sharjah - U.A.E", doc.internal.pageSize.width / 2, nextY + 16, { align: "center" });
+
+  //   // doc.setFontSize(10);
+  //   // doc.text("+971 65 622 238", doc.internal.pageSize.width / 2, nextY + 22, { align: "center" });
+
+  //   // doc.setFontSize(9);
+  //   // doc.text("Email: cso@haitianme.com", doc.internal.pageSize.width / 2, nextY + 28, { align: "center" });
+  //   // doc.text("Web: www.haitianme.com", doc.internal.pageSize.width / 2, nextY + 34, { align: "center" });
+
+  //   // const centerX = doc.internal.pageSize.width / 2; // Get center alignment
+
+  //   // doc.setFont("helvetica", "bold");
+  //   // doc.setFontSize(10);
+  //   // doc.text("Haitian Middle East F2E", centerX, nextY + 5, { align: "center" });
+
+  //   // doc.setFontSize(9);
+  //   // doc.text("Sharjah - U.A.E", centerX, nextY + 10, { align: "center" });
+
+  //   // doc.setFontSize(10);
+  //   // doc.text("+971 65 622 238", centerX, nextY + 14, { align: "center" });
+
+  //   // doc.setFontSize(9);
+  //   // doc.text("Email: cso@haitianme.com", centerX, nextY + 18, { align: "center" });
+  //   // doc.text("Web: www.haitianme.com", centerX, nextY + 22, { align: "center" });
+
+  //   // const centerX = doc.internal.pageSize.width / 2; // Get center alignment
+  //   // const leftAlignX = 80;  // Adjust for left-side text
+  //   // const rightAlignX = doc.internal.pageSize.width - 50;  // Adjust for right-side text
+
+  //   // // **Company Name - Centered**
+  //   // doc.setFont("helvetica", "bold");
+  //   // doc.setFontSize(10);
+  //   // doc.text("Haitian Middle East F2E", centerX, nextY + 5, { align: "center" });
+
+  //   // // **Second Row: "Sharjah - U.A.E" (left) and "+971 65 622 238" (right)**
+  //   // doc.setFontSize(9);
+  //   // doc.text("Sharjah - U.A.E", leftAlignX, nextY + 10);
+  //   // doc.text("+971 65 622 238", rightAlignX-43, nextY + 10, { align: "center" });
+
+  //   // // **Third Row: "Email" (left) and "Web" (right)**
+  //   // doc.text("Email: cso@haitianme.com", leftAlignX-10, nextY + 15);
+  //   // doc.text("Web: www.haitianme.com", rightAlignX-7, nextY + 15, { align: "right" });
+
+  //   // const pageHeight = doc.internal.pageSize.height; // Get page height
+  //   const footerY = pageHeight - 20; // Adjust footer position from bottom
+  //   const centerX = doc.internal.pageSize.width / 2; // Get center alignment
+  //   const leftAlignX = 40; // Adjust for left-side text
+  //   const rightAlignX = doc.internal.pageSize.width - 80; // Adjust for right-side text
+
+  //   // **Company Name - Centered**
+  //   doc.setFont("helvetica", "bold");
+  //   doc.setFontSize(10);
+  //   doc.text("Haitian Middle East F2E", centerX, footerY, { align: "center" });
+
+  //   // **Second Row: "Sharjah - U.A.E" (left) and "+971 65 622 238" (right)**
+  //   doc.setFontSize(9);
+  //   doc.text("Sharjah - U.A.E", leftAlignX + 40, footerY + 6);
+  //   doc.text("+971 65 622 238", rightAlignX, footerY + 6, { align: "right" });
+
+  //   // **Third Row: "Email" (left) and "Web" (right)**
+  //   doc.text("Email: cso@haitianme.com", leftAlignX + 22, footerY + 12);
+  //   doc.text("Web: www.haitianme.com", rightAlignX + 15, footerY + 12, {
+  //     align: "right",
+  //   });
+
+  //   const now = new Date();
+  //   const year = now.getUTCFullYear();
+  //   const month = String(now.getUTCMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+  //   const day = String(now.getUTCDate()).padStart(2, "0");
+  
+  //   let hours = now.getUTCHours();
+  //   const minutes = String(now.getUTCMinutes()).padStart(2, "0");
+  //   const seconds = String(now.getUTCSeconds()).padStart(2, "0");
+  
+  //   // Convert to 12-hour format with AM/PM
+  //   const amPm = hours >= 12 ? "PM" : "AM";
+  //   hours = hours % 12 || 12; // Convert 0 (midnight) and 12 (noon) properly
+  
+  //   // Format: YYYY-MM-DD_HH-MM-SS_AMPM (UTC)
+  //   // const dateTimeUTC = `${year}-${month}-${day}_${hours}:${minutes}:${seconds}_${amPm}`;
+  //   const dateTimeUTC = `${year}-${month}-${day}_${hours}`;
+
+  
+  //   // Construct filename: "2025-03-14_02-30-45_PM_Service_Report_1001.pdf"
+  //   const fileName = `${dateTimeUTC}_Service_Report_${srn || "N/A"}.pdf`;
+
+  //   // doc.save("Service_Report.pdf");
+  //   doc.save(fileName);
+  // };
+
   const generatePDF = (formData, checkboxValues, partsUsed) => {
     const doc = new jsPDF();
     // const startX = 10;
@@ -2364,7 +3160,7 @@ export default function FormComponent() {
     // Left Side: Customer Details
     addField("Customer", formData.customerName, startX, nextY);
     addField("Machine Type", formData.machineType, rightX, nextY);
-    nextY += 5;
+    nextY = 29;
 
     // addField("Address", formData.address, startX, nextY + 5);
     let addressSpaceUsed = addField(
@@ -2386,18 +3182,18 @@ export default function FormComponent() {
       60
     );
     // nextY += serialSpaceUsed + 3; // Move down based on space used
-    nextY += Math.max(addressSpaceUsed, serialSpaceUsed) + 6;
-
+    // nextY += Math.max(addressSpaceUsed, serialSpaceUsed) + 6;
+    nextY=45;
     addField("Contact", formData.contact, startX, nextY + 4);
-    nextY += 5;
+    nextY = 49;
     addField("Installation Date", formData.installationDate, rightX, nextY + 8);
-    nextY += 5;
+    nextY = 53;
 
     addField("Telephone", formData.telephone, startX, nextY + 4);
-    nextY += 6;
+    nextY = 58;
 
     addField("Work Time", formData.workTime, rightX, nextY + 7);
-    nextY += 6;
+    nextY = 63;
 
     addField(
       "Service Technician",
@@ -2405,12 +3201,12 @@ export default function FormComponent() {
       startX,
       nextY + 2
     );
-    nextY += 6;
+    nextY = 68;
     addField("Departure Date", formData.departureDate, startX, nextY + 5);
-    nextY += 6;
+    nextY += 5;
     addField("Return Date", formData.returnDate, rightX, nextY);
 
-    nextY += 9;
+    nextY =81;
 
     doc.setFont("helvetica", "bold");
     doc.text("Report Type", startX, nextY);
@@ -2461,9 +3257,9 @@ export default function FormComponent() {
       maxWidth
     );
     doc.text(description, startX, nextY);
-    nextY += description.length * 2;
+    // nextY += description.length * 2;
 
-    nextY += 18;
+    nextY = 119;
     doc.setFont("helvetica", "bold");
     doc.text("Cause of failure:", startX, nextY);
     doc.setFont("helvetica", "normal");
@@ -2473,16 +3269,16 @@ export default function FormComponent() {
       maxWidth
     );
     doc.text(causeOfFailure, startX, nextY);
-    nextY += causeOfFailure.length * 2;
+    // nextY += causeOfFailure.length * 2;
 
-    nextY += 10;
+    nextY = 133;
     doc.setFont("helvetica", "bold");
     doc.text("Notes/Further action required:", startX, nextY);
     doc.setFont("helvetica", "normal");
     nextY += 4;
     const notes = doc.splitTextToSize(formData.notes || "N/A", maxWidth);
     doc.text(notes, startX, nextY);
-    nextY += notes.length * 2;
+    // nextY += notes.length * 2;
 
     // doc.setFont("helvetica", "bold");
     // doc.text("Parts Used:", startX, nextY);
@@ -2496,7 +3292,7 @@ export default function FormComponent() {
     //   );
     //   nextY += 5;
     // });
-
+    nextY=137;
     const colWidths = [40, 65, 18, 65]; // Column widths
     const rowHeight = 8; // Row height
 
@@ -2631,80 +3427,132 @@ export default function FormComponent() {
     //   }
     // });
 
-    const maxRows = 12; // Limit to 12 rows
-    let rowCount = 0; // Track number of printed rows
+    // //100% WORKING CODE ON THE ENTER INPUT BORDER ONLY PRINTED NOT ALL BORDER PRINTED
+    // const maxRows = 12; // Limit to 12 rows
+    // let rowCount = 0; // Track number of printed rows
 
-    for (let i = 0; i < partsUsed.length; i++) {
-      if (rowCount >= maxRows) break; // Stop adding rows after 5
+    // for (let i = 0; i < partsUsed.length; i++) {
+    //   if (rowCount >= maxRows) break; // Stop adding rows after 5
 
-      let part = partsUsed[i];
+    //   let part = partsUsed[i];
 
-      let partNumberLines = doc.splitTextToSize(
-        part.partNumber || "N/A",
-        colWidths[0] - 5
-      );
-      let descriptionLines = doc.splitTextToSize(
-        part.description || "N/A",
-        colWidths[1] - 5
-      );
-      let quantityLines = doc.splitTextToSize(
-        part.quantity?.toString() || "N/A",
-        colWidths[2] - 5
-      );
-      let noteLines = doc.splitTextToSize(part.note || "N/A", colWidths[3] - 5);
+    //   let partNumberLines = doc.splitTextToSize(
+    //     part.partNumber || "N/A",
+    //     colWidths[0] - 5
+    //   );
+    //   let descriptionLines = doc.splitTextToSize(
+    //     part.description || "N/A",
+    //     colWidths[1] - 5
+    //   );
+    //   let quantityLines = doc.splitTextToSize(
+    //     part.quantity?.toString() || "N/A",
+    //     colWidths[2] - 5
+    //   );
+    //   let noteLines = doc.splitTextToSize(part.note || "N/A", colWidths[3] - 5);
 
-      let maxLines = Math.max(
-        partNumberLines.length,
-        descriptionLines.length,
-        quantityLines.length,
-        noteLines.length
-      );
+    //   let maxLines = Math.max(
+    //     partNumberLines.length,
+    //     descriptionLines.length,
+    //     quantityLines.length,
+    //     noteLines.length
+    //   );
 
-      // Ensure total rows do not exceed 5
-      if (rowCount + maxLines > maxRows) break;
+    //   // Ensure total rows do not exceed 5
+    //   if (rowCount + maxLines > maxRows) break;
 
-      for (let j = 0; j < maxLines; j++) {
-        if (rowCount >= maxRows) break; // Stop adding rows after 5
+    //   for (let j = 0; j < maxLines; j++) {
+    //     if (rowCount >= maxRows) break; // Stop adding rows after 5
 
-        doc.setFont("helvetica", "normal");
+    //     doc.setFont("helvetica", "normal");
 
-        if (partNumberLines[j])
-          doc.text(partNumberLines[j], startX + 2, nextY + 5);
-        if (descriptionLines[j])
-          doc.text(descriptionLines[j], startX + colWidths[0] + 2, nextY + 5);
-        if (quantityLines[j])
-          doc.text(
-            quantityLines[j],
-            startX + colWidths[0] + colWidths[1] + 2,
-            nextY + 5
-          );
-        if (noteLines[j])
-          doc.text(
-            noteLines[j],
-            startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
-            nextY + 5
-          );
+    //     if (partNumberLines[j])
+    //       doc.text(partNumberLines[j], startX + 2, nextY + 5);
+    //     if (descriptionLines[j])
+    //       doc.text(descriptionLines[j], startX + colWidths[0] + 2, nextY + 5);
+    //     if (quantityLines[j])
+    //       doc.text(
+    //         quantityLines[j],
+    //         startX + colWidths[0] + colWidths[1] + 2,
+    //         nextY + 5
+    //       );
+    //     if (noteLines[j])
+    //       doc.text(
+    //         noteLines[j],
+    //         startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
+    //         nextY + 5
+    //       );
 
-        // ✅ Draw borders for each row
-        doc.rect(startX, nextY, colWidths[0], rowHeight);
-        doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
-        doc.rect(
-          startX + colWidths[0] + colWidths[1],
-          nextY,
-          colWidths[2],
-          rowHeight
-        );
-        doc.rect(
-          startX + colWidths[0] + colWidths[1] + colWidths[2],
-          nextY,
-          colWidths[3],
-          rowHeight
-        );
+    //     // ✅ Draw borders for each row
+    //     doc.rect(startX, nextY, colWidths[0], rowHeight);
+    //     doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
+    //     doc.rect(
+    //       startX + colWidths[0] + colWidths[1],
+    //       nextY,
+    //       colWidths[2],
+    //       rowHeight
+    //     );
+    //     doc.rect(
+    //       startX + colWidths[0] + colWidths[1] + colWidths[2],
+    //       nextY,
+    //       colWidths[3],
+    //       rowHeight
+    //     );
 
-        nextY += rowHeight; // Move Y position down
-        rowCount++; // Increment row count
-      }
+    //     nextY += rowHeight; // Move Y position down
+    //     rowCount++; // Increment row count
+    //   }
+    // }
+
+    const maxRows = 6; // Fixed row count
+let rowCount = 0; // Track how many total rows are printed
+
+for (let i = 0; i < maxRows; i++) {
+  if (rowCount >= maxRows) break; // Ensure exactly 7 rows are printed
+
+  let part = partsUsed[i] || { partNumber: "", description: "", quantity: "", note: "" }; // Ensure blank rows if not enough data
+
+  // Wrap text for each column
+  let partNumberLines = doc.splitTextToSize(part.partNumber || "", colWidths[0] - 5);
+  let descriptionLines = doc.splitTextToSize(part.description || "", colWidths[1] - 5);
+  let quantityLines = doc.splitTextToSize(part.quantity?.toString() || "", colWidths[2] - 5);
+  let noteLines = doc.splitTextToSize(part.note || "", colWidths[3] - 5);
+
+  // Get the highest line count for this row
+  let maxLines = Math.max(
+    partNumberLines.length,
+    descriptionLines.length,
+    quantityLines.length,
+    noteLines.length
+  );
+
+  // **Ensure the row limit is not exceeded**
+  if (rowCount + maxLines > maxRows) {
+    maxLines = maxRows - rowCount; // Adjust to fit exactly within 7 rows
+  }
+
+  for (let j = 0; j < maxLines; j++) {
+    if (rowCount >= maxRows) break; // Stop when exactly 7 rows are printed
+
+    doc.setFont("helvetica", "normal");
+
+    // ✅ Print wrapped text inside columns
+    if (partNumberLines[j]) doc.text(partNumberLines[j], startX + 2, nextY + 5);
+    if (descriptionLines[j]) doc.text(descriptionLines[j], startX + colWidths[0] + 2, nextY + 5);
+    if (quantityLines[j]) doc.text(quantityLines[j], startX + colWidths[0] + colWidths[1] + 2, nextY + 5);
+    if (noteLines[j]) doc.text(noteLines[j], startX + colWidths[0] + colWidths[1] + colWidths[2] + 2, nextY + 5);
+
+    // ✅ Draw borders for each row
+    let xPos = startX;
+    for (let k = 0; k < colWidths.length; k++) {
+      doc.rect(xPos, nextY, colWidths[k], rowHeight);
+      xPos += colWidths[k];
     }
+
+    nextY += rowHeight; // Move Y position down
+    rowCount++; // Increment row count
+  }
+}
+
 
     // Service Type Section
     // doc.setFont("helvetica", "bold");
@@ -2761,7 +3609,7 @@ export default function FormComponent() {
     // nextY += maxServiceRowHeight + 5;
 
     doc.setFont("helvetica", "bold");
-    nextY = 220;
+    nextY = 213;
     doc.text("Service Type", 10, nextY);
     nextY-= 2; // Space after the title
 
@@ -2828,8 +3676,9 @@ export default function FormComponent() {
     });
 
     // Move Y to the next section after full row
-    nextY += maxServiceRowHeight + 10;
+    // nextY += maxServiceRowHeight + 10;
 
+    nextY=229
     const addSignatures = (signatures, nextY) => {
       doc.setFont("helvetica", "bold");
 
@@ -3049,6 +3898,7 @@ export default function FormComponent() {
     // doc.save("Service_Report.pdf");
     doc.save(fileName);
   };
+
 
   const handleSubmit = async (values) => {
     try {
@@ -3270,7 +4120,7 @@ export default function FormComponent() {
                           value={address}
                           onChange={handleAddressChange}
                           autoSize={{ minRows: 3, maxRows: 3 }}
-                          maxLength={120}
+                          maxLength={100}
                           showCount
                         />
                       </Form.Item>
@@ -3341,7 +4191,7 @@ export default function FormComponent() {
                           value={serialNumber}
                           onChange={handleSerialNumberChange}
                           autoSize={{ minRows: 3, maxRows: 3 }}
-                          maxLength={100}
+                          maxLength={60}
                           showCount
                         />
                       </Form.Item>
@@ -3457,7 +4307,7 @@ export default function FormComponent() {
                         value={descriptionText}
                         onChange={handleDescriptionTextChange}
                         autoSize={{ minRows: 5, maxRows: 5 }}
-                        maxLength={200}
+                        maxLength={150}
                         showCount
                       />
                     </Form.Item>
