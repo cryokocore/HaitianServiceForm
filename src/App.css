@@ -85,7 +85,7 @@ font-weight: bolder;
 
 @media only screen and (max-width: 768px) {
   .haitianLogo{
-    width:30% !important;
+    width:50% !important;
     }
 }
 
@@ -105,4 +105,10 @@ font-weight: bolder;
   .haitianLogo{
     width:70% !important;
     }
+}
+
+@media only screen and (max-width: 768px) and (orientation: landscape) {
+  .haitianLogo {
+    width: 60% !important;
+  }
 }
