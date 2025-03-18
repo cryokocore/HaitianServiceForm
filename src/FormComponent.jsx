@@ -32,23 +32,6 @@ message.config({
   maxCount: 3,
 });
 
-// const reportOptions = [
-//   { label: "Installation", value: "Installation" },
-//   { label: "Maintenance", value: "Maintenance" },
-//   { label: "Defect", value: "Defect" },
-//   { label: "Customer Visit", value: "Customer Visit" },
-// ];
-
-// const serviceOptions = [
-//   { label: "F.O.C Commissioning", value: "F.O.C Commissioning" },
-//   { label: "F.O.C Maintenance", value: "F.O.C Maintenance" },
-//   { label: "Guarantee", value: "Guarantee" },
-//   { label: "Chargeable Commissioning", value: "Chargeable Commissioning" },
-//   { label: "Customer Visit", value: "Customer Visit" },
-//   { label: "Service contract", value: "Service contract" },
-//   { label: "Goodwill", value: "Goodwill" },
-// ];
-
 const reportOptions = [
   "Installation/Commission",
   "Maintenance",
@@ -72,8 +55,6 @@ export default function FormComponent() {
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
-  //   const sigCanvas = useRef();
-  //   const [signatureData, setSignatureData] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [descriptionText, setDescriptionText] = useState("");
   const [causeOfFailure, setcauseOfFailure] = useState("");
@@ -93,26 +74,25 @@ export default function FormComponent() {
     },
   ]);
 
+  const fetchSRN = async () => {
+    try {
+      const response = await fetch(
+        "https://script.google.com/macros/s/AKfycbyNY5d3SHNbeBM3uP-KtUuh7nQ6hUhzCsYUdF8B84OfA6H26HF-J5OPzC-ByO-3Mr8Syg/exec"
+      );
+      const data = await response.json(); // ✅ Parse JSON directly
 
-    const fetchSRN = async () => {
-      try {
-        const response = await fetch(
-          "https://script.google.com/macros/s/AKfycbyNY5d3SHNbeBM3uP-KtUuh7nQ6hUhzCsYUdF8B84OfA6H26HF-J5OPzC-ByO-3Mr8Syg/exec"
-        );
-        const data = await response.json(); // ✅ Parse JSON directly
+      console.log("Fetched SRN:", data.srn); // ✅ Log SRN in console
 
-        console.log("Fetched SRN:", data.srn); // ✅ Log SRN in console
-
-        if (data.success) {
-          setSRN(data.srn); // ✅ Set state with fetched SRN
-        } else {
-          console.error("Error fetching SRN:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching SRN:", error);
+      if (data.success) {
+        setSRN(data.srn); // ✅ Set state with fetched SRN
+      } else {
+        console.error("Error fetching SRN:", data.message);
       }
-    };
-    useEffect(() => {
+    } catch (error) {
+      console.error("Error fetching SRN:", error);
+    }
+  };
+  useEffect(() => {
     fetchSRN();
   }, []);
 
@@ -127,12 +107,6 @@ export default function FormComponent() {
       );
       value = lines.slice(0, 2).join("\n"); // Trim excess lines
     }
-
-    // Limit strictly to 200 characters
-    // if (value.length > 200) {
-    //   message.warning("Maximum 200 characters allowed!");
-    //   value = value.substring(0, 200); // Trim excess characters
-    // }
 
     setSerialNumber(value); // Update state only if within limits
   };
@@ -149,12 +123,6 @@ export default function FormComponent() {
       value = lines.slice(0, 2).join("\n"); // Trim excess lines
     }
 
-    // Limit strictly to 200 characters
-    // if (value.length > 200) {
-    //   message.warning("Maximum 200 characters allowed!");
-    //   value = value.substring(0, 200); // Trim excess characters
-    // }
-
     setAddress(value); // Update state only if within limits
   };
 
@@ -170,12 +138,6 @@ export default function FormComponent() {
       value = lines.slice(0, 2).join("\n"); // Trim excess lines
     }
 
-    // Limit strictly to 200 characters
-    // if (value.length > 200) {
-    //   message.warning("Maximum 200 characters allowed!");
-    //   value = value.substring(0, 200); // Trim excess characters
-    // }
-
     setDescriptionText(value); // Update state only if within limits
   };
 
@@ -183,19 +145,12 @@ export default function FormComponent() {
     let value = e.target.value;
     let lines = value.split("\n");
 
-    // Limit strictly to 5 rows
     if (lines.length > 1 || value.length > 100) {
       message.warning(
         "Input limited to 1 line, 100 characters. Excess text won't be included."
       );
       value = lines.slice(0, 1).join("\n"); // Trim excess lines
     }
-
-    // Limit strictly to 200 characters
-    // if (value.length > 200) {
-    //   message.warning("Maximum 200 characters allowed!");
-    //   value = value.substring(0, 200); // Trim excess characters
-    // }
 
     setcauseOfFailure(value); // Update state only if within limits
   };
@@ -212,96 +167,8 @@ export default function FormComponent() {
       value = lines.slice(0, 1).join("\n"); // Trim excess lines
     }
 
-    // Limit strictly to 200 characters
-    // if (value.length > 200) {
-    //   message.warning("Maximum 200 characters allowed!");
-    //   value = value.substring(0, 200); // Trim excess characters
-    // }
-
     setNotes(value); // Update state only if within limits
   };
-
-  // const handleInputChange = (key, field, value) => {
-  //   const maxLengths = {
-  //     partNumber: 50,
-  //     description: 70,
-  //     note: 70,
-  //   };
-  //   const fieldNames = {
-  //     partNumber: "Part Number",
-  //     description: "Description",
-  //     note: "Note",
-  //   };
-
-  //   // Check if value exceeds the limit
-  //   if (value.length >= maxLengths[field]) {
-  //     message.warning(
-  //       `${fieldNames[field]} cannot exceed more than ${maxLengths[field]} characters.`
-  //     );
-  //   }
-
-  //   // Update the state
-  //   const updatedData = data.map((row) =>
-  //     row.key === key ? { ...row, [field]: value } : row
-  //   );
-  //   setData(updatedData);
-  // };
-
-  //Working code
-  // const handleInputChange = (key, field, value) => {
-  //   // Directly update numeric values (e.g., Quantity)
-  //   if (field === "quantity") {
-  //     const updatedData = data.map((row) =>
-  //       row.key === key ? { ...row, [field]: value } : row
-  //     );
-  //     setData(updatedData);
-  //     return; // Exit function early for numeric inputs
-  //   }
-
-  //   // Ensure text inputs are handled correctly
-  //   let stringValue =
-  //     typeof value === "string" ? value : value?.toString() || "";
-
-  //   const maxLengths = {
-  //     partNumber: 30,
-  //     description: 60,
-  //     note: 60,
-  //   };
-
-  //   const maxRows = {
-  //     partNumber: 1,
-  //     description: 1,
-  //     note: 1,
-  //   };
-
-  //   const fieldMessages = {
-  //     partNumber:
-  //       "Input limited to 1 line, 30 characters. Excess text won't be included.",
-  //     description:
-  //       "Input limited to 1 line, 60 characters. Excess text won't be included.",
-  //     note: "Input limited to 1 line, 60 characters. Excess text won't be included.",
-  //   };
-
-  //   let lines = stringValue.split("\n");
-
-  //   // Enforce row limits
-  //   if (lines.length > maxRows[field]) {
-  //     message.warning(fieldMessages[field]);
-  //     stringValue = lines.slice(0, maxRows[field]).join("\n");
-  //   }
-
-  //   // Enforce character limits
-  //   if (stringValue.length > maxLengths[field]) {
-  //     message.warning(fieldMessages[field]);
-  //     stringValue = stringValue.substring(0, maxLengths[field]);
-  //   }
-
-  //   // Update the state
-  //   const updatedData = data.map((row) =>
-  //     row.key === key ? { ...row, [field]: stringValue } : row
-  //   );
-  //   setData(updatedData);
-  // };
 
   const handleInputChange = (key, field, value) => {
     // Directly update numeric values (e.g., Quantity)
@@ -370,23 +237,9 @@ export default function FormComponent() {
     }));
   };
 
-  // const handleAddRow = () => {
-  //   setData([
-  //     ...data,
-  //     {
-  //       key: Date.now(),
-  //       partNumber: "",
-  //       description: "",
-  //       quantity: "",
-  //       note: "",
-  //     },
-  //   ]);
-  // };
-
   const handleAddRow = () => {
     if (data.length < 3) {
       const newRow = {
-        // key: (data.length + 1).toString(),
         key: Date.now().toString(), // Use a unique identifier
         partNumber: "",
         description: "",
@@ -419,188 +272,6 @@ export default function FormComponent() {
     }
     return true;
   };
-
-  // const columns = [
-  //   {
-  //     title: "Part Number",
-  //     dataIndex: "partNumber",
-  //     key: "partNumber",
-  //     render: (_, record) => (
-  //       <Input
-  //         value={record.partNumber}
-  //         onChange={(e) =>
-  //           handleInputChange(record.key, "partNumber", e.target.value)
-  //         }
-  //       />
-  //     ),
-  //   },
-  //   {
-  //     title: "Description",
-  //     dataIndex: "description",
-  //     key: "description",
-  //     render: (_, record) => (
-  //       <Input
-  //         value={record.description}
-  //         onChange={(e) =>
-  //           handleInputChange(record.key, "description", e.target.value)
-  //         }
-  //       />
-  //     ),
-  //   },
-  //   {
-  //     title: "Quantity",
-  //     dataIndex: "quantity",
-  //     key: "quantity",
-  //     render: (_, record) => (
-  //       <InputNumber
-  //         min={1} // Prevents negative or zero values
-  //         value={record.quantity}
-  //         onChange={(value) => handleInputChange(record.key, "quantity", value)}
-  //         style={{ width: "100%" }}
-  //       />
-  //     ),
-  //   },
-  //   {
-  //     title: "Note",
-  //     dataIndex: "note",
-  //     key: "note",
-  //     render: (_, record) => (
-  //       <Input
-  //         value={record.note}
-  //         onChange={(e) =>
-  //           handleInputChange(record.key, "note", e.target.value)
-  //         }
-  //       />
-  //     ),
-  //   },
-  //   {
-  //     title: "Action",
-  //     key: "action",
-  //     render: (_, record) => (
-  //       <Space size="middle">
-  //         <Button type="primary" onClick={handleAddRow}>
-  //           Add
-  //         </Button>
-  //         <Button
-  //           type="primary"
-  //           danger
-  //           onClick={() => handleDeleteRow(record.key)}
-  //           disabled={data.length === 1} // Disables delete button if only one row exists
-  //         >
-  //           Delete
-  //         </Button>
-  //       </Space>
-  //     ),
-  //   },
-  // ];
-
-  //Working Code
-  // const columns = [
-  //   {
-  //     title: "Part Number",
-  //     dataIndex: "partNumber",
-  //     key: "partNumber",
-  //     width: "25%", // Adjust as needed
-  //     render: (_, record) => (
-  //       <Tooltip title={record.partNumber}>
-
-  //       <Input
-  //         value={record.partNumber}
-  //         onChange={(e) =>
-  //           handleInputChange(record.key, "partNumber", e.target.value)
-  //         }
-  //         placeholder="Enter the part number"
-  //         maxLength={50}
-  //         // showCount
-  //       />
-  //             </Tooltip>
-
-  //     ),
-  //   },
-  //   {
-  //     title: "Description",
-  //     dataIndex: "description",
-  //     key: "description",
-  //     width: "35%", // Increased size
-  //     render: (_, record) => (
-  //       <Tooltip title={record.description}>
-
-  //       <TextArea
-  //         value={record.description}
-  //         onChange={(e) =>
-  //           handleInputChange(record.key, "description", e.target.value)
-  //         }
-  //         rows={1}
-  //         placeholder="Enter the description"
-  //         maxLength={100}
-  //         // showCount
-  //       />
-  //             </Tooltip>
-
-  //     ),
-  //   },
-  //   {
-  //     title: "Quantity",
-  //     dataIndex: "quantity",
-  //     key: "quantity",
-  //     width: "10%", // Reduced size
-  //     render: (_, record) => (
-  //       <Tooltip title={record.quantity}>
-
-  //       <InputNumber
-  //         min={1}
-  //         value={record.quantity}
-  //         onChange={(value) => handleInputChange(record.key, "quantity", value)}
-  //         style={{ width: "100%" }}
-  //         placeholder="Qty"
-  //       />
-  //             </Tooltip>
-
-  //     ),
-  //   },
-  //   {
-  //     title: "Note",
-  //     dataIndex: "note",
-  //     key: "note",
-  //     width: "30%", // Increased size
-  //     render: (_, record) => (
-  //       <Tooltip title={record.note}>
-
-  //       <TextArea
-  //         value={record.note}
-  //         onChange={(e) =>
-  //           handleInputChange(record.key, "note", e.target.value)
-  //         }
-  //         placeholder="Enter the note"
-  //         maxLength={100}
-  //         // showCount
-  //         rows={1}
-  //       />
-  //             </Tooltip>
-
-  //     ),
-  //   },
-  //   {
-  //     title: "Action",
-  //     key: "action",
-  //     width: "13%", // Reduced size
-  //     render: (_, record) => (
-  //       <Space size="middle">
-  //         <Button type="primary" onClick={handleAddRow} disabled={isSubmitting}>
-  //           Add
-  //         </Button>
-  //         <Button
-  //           type="primary"
-  //           danger
-  //           onClick={() => handleDeleteRow(record.key)}
-  //           disabled={isSubmitting || data.length === 1}
-  //         >
-  //           Delete
-  //         </Button>
-  //       </Space>
-  //     ),
-  //   },
-  // ];
 
   const columns = [
     {
@@ -660,17 +331,6 @@ export default function FormComponent() {
       key: "quantity",
       width: "10%", // Reduced size
       render: (_, record) => (
-        //   <Tooltip title={record.quantity} open={tooltipVisibility[record.key]?.quantity}>
-        //   <InputNumber
-        //     min={1}
-        //     value={record.quantity}
-        //     onChange={(value) => handleInputChange(record.key, "quantity", value)}
-        //     onBlur={() => handleTooltipHide(record.key, "quantity")}
-        //     onFocus={() => handleInputChange(record.key, "quantity", record.quantity)}
-        //     style={{ width: "100%" }}
-        //     placeholder="Qty"
-        //   />
-        // </Tooltip>
         <Tooltip
           title={record.quantity}
           open={tooltipVisibility[record.key]?.quantity}
@@ -756,8 +416,6 @@ export default function FormComponent() {
     return () => window.removeEventListener("resize", updateCanvasSize);
   }, []);
 
-  // Separate functions for saving and clearing each signature
-
   // Service Technician Signature
   const saveTechnicianSignature = () => {
     if (sigTechnician.current && !sigTechnician.current.isEmpty()) {
@@ -806,83 +464,6 @@ export default function FormComponent() {
     setSignatureCustomer("");
   };
 
-  // const handleSubmit = async (values) => {
-  //   try {
-  //     // Validate form fields
-  //     await form.validateFields();
-
-  //     // Check if the table has at least one row filled
-  //     if (data.length === 0) {
-  //       message.error("Please add at least one part in the table.");
-  //       return;
-  //     }
-
-  //     // Check if all table fields are filled
-  //     const isTableValid = data.every(
-  //       (row) =>
-  //         row.partNumber &&
-  //         row.partNumber.trim() !== "" &&
-  //         row.description &&
-  //         row.description.trim() !== "" &&
-  //         row.quantity !== "" &&
-  //         !isNaN(row.quantity) && // Ensure quantity is a valid number
-  //         row.note &&
-  //         row.note.trim() !== ""
-  //     );
-
-  //     if (!isTableValid) {
-  //       message.error(
-  //         "Please fill all required fields in the table correctly."
-  //       );
-  //       return;
-  //     }
-
-  //     if (!signatureTechnician) {
-  //       message.error(
-  //         "Please provide the Service Technician signature and click 'Save Signature'."
-  //       );
-  //       return;
-  //     }
-  //     if (!signatureManager) {
-  //       message.error(
-  //         "Please provide the Service Manager signature and click 'Save Signature'."
-  //       );
-  //       return;
-  //     }
-  //     if (!signatureCustomer) {
-  //       message.error(
-  //         "Please provide the Customer signature and click 'Save Signature'."
-  //       );
-  //       return;
-  //     }
-
-  //     // Prepare final form data
-  //     const formData = {
-  //       ...values,
-  //       partsUsed: data.map((row) => ({
-  //         partNumber: row.partNumber.trim(),
-  //         description: row.description.trim(),
-  //         quantity: Number(row.quantity),
-  //         note: row.note.trim(),
-  //       })),
-  //       signatures: {
-  //         technician: signatureTechnician,
-  //         manager: signatureManager,
-  //         customer: signatureCustomer,
-  //       },
-  //     };
-
-  //     console.log("Final Submission Data:", formData);
-
-  //     // Simulate API call
-  //     // await axios.post("/api/submit", formData);
-  //     message.success("Form submitted successfully!");
-  //   } catch (error) {
-  //     console.error("Validation Error:", error);
-  //     message.error("Please complete all required fields before submitting.");
-  //   }
-  // };
-
   const getBase64Image = (imgUrl, callback) => {
     const img = new Image();
     img.crossOrigin = "Anonymous"; // Important for external images
@@ -897,2388 +478,6 @@ export default function FormComponent() {
       callback(dataURL);
     };
   };
-
-  // const generatePDF = (formData, checkboxValues, partsUsed) => {
-  //   const doc = new jsPDF();
-  //   const startX = 20; // Left margin
-  //   const colWidths = [40, 60, 20, 50]; // Column widths
-  //   const rowHeight = 8; // Row height
-  //   const pageHeight = doc.internal.pageSize.height; // ✅ Move this to the top
-  //   let pageNumber = 1; // Start page numbering
-  //   const bottomMargin = 30;
-  //   const headerPadding = 10;
-
-  //   const addPageNumber = () => {
-  //     doc.setFontSize(10);
-  //     doc.text(
-  //       `Page ${pageNumber}`,
-  //       doc.internal.pageSize.width / 2,
-  //       pageHeight - 10,
-  //       { align: "center" }
-  //     );
-  //     pageNumber++; // Increment for next page
-  //   };
-
-  //   // Function to check if a new page is needed
-  //   const checkPageLimit = (currentY) => {
-  //     if (currentY + bottomMargin > pageHeight) {
-  //       addPageNumber();
-  //       doc.addPage();
-  //       resetHeader();
-
-  //       return 20 + headerPadding;
-  //     }
-  //     return currentY;
-  //   };
-  //   const resetHeader = () => {
-  //     // doc.setFont("helvetica", "normal");
-  //     // doc.setFontSize(14);
-  //     // doc.text("Service Report", 90, 10);
-  //     // doc.setDrawColor(0, 0, 0);
-  //     // doc.setLineWidth(0.5);
-  //     // doc.line(20, 15, 190, 15);
-  //     doc.addImage(HaitianLogo, "PNG", 18, 1, 50, 20);
-  //     doc.setFont("helvetica", "normal");
-  //     doc.setFontSize(14);
-  //     doc.text("Service No", 160, 12);
-  //     doc.setDrawColor(0, 0, 0);
-  //     doc.setLineWidth(0.5);
-  //     doc.line(20, 22, 190, 22);
-  //   };
-
-  //   let nextY = 35 + headerPadding; // Start Y position
-  //   resetHeader();
-  //   // Ensure nextY is properly updated before adding content
-  //   nextY = checkPageLimit(nextY);
-
-  //   const getBase64Image = (imgUrl, callback) => {
-  //     const img = new Image();
-  //     img.crossOrigin = "Anonymous";
-  //     img.src = imgUrl;
-  //     img.onload = function () {
-  //       const canvas = document.createElement("canvas");
-  //       canvas.width = img.width;
-  //       canvas.height = img.height;
-  //       const ctx = canvas.getContext("2d");
-  //       ctx.drawImage(img, 0, 0);
-  //       const dataURL = canvas.toDataURL("image/png");
-  //       callback(dataURL);
-  //     };
-  //   };
-
-  //   getBase64Image(HaitianLogo, (base64Image) => {
-  //     // doc.addImage(base64Image, "PNG", 18, 1, 50, 20);
-  //     // doc.setFont("helvetica", "normal");
-
-  //     // // Header
-  //     // doc.setFontSize(12);
-  //     // doc.text("Service No", 160, 12);
-  //     // doc.setDrawColor(0, 0, 0);
-  //     // doc.setLineWidth(0.5);
-  //     // doc.line(20, 22, 190, 22);
-
-  //     let nextY = 35; // Starting Y position
-
-  //     // Function to add text fields dynamically
-  //     const addField = (label, value, x, y, extraSpace = 12) => {
-  //       doc.setFontSize(14);
-  //       doc.setFont("helvetica", "bold");
-  //       doc.text(label, x, y);
-  //       doc.setFont("helvetica", "normal");
-  //       doc.text(value?.toString() || "N/A", x, y + 6);
-  //       return y + extraSpace;
-  //     };
-
-  //     nextY = addField("Customer Name", formData.customerName, 20, 30, 16);
-  //     nextY = addField("Machine Type", formData.machineType, 150, 30, 16);
-
-  //     // Address and Serial Number
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Address", 20, nextY);
-  //     doc.text("Serial Number", 150, nextY);
-
-  //     doc.setFont("helvetica", "normal");
-
-  //     const maxAddressWidth = 80;
-  //     const addressLines = doc.splitTextToSize(
-  //       formData.address?.toString() || "N/A",
-  //       maxAddressWidth
-  //     );
-
-  //     let addressStartY = nextY + 6;
-  //     let addressLineHeight = 7;
-
-  //     addressLines.forEach((line, index) => {
-  //       doc.text(line, 20, addressStartY + index * addressLineHeight);
-  //     });
-
-  //     doc.text(formData.serialNumber?.toString() || "N/A", 150, nextY + 6);
-
-  //     let addressHeight = addressLines.length * addressLineHeight;
-  //     nextY += addressHeight + 12;
-
-  //     // Contact and Installation Date
-  //     const formattedInstallDate = formData.installationDate
-  //       ? new Date(formData.installationDate).toLocaleDateString()
-  //       : "N/A";
-
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Contact", 20, nextY);
-  //     doc.text("Installation Date", 150, nextY);
-
-  //     doc.setFont("helvetica", "normal");
-  //     doc.text(formData.contact?.toString() || "N/A", 20, nextY + 6);
-  //     doc.text(formattedInstallDate, 150, nextY + 6);
-
-  //     nextY += 15;
-
-  //     // Telephone and Work Time
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Telephone", 20, nextY);
-  //     doc.text("Work Time", 150, nextY);
-
-  //     doc.setFont("helvetica", "normal");
-  //     doc.text(formData.telephone?.toString() || "N/A", 20, nextY + 6);
-  //     doc.text(formData.workTime?.toString() || "N/A", 150, nextY + 6);
-
-  //     nextY += 15;
-
-  //     // Service Technician, Departure Date, Return Date
-  //     const formattedDepartureDate = formData.departureDate
-  //       ? new Date(formData.departureDate).toLocaleDateString()
-  //       : "N/A";
-
-  //     const formattedReturnDate = formData.returnDate
-  //       ? new Date(formData.returnDate).toLocaleDateString()
-  //       : "N/A";
-
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-
-  //     doc.text("Service Technician", 20, nextY);
-  //     doc.text("Departure Date", 150, nextY);
-
-  //     doc.setFont("helvetica", "normal");
-  //     doc.text(formData.serviceTechnician?.toString() || "N/A", 20, nextY + 6);
-  //     doc.text(formattedDepartureDate, 150, nextY + 6);
-
-  //     nextY += 15; // Move to the next row for Return Date
-
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Return Date", 20, nextY);
-
-  //     doc.setFont("helvetica", "normal");
-  //     doc.text(formattedReturnDate, 20, nextY + 6);
-
-  //     nextY += 15;
-
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Report Type", 20, nextY);
-
-  //     doc.setFontSize(12);
-  //     doc.setFont("helvetica", "normal");
-
-  //     const reportOptions = [
-  //       "Installation",
-  //       "Maintenance",
-  //       "Defect",
-  //       "Customer Visit",
-  //     ];
-
-  //     let optionX = 20;
-  //     const spaceBetweenOptions = 40;
-
-  //     console.log("checkboxValues:", checkboxValues); // Debugging checkbox values
-
-  //     reportOptions.forEach((option) => {
-  //       const isChecked = checkboxValues[option]; // Check if the option is selected in checkboxValues
-  //       if (isChecked) {
-  //         // Draw a border around the checkbox
-  //         doc.rect(optionX + 1, nextY + 4.5, 4.5, 4.5); // Adjust values as needed
-  //       } else {
-  //         doc.rect(optionX + 1, nextY + 4.5, 4.5, 4.5); // Adjust values as needed
-  //       }
-  //       // Set font for checkbox symbols
-  //       doc.setFont("Zapfdingbats"); // Set Zapfdingbats font
-
-  //       // Use symbol for checked ('4') and unchecked ('o')
-  //       const symbol = isChecked ? "4" : ""; // '4' for tick, 'o' for empty
-  //       doc.text(`${symbol}`, optionX + 1.3, nextY + 8);
-
-  //       doc.setFont("helvetica", "normal");
-
-  //       doc.text(option, optionX + 6, nextY + 8);
-  //       optionX += spaceBetweenOptions;
-  //     });
-
-  //     // let nextY = 35; // Start Y position
-
-  //     // Render content dynamically
-  //     // nextY = checkPageLimit(nextY); // Ensure space before adding content
-
-  //     nextY += 18;
-  //     // nextY = checkPageLimit(nextY);
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Description of work/of defect/failure mode", 20, nextY);
-  //     nextY -= 1;
-  //     const maxDescriptionWidth = 170;
-  //     doc.setFont("helvetica", "normal");
-  //     const description = doc.splitTextToSize(
-  //       formData.description?.toString() || "N/A",
-  //       maxDescriptionWidth
-  //     );
-  //     let descriptionStartY = nextY + 6;
-  //     let descriptionLineHeight = 7;
-  //     doc.setFont("helvetica", "normal");
-
-  //     // description.forEach((line, index) => {
-  //     //   doc.text(line, 20, descriptionStartY + index * descriptionLineHeight);
-  //     // });
-  //     description.forEach((line, index) => {
-  //       nextY = checkPageLimit(nextY + 7); // Check if it fits, else add new page
-  //       doc.text(line, 20, nextY);
-  //     });
-
-  //     // Ensure 'nextY' is updated dynamically after the description section
-  //     // nextY =
-  //     //   descriptionStartY + description.length * descriptionLineHeight + 3; // Add extra space
-  //     nextY += 10;
-
-  //     // Check if the notes section fits on the current page
-
-  //     if (nextY + 20 > pageHeight) {
-  //       doc.addPage(); // Add a new page if there's not enough space
-  //       nextY = 15; // Reset Y position for new page
-  //       addPageNumber();
-  //     }
-  //     nextY = checkPageLimit(nextY, 30);
-
-  //     // Now add the Notes section
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Notes/Further action required", 20, nextY);
-  //     nextY -= 1;
-
-  //     // Ensure notes are properly split into lines
-  //     const maxNotesWidth = 170;
-  //     doc.setFont("helvetica", "normal");
-
-  //     const notesText = formData.notes?.toString() || "N/A";
-
-  //     const notesLines = doc.splitTextToSize(notesText, maxNotesWidth);
-
-  //     let notesStartY = nextY + 6; // Add extra space below the title
-  //     let notesLineHeight = 7;
-
-  //     // Render each line dynamically
-  //     // notesLines.forEach((line, index) => {
-  //     //   doc.text(line, 20, notesStartY + index * notesLineHeight);
-  //     // });
-
-  //     notesLines.forEach((line, index) => {
-  //       nextY = checkPageLimit(nextY + 7); // Check if it fits, else add new page
-  //       doc.text(line, 20, nextY);
-  //     });
-
-  //     nextY += 10;
-
-  //     // Check if the notes section fits on the current page
-
-  //     if (nextY + 20 > pageHeight) {
-  //       doc.addPage(); // Add a new page if there's not enough space
-  //       nextY = 15; // Reset Y position for new page
-  //       addPageNumber();
-  //     }
-  //     nextY = checkPageLimit(nextY, 30);
-
-  //     // Now add the Notes section
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Cause of Failure", 20, nextY);
-  //     nextY -= 1;
-
-  //     // Ensure notes are properly split into lines
-  //     const maxcauseOfFailureWidth = 170;
-  //     doc.setFont("helvetica", "normal");
-
-  //     const causeOfFailureText = formData.causeOfFailure?.toString() || "N/A";
-
-  //     const causeOfFailureLines = doc.splitTextToSize(
-  //       causeOfFailureText,
-  //       maxcauseOfFailureWidth
-  //     );
-
-  //     let causeOfFailureStartY = nextY + 6; // Add extra space below the title
-  //     let causeOfFailureLineHeight = 7;
-
-  //     // Render each line dynamically
-  //     // notesLines.forEach((line, index) => {
-  //     //   doc.text(line, 20, notesStartY + index * notesLineHeight);
-  //     // });
-
-  //     causeOfFailureLines.forEach((line, index) => {
-  //       nextY = checkPageLimit(nextY + 7); // Check if it fits, else add new page
-  //       doc.text(line, 20, nextY);
-  //     });
-
-  //     // nextY += 10;
-
-  //     // if (nextY + 20 > pageHeight) {
-  //     //   doc.addPage(); // Add a new page if there's not enough space
-  //     //   nextY = 15; // Reset Y position for new page
-  //     //   addPageNumber();
-  //     // }
-  //     // nextY = checkPageLimit(nextY, 30);
-
-  //     // // Now add the Notes section
-  //     // doc.setFontSize(14);
-  //     // doc.setFont("helvetica", "bold");
-  //     // doc.text("Parts Used", 20, nextY);
-
-  //     // partsUsed.forEach((part) => {
-  //     //   doc.setFontSize(14);
-  //     //   doc.setFont("helvetica", "bold");
-  //     //   doc.text("Part Number", 20, nextY + 10);
-  //     //   doc.setFont("helvetica", "normal");
-
-  //     //   doc.text(part.partNumber, 20, nextY + 16); // ✅ Fix: Make sure part exists
-  //     //   doc.text(part.description, 60, nextY + 16); // Example: Add part description
-  //     //   doc.text(part.quantity.toString(), 120, nextY + 16); // Example: Add quantity
-
-  //     //   nextY += 10; // Move Y down for the next part
-  //     // });
-
-  //     const addPageNumber = () => {
-  //       doc.setFontSize(10);
-  //       doc.setFont("helvetica", "normal");
-
-  //       doc.text(
-  //         `Page ${pageNumber}`,
-  //         doc.internal.pageSize.width / 2,
-  //         pageHeight - 10,
-  //         { align: "center" }
-  //       );
-  //       pageNumber++;
-  //       doc.setFont("helvetica", "normal");
-  //     };
-
-  //     // Function to draw table headers
-  //     const drawTableHeaders = () => {
-  //       doc.setFontSize(12);
-  //       doc.setFont("helvetica", "bold");
-
-  //       doc.text("Part Number", startX + 2, nextY + 5);
-  //       doc.text("Description", startX + colWidths[0] + 2, nextY + 5);
-  //       doc.text(
-  //         "Quantity",
-  //         startX + colWidths[0] + colWidths[1] + 2,
-  //         nextY + 5
-  //       );
-  //       doc.text(
-  //         "Note",
-  //         startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
-  //         nextY + 5
-  //       );
-
-  //       doc.rect(startX, nextY, colWidths[0], rowHeight);
-  //       doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
-  //       doc.rect(
-  //         startX + colWidths[0] + colWidths[1],
-  //         nextY,
-  //         colWidths[2],
-  //         rowHeight
-  //       );
-  //       doc.rect(
-  //         startX + colWidths[0] + colWidths[1] + colWidths[2],
-  //         nextY,
-  //         colWidths[3],
-  //         rowHeight
-  //       );
-
-  //       nextY += rowHeight;
-  //     };
-
-  //     // **Ensure space before table starts**
-  //     if (nextY + 20 > pageHeight) {
-  //       doc.addPage();
-  //       doc.setFont("helvetica", "normal");
-  //       nextY = 25;
-  //       resetHeader();
-  //       addPageNumber();
-  //     }
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Parts Used", startX, nextY + 10);
-  //     nextY += 13;
-  //     drawTableHeaders();
-
-  //     doc.setFont("helvetica", "normal");
-
-  //     // **Loop Through Parts and Print Rows**
-  //     // partsUsed.forEach((part) => {
-  //     //   let partNumberLines = doc.splitTextToSize(
-  //     //     part.partNumber || "N/A",
-  //     //     colWidths[0] - 5
-  //     //   );
-  //     //   let descriptionLines = doc.splitTextToSize(
-  //     //     part.description || "N/A",
-  //     //     colWidths[1] - 5
-  //     //   );
-  //     //   let quantityLines = doc.splitTextToSize(
-  //     //     part.quantity.toString() || "N/A",
-  //     //     colWidths[2] - 5
-  //     //   );
-  //     //   let noteLines = doc.splitTextToSize(
-  //     //     part.note || "N/A",
-  //     //     colWidths[3] - 5
-  //     //   );
-
-  //     //   let maxLines = Math.max(
-  //     //     partNumberLines.length,
-  //     //     descriptionLines.length,
-  //     //     quantityLines.length,
-  //     //     noteLines.length
-  //     //   );
-  //     //   let rowHeightTotal = maxLines * rowHeight;
-
-  //     //   // **Ensure the full row fits on the current page**
-  //     //   if (nextY + rowHeightTotal > pageHeight - 30) {
-  //     //     addPageNumber(); // Add page number before adding a new page
-  //     //     doc.setFont("helvetica", "normal");
-  //     //     doc.addPage();
-  //     //     nextY = 25;
-  //     //     resetHeader();
-  //     //     drawTableHeaders();
-  //     //   }
-  //     //   doc.setFont("helvetica", "normal");
-
-  //     //   // **Print each wrapped line dynamically**
-  //     //   // for (let i = 0; i < maxLines; i++) {
-  //     //   //   if (partNumberLines[i])
-  //     //   //     doc.text(partNumberLines[i], startX + 2, nextY + 5);
-  //     //   //   if (descriptionLines[i])
-  //     //   //     doc.text(descriptionLines[i], startX + colWidths[0] + 2, nextY + 5);
-  //     //   //   if (quantityLines[i])
-  //     //   //     doc.text(
-  //     //   //       quantityLines[i],
-  //     //   //       startX + colWidths[0] + colWidths[1] + 2,
-  //     //   //       nextY + 5
-  //     //   //     );
-  //     //   //   if (noteLines[i])
-  //     //   //     doc.text(
-  //     //   //       noteLines[i],
-  //     //   //       startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
-  //     //   //       nextY + 5
-  //     //   //     );
-  //     //   //   nextY += rowHeight;
-  //     //   // }
-
-  //     //   for (let i = 0; i < maxLines; i++) {
-  //     //     // ✅ **Check if we need to add a new page before printing each line**
-  //     //     if (nextY + rowHeight > pageHeight - 30) {
-  //     //       addPageNumber();
-  //     //       doc.addPage();
-  //     //       nextY = 25;
-  //     //       resetHeader();
-  //     //       drawTableHeaders();
-  //     //     }
-
-  //     //     // ✅ **Now print the text in the correct column positions**
-  //     //     if (partNumberLines[i]) doc.text(partNumberLines[i], startX + 2, nextY + 5);
-  //     //     if (descriptionLines[i]) doc.text(descriptionLines[i], startX + colWidths[0] + 2, nextY + 5);
-  //     //     if (quantityLines[i]) doc.text(quantityLines[i], startX + colWidths[0] + colWidths[1] + 2, nextY + 5);
-  //     //     if (noteLines[i]) doc.text(noteLines[i], startX + colWidths[0] + colWidths[1] + colWidths[2] + 2, nextY + 5);
-
-  //     //     nextY += rowHeight; // Move Y position down
-  //     //   }
-
-  //     //   // **Draw Borders Around Each Row**
-  //     //   doc.rect(startX, nextY - rowHeightTotal, colWidths[0], rowHeightTotal);
-  //     //   doc.rect(
-  //     //     startX + colWidths[0],
-  //     //     nextY - rowHeightTotal,
-  //     //     colWidths[1],
-  //     //     rowHeightTotal
-  //     //   );
-  //     //   doc.rect(
-  //     //     startX + colWidths[0] + colWidths[1],
-  //     //     nextY - rowHeightTotal,
-  //     //     colWidths[2],
-  //     //     rowHeightTotal
-  //     //   );
-  //     //   doc.rect(
-  //     //     startX + colWidths[0] + colWidths[1] + colWidths[2],
-  //     //     nextY - rowHeightTotal,
-  //     //     colWidths[3],
-  //     //     rowHeightTotal
-  //     //   );
-  //     // });
-
-  //     //100% Working code
-
-  //     partsUsed.forEach((part) => {
-  //       let partNumberLines = doc.splitTextToSize(
-  //         part.partNumber || "N/A",
-  //         colWidths[0] - 5
-  //       );
-  //       let descriptionLines = doc.splitTextToSize(
-  //         part.description || "N/A",
-  //         colWidths[1] - 5
-  //       );
-  //       let quantityLines = doc.splitTextToSize(
-  //         part.quantity.toString() || "N/A",
-  //         colWidths[2] - 5
-  //       );
-  //       let noteLines = doc.splitTextToSize(
-  //         part.note || "N/A",
-  //         colWidths[3] - 5
-  //       );
-
-  //       let maxLines = Math.max(
-  //         partNumberLines.length,
-  //         descriptionLines.length,
-  //         quantityLines.length,
-  //         noteLines.length
-  //       );
-  //       let rowHeightTotal = maxLines * rowHeight;
-
-  //       // **Ensure bottom margin of 30px is maintained**
-  //       if (nextY + rowHeightTotal > pageHeight - 30) {
-  //         addPageNumber();
-  //         doc.addPage();
-  //         nextY = 25;
-  //         resetHeader();
-  //         drawTableHeaders();
-  //       }
-
-  //       // **Print each wrapped line dynamically**
-  //       // for (let i = 0; i < maxLines; i++) {
-  //       //   // ✅ **Check if we need to add a new page before printing each line**
-  //       //   if (nextY + rowHeight > pageHeight - 30) {
-  //       //     addPageNumber();
-  //       //     doc.addPage();
-  //       //     nextY = 25;
-  //       //     resetHeader();
-  //       //     drawTableHeaders();
-  //       //   }
-
-  //       // ✅ **Now print the text in the correct column positions**
-  //       //   if (partNumberLines[i]) doc.text(partNumberLines[i], startX + 2, nextY + 5);
-  //       //   if (descriptionLines[i]) doc.text(descriptionLines[i], startX + colWidths[0] + 2, nextY + 5);
-  //       //   if (quantityLines[i]) doc.text(quantityLines[i], startX + colWidths[0] + colWidths[1] + 2, nextY + 5);
-  //       //   if (noteLines[i]) doc.text(noteLines[i], startX + colWidths[0] + colWidths[1] + colWidths[2] + 2, nextY + 5);
-
-  //       //   nextY += rowHeight; // Move Y position down
-  //       // }
-
-  //       // ✅ **Draw Borders Around Each Row AFTER ensuring it fits within the page**
-  //       // doc.rect(startX, nextY - rowHeightTotal, colWidths[0], rowHeightTotal);
-  //       // doc.rect(startX + colWidths[0], nextY - rowHeightTotal, colWidths[1], rowHeightTotal);
-  //       // doc.rect(startX + colWidths[0] + colWidths[1], nextY - rowHeightTotal, colWidths[2], rowHeightTotal);
-  //       // doc.rect(startX + colWidths[0] + colWidths[1] + colWidths[2], nextY - rowHeightTotal, colWidths[3], rowHeightTotal);
-
-  //       // ✅ Print each wrapped line dynamically with borders
-  //       for (let i = 0; i < maxLines; i++) {
-  //         // ✅ Check if we need to add a new page before printing each line
-  //         if (nextY + rowHeight > pageHeight - 30) {
-  //           doc.setFontSize(12);
-  //           doc.setFont("helvetica", "normal");
-  //           addPageNumber();
-  //           doc.addPage();
-  //           nextY = 25;
-  //           resetHeader();
-  //           drawTableHeaders();
-  //         }
-  //         doc.setFontSize(12);
-  //         doc.setFont("helvetica", "normal");
-
-  //         // ✅ Print the text in the correct column positions
-  //         if (partNumberLines[i])
-  //           doc.text(partNumberLines[i], startX + 2, nextY + 5);
-  //         if (descriptionLines[i])
-  //           doc.text(descriptionLines[i], startX + colWidths[0] + 2, nextY + 5);
-  //         if (quantityLines[i])
-  //           doc.text(
-  //             quantityLines[i],
-  //             startX + colWidths[0] + colWidths[1] + 2,
-  //             nextY + 5
-  //           );
-  //         if (noteLines[i])
-  //           doc.text(
-  //             noteLines[i],
-  //             startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
-  //             nextY + 5
-  //           );
-
-  //         // ✅ Draw borders for the current line
-  //         doc.rect(startX, nextY, colWidths[0], rowHeight);
-  //         doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
-  //         doc.rect(
-  //           startX + colWidths[0] + colWidths[1],
-  //           nextY,
-  //           colWidths[2],
-  //           rowHeight
-  //         );
-  //         doc.rect(
-  //           startX + colWidths[0] + colWidths[1] + colWidths[2],
-  //           nextY,
-  //           colWidths[3],
-  //           rowHeight
-  //         );
-
-  //         nextY += rowHeight; // Move Y position down
-  //       }
-  //     });
-
-  //     // nextY += 9;
-  //     // if (nextY + 20 > pageHeight) {
-  //     //   doc.addPage(); // Add a new page if there's not enough space
-  //     //   nextY = 15; // Reset Y position for new page
-  //     //   addPageNumber();
-  //     // }
-  //     // nextY = checkPageLimit(nextY, 30);
-
-  //     // doc.setFontSize(14);
-  //     // doc.setFont("helvetica", "bold");
-  //     // doc.text("Service Type", 20, nextY);
-  //     // nextY -= 2;
-
-  //     // doc.setFontSize(12);
-  //     // doc.setFont("helvetica", "normal");
-
-  //     // const serviceOptions = [
-  //     //   "F.O.C Commissioning",
-  //     //   "F.O.C Maintenance",
-  //     //   "Guarantee",
-  //     //   "Chargeable Commissioning",
-  //     //   "Customer Visit",
-  //     //   "Service contract",
-  //     //   "Goodwill",
-  //     // ];
-
-  //     // let optionServiceX = 20;
-  //     // const spaceBetweenServiceOptions = 65; // ✅ Adjusted for better spacing
-  //     // const checkboxSize = 4.5; // ✅ Standardized checkbox size
-
-  //     // serviceOptions.forEach((option, index) => {
-  //     //   if (index % 3 === 0 && index !== 0) {
-  //     //     nextY += 8; // ✅ Move to the next line after 3 checkboxes
-  //     //     optionServiceX = 20; // Reset X position
-  //     //   }
-
-  //     //   const isChecked = checkboxValues[option] || false; // ✅ Ensure it handles undefined values
-
-  //     //   // Draw the checkbox border
-  //     //   doc.rect(optionServiceX + 1, nextY + 4.5, checkboxSize, checkboxSize);
-
-  //     //   // Draw the checkmark inside the box (if selected)
-  //     //   if (isChecked) {
-  //     //     doc.setFont("Zapfdingbats"); // ✅ Ensures proper checkmark rendering
-  //     //     doc.text("4", optionServiceX + 1.5, nextY + 8);
-  //     //     doc.setFont("helvetica", "normal"); // Reset font after checkmark
-  //     //   }
-
-  //     //   // Draw the text next to the checkbox
-  //     //   doc.text(option, optionServiceX + checkboxSize + 2, nextY + 8);
-
-  //     //   optionServiceX += spaceBetweenServiceOptions; // Move to the next option position
-  //     // });
-
-  //     // Move down for spacing before the section
-  //     //
-
-  //     // Service Options Array (Defined Early)
-  //     const serviceOptions = [
-  //       "F.O.C Commissioning",
-  //       "F.O.C Maintenance",
-  //       "Guarantee",
-  //       "Chargeable Commissioning",
-  //       "Customer Visit",
-  //       "Service contract",
-  //       "Goodwill",
-  //     ];
-
-  //     // Move down for spacing before the section
-  //     nextY += 12;
-
-  //     // Calculate total height for the Service Type section
-  //     const serviceTypeTitleHeight = 14; // Title height
-  //     const checkboxLineHeight = 7; // Height for each line of checkboxes
-  //     const numberOfLines = Math.ceil(serviceOptions.length / 3); // Calculate how many lines of checkboxes are needed
-  //     const estimatedHeight =
-  //       serviceTypeTitleHeight + numberOfLines * checkboxLineHeight + 5; // Extra space
-
-  //     // Check if the entire "Service Type" section will fit on the current page
-  //     if (nextY + estimatedHeight > pageHeight - 30) {
-  //       addPageNumber(); // ✅ Add page number before a new page
-  //       doc.addPage(); // ✅ Add a new page if there's not enough space
-  //       nextY = 25; // ✅ Reset Y position for new page
-  //       resetHeader(); // ✅ Reset the header on the new page
-  //     }
-
-  //     // Service Type Section
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Service Type", 20, nextY + 5);
-  //     nextY += 4; // Space after the title
-
-  //     doc.setFontSize(12);
-  //     doc.setFont("helvetica", "normal");
-
-  //     let optionServiceX = 20;
-  //     const spaceBetweenServiceOptions = 65;
-  //     const checkboxSize = 4.5;
-
-  //     serviceOptions.forEach((option, index) => {
-  //       // Check for line break after every 3 options
-  //       if (index % 3 === 0 && index !== 0) {
-  //         nextY += 7; // Move down for the next line of options
-  //         optionServiceX = 20;
-
-  //         // Ensure the entire line fits within the page
-  //         if (nextY + 20 > pageHeight - 30) {
-  //           addPageNumber(); // ✅ Add page number before a new page
-  //           doc.addPage(); // ✅ Add a new page if there's not enough space
-  //           nextY = 25; // ✅ Reset Y position for new page
-  //           resetHeader(); // ✅ Reset the header on the new page
-  //           doc.setFontSize(14);
-  //           doc.setFont("helvetica", "bold");
-  //           doc.text("Service Type (Continued)", 20, nextY); // ✅ Continued title
-  //           nextY += 4;
-  //         }
-  //       }
-
-  //       // Draw the checkbox border
-  //       doc.rect(optionServiceX + 1, nextY + 4.5, checkboxSize, checkboxSize);
-
-  //       // Draw the checkmark inside the box (if selected)
-  //       const isChecked = checkboxValues[option] || false;
-  //       if (isChecked) {
-  //         doc.setFont("Zapfdingbats");
-  //         doc.text("4", optionServiceX + 1.5, nextY + 8);
-  //         doc.setFont("helvetica", "normal");
-  //       }
-
-  //       // Draw the text next to the checkbox
-  //       doc.text(option, optionServiceX + checkboxSize + 2, nextY + 8);
-
-  //       optionServiceX += spaceBetweenServiceOptions;
-  //     });
-
-  //     // Add Signatures Section
-  //     nextY += 9;
-  //     if (nextY + 20 > pageHeight) {
-  //       doc.addPage(); // Add a new page if there's not enough space
-  //       nextY = 15; // Reset Y position for new page
-  //       addPageNumber();
-  //     }
-  //     nextY = checkPageLimit(nextY, 10);
-
-  //     // const addSignatures = (signatures, nextY) => {
-  //     //   doc.setFontSize(12);
-  //     //   doc.setFont("helvetica", "bold");
-  //     //   // doc.text("Signatures:", 20, nextY);
-  //     //   nextY += 0; // Adjust spacing
-
-  //     //   let signatureHeight = 20; // Signature box height
-  //     //   let signatureWidth = 50; // Signature box width
-  //     //   let signatureSpacing = 65; // Space between signatures
-  //     //   let baseY = nextY + 5; // Adjusted position for images
-
-  //     //   // Column positions
-  //     //   let col1X = 20;   // Left column (Technician)
-  //     //   let col2X = 90;   // Center column (Manager)
-  //     //   let col3X = 160;  // Right column (Customer)
-
-  //     //   // Technician Signature
-  //     //   if (signatures.technician) {
-  //     //     doc.text("Service Technician:", col1X, nextY);
-  //     //     doc.addImage(signatures.technician, "PNG", col1X, baseY, signatureWidth, signatureHeight);
-  //     //   }
-
-  //     //   // Manager Signature
-  //     //   if (signatures.manager) {
-  //     //     doc.text("Service Manager:", col2X, nextY);
-  //     //     doc.addImage(signatures.manager, "PNG", col2X, baseY, signatureWidth, signatureHeight);
-  //     //   }
-
-  //     //   // Customer Signature
-  //     //   if (signatures.customer) {
-  //     //     doc.text("Customer Signature:", col3X, nextY);
-  //     //     doc.addImage(signatures.customer, "PNG", col3X, baseY, signatureWidth, signatureHeight);
-  //     //   }
-
-  //     //   return baseY + signatureHeight + 10; // Ensure next section is correctly positioned
-  //     // };
-
-  //     // const addSignatures = (signatures, nextY) => {
-  //     //   doc.setFontSize(12);
-  //     //   doc.setFont("helvetica", "bold");
-  //     //   // doc.text("Signatures:", 20, nextY);
-  //     //   nextY += 10; // Adjust spacing
-
-  //     //   let signatureHeight = 30; // Default signature height
-  //     //   let signatureWidth = 60; // Signature width
-  //     //   let baseY = nextY + 5; // Adjusted Y position for images
-
-  //     //   // Column positions
-  //     //   let col1X = 20; // Left column (Technician)
-  //     //   let col2X = 110; // Right column (Manager)
-  //     //   let col3X = 65; // Centered for Customer in the next row
-
-  //     //   let maxHeightRow1 = signatureHeight; // Track tallest signature in row 1
-
-  //     //   // Row 1: Technician and Manager Signatures
-  //     //   if (signatures.technician) {
-  //     //     doc.text("Signature of service technician:", col1X, nextY);
-  //     //     doc.addImage(
-  //     //       signatures.technician,
-  //     //       "PNG",
-  //     //       col1X,
-  //     //       baseY,
-  //     //       signatureWidth,
-  //     //       signatureHeight
-  //     //     );
-  //     //   }
-
-  //     //   if (signatures.manager) {
-  //     //     doc.text("Signature of service manager:", col2X, nextY);
-  //     //     doc.addImage(
-  //     //       signatures.manager,
-  //     //       "PNG",
-  //     //       col2X,
-  //     //       baseY,
-  //     //       signatureWidth,
-  //     //       signatureHeight
-  //     //     );
-  //     //   }
-
-  //     //   // Dynamically adjust height for row 1 (whichever signature is taller)
-  //     //   let technicianHeight = signatures.technician ? signatureHeight : 0;
-  //     //   let managerHeight = signatures.manager ? signatureHeight : 0;
-  //     //   maxHeightRow1 = Math.max(technicianHeight, managerHeight);
-
-  //     //   nextY = baseY + maxHeightRow1 + 10; // Move to the next row with extra spacing
-
-  //     //   // Row 2: Customer Signature
-  //     //   if (signatures.customer) {
-  //     //     doc.text("Customer signature:", col3X, nextY);
-  //     //     doc.addImage(
-  //     //       signatures.customer,
-  //     //       "PNG",
-  //     //       col3X,
-  //     //       nextY + 5,
-  //     //       signatureWidth,
-  //     //       signatureHeight
-  //     //     );
-  //     //     nextY += signatureHeight + 10; // Move down for the next section
-  //     //   }
-
-  //     //   return nextY; // Return updated Y position for further content
-  //     // };
-
-  //     // // Before saving the PDF, call addSignatures()
-  //     // nextY = addSignatures(formData.signatures, nextY);
-
-  //     const addSignatures = (signatures, nextY) => {
-  //       doc.setFontSize(14);
-  //       doc.setFont("helvetica", "bold");
-
-  //       // Title for Signatures Section
-  //       const signatureHeight = 30; // Signature height
-  //       const signatureWidth = 60;  // Signature width
-  //       const spacing = 5;         // Space between rows and signatures
-  //       const titleHeight = 14;     // Height for the title
-
-  //       // Estimate the total height needed for the signature section
-  //       const estimatedHeight = titleHeight + signatureHeight * 2 + spacing * 3;
-
-  //       // Check if the entire signature section fits on the current page
-  //       if (nextY + estimatedHeight > pageHeight - 30) {
-  //           addPageNumber(); // Add page number before creating a new page
-  //           doc.addPage();   // Create a new page
-  //           nextY = 25;      // Reset Y position for new page
-  //           resetHeader();   // Reset header for the new page
-  //       }
-
-  //       // Print the Signatures title
-  //       nextY += spacing;
-
-  //       // Column positions for the signatures
-  //       const col1X = 20;   // Technician signature position
-  //       const col2X = 110;  // Manager signature position
-  //       const col3X = 20;   // Customer signature position (centered below)
-
-  //       let baseY = nextY + 5; // Adjusted Y position for images
-  //       doc.setFontSize(14);
-  //       doc.setFont("helvetica", "bold");
-  //       // Row 1: Technician and Manager Signatures
-  //       if (signatures.technician) {
-  //           doc.text("Signature of service technician:", col1X, nextY);
-  //           doc.addImage(signatures.technician, "PNG", col1X, baseY, signatureWidth, signatureHeight);
-  //       }
-  //       doc.setFontSize(14);
-  //       doc.setFont("helvetica", "bold");
-  //       if (signatures.manager) {
-  //           doc.text("Signature of service manager:", col2X, nextY);
-  //           doc.addImage(signatures.manager, "PNG", col2X, baseY, signatureWidth, signatureHeight);
-  //       }
-
-  //       // Adjust Y for the next row based on the tallest signature in Row 1
-  //       nextY = baseY + signatureHeight + spacing;
-  //       doc.setFontSize(14);
-  //       doc.setFont("helvetica", "bold");
-  //       // Row 2: Customer Signature
-  //       if (signatures.customer) {
-  //           // Check if the customer signature fits on the current page
-  //           if (nextY + signatureHeight + spacing > pageHeight - 30) {
-  //               addPageNumber(); // Add page number before breaking
-  //               doc.addPage();   // Add new page if space is insufficient
-  //               nextY = 25;      // Reset Y position for new page
-  //               resetHeader();   // Reset header for the new page
-  //           }
-
-  //           doc.text("Customer signature:", col3X, nextY);
-  //           doc.addImage(signatures.customer, "PNG", col3X, nextY + 5, signatureWidth, signatureHeight);
-  //           nextY += signatureHeight + spacing;
-  //       }
-
-  //       return nextY; // Return updated Y position for further content
-  //   };
-
-  //   // Call the function to add signatures
-  //   nextY = addSignatures(formData.signatures, nextY);
-
-  //     resetHeader();
-  //     addPageNumber();
-
-  //     doc.save();
-  //   });
-  // };
-
-  // const generatePDF = (formData, checkboxValues, partsUsed) => {
-  //   const doc = new jsPDF();
-  //   const startX = 10; // Left margin
-  //   const colWidths = [40, 60, 20, 50]; // Column widths
-  //   const rowHeight = 8; // Row height
-  //   const pageHeight = doc.internal.pageSize.height; // ✅ Move this to the top
-  //   let pageNumber = 1; // Start page numbering
-  //   const bottomMargin = 30;
-  //   const headerPadding = 10;
-  //   const addPageNumber = () => {
-  //     doc.setFontSize(10);
-  //     doc.text(
-  //       `Page ${pageNumber}`,
-  //       doc.internal.pageSize.width / 2,
-  //       pageHeight - 10,
-  //       { align: "center" }
-  //     );
-  //     pageNumber++; // Increment for next page
-  //   };
-  //   const checkPageLimit = (currentY) => {
-  //     if (currentY + bottomMargin > pageHeight) {
-  //       addPageNumber();
-  //       doc.addPage();
-  //       resetHeader();
-
-  //       return 20 + headerPadding;
-  //     }
-  //     return currentY;
-  //   };
-  //   const resetHeader = () => {
-  //     doc.addImage(HaitianLogo, "PNG", 18, 1, 50, 20);
-  //     doc.setFont("helvetica", "normal");
-  //     doc.setFontSize(14);
-  //     doc.text("Service No", 160, 12);
-  //     doc.setDrawColor(0, 0, 0);
-  //     doc.setLineWidth(0.5);
-  //     doc.line(20, 22, 190, 22);
-  //   };
-
-  //   let nextY = 35 + headerPadding; // Start Y position
-  //   resetHeader();
-  //   nextY = checkPageLimit(nextY);
-  //   const getBase64Image = (imgUrl, callback) => {
-  //     const img = new Image();
-  //     img.crossOrigin = "Anonymous";
-  //     img.src = imgUrl;
-  //     img.onload = function () {
-  //       const canvas = document.createElement("canvas");
-  //       canvas.width = img.width;
-  //       canvas.height = img.height;
-  //       const ctx = canvas.getContext("2d");
-  //       ctx.drawImage(img, 0, 0);
-  //       const dataURL = canvas.toDataURL("image/png");
-  //       callback(dataURL);
-  //     };
-  //   };
-
-  //   getBase64Image(HaitianLogo, (base64Image) => {
-  //     let nextY = 35; // Starting Y position
-  //     const addField = (label, value, x, y, extraSpace = 12) => {
-  //       doc.setFontSize(14);
-  //       doc.setFont("helvetica", "bold");
-  //       doc.text(label, x, y);
-  //       doc.setFont("helvetica", "normal");
-  //       doc.text(value?.toString() || "N/A", x, y + 6);
-  //       return y + extraSpace;
-  //     };
-
-  //     nextY = addField("Customer Name", formData.customerName, 20, 30, 16);
-  //     nextY = addField("Machine Type", formData.machineType, 150, 30, 16);
-
-  //     // Address and Serial Number
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Address", 20, nextY);
-  //     doc.text("Serial Number", 150, nextY);
-
-  //     doc.setFont("helvetica", "normal");
-
-  //     const maxAddressWidth = 80;
-  //     const addressLines = doc.splitTextToSize(
-  //       formData.address?.toString() || "N/A",
-  //       maxAddressWidth
-  //     );
-
-  //     let addressStartY = nextY + 6;
-  //     let addressLineHeight = 7;
-
-  //     addressLines.forEach((line, index) => {
-  //       doc.text(line, 20, addressStartY + index * addressLineHeight);
-  //     });
-
-  //     doc.text(formData.serialNumber?.toString() || "N/A", 150, nextY + 6);
-
-  //     let addressHeight = addressLines.length * addressLineHeight;
-  //     nextY += addressHeight + 12;
-
-  //     // Contact and Installation Date
-  //     const formattedInstallDate = formData.installationDate
-  //       ? new Date(formData.installationDate).toLocaleDateString()
-  //       : "N/A";
-
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Contact", 20, nextY);
-  //     doc.text("Installation Date", 150, nextY);
-
-  //     doc.setFont("helvetica", "normal");
-  //     doc.text(formData.contact?.toString() || "N/A", 20, nextY + 6);
-  //     doc.text(formattedInstallDate, 150, nextY + 6);
-
-  //     nextY += 15;
-
-  //     // Telephone and Work Time
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Telephone", 20, nextY);
-  //     doc.text("Work Time", 150, nextY);
-
-  //     doc.setFont("helvetica", "normal");
-  //     doc.text(formData.telephone?.toString() || "N/A", 20, nextY + 6);
-  //     doc.text(formData.workTime?.toString() || "N/A", 150, nextY + 6);
-
-  //     nextY += 15;
-
-  //     // Service Technician, Departure Date, Return Date
-  //     const formattedDepartureDate = formData.departureDate
-  //       ? new Date(formData.departureDate).toLocaleDateString()
-  //       : "N/A";
-
-  //     const formattedReturnDate = formData.returnDate
-  //       ? new Date(formData.returnDate).toLocaleDateString()
-  //       : "N/A";
-
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-
-  //     doc.text("Service Technician", 20, nextY);
-  //     doc.text("Departure Date", 150, nextY);
-
-  //     doc.setFont("helvetica", "normal");
-  //     doc.text(formData.serviceTechnician?.toString() || "N/A", 20, nextY + 6);
-  //     doc.text(formattedDepartureDate, 150, nextY + 6);
-
-  //     nextY += 15; // Move to the next row for Return Date
-
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Return Date", 20, nextY);
-
-  //     doc.setFont("helvetica", "normal");
-  //     doc.text(formattedReturnDate, 20, nextY + 6);
-
-  //     nextY += 15;
-
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Report Type", 20, nextY);
-
-  //     doc.setFontSize(12);
-  //     doc.setFont("helvetica", "normal");
-
-  //     const reportOptions = [
-  //       "Installation",
-  //       "Maintenance",
-  //       "Defect",
-  //       "Customer Visit",
-  //     ];
-
-  //     let optionX = 20;
-  //     const spaceBetweenOptions = 40;
-
-  //     console.log("checkboxValues:", checkboxValues); // Debugging checkbox values
-
-  //     reportOptions.forEach((option) => {
-  //       const isChecked = checkboxValues[option]; // Check if the option is selected in checkboxValues
-  //       if (isChecked) {
-  //         // Draw a border around the checkbox
-  //         doc.rect(optionX + 1, nextY + 4.5, 4.5, 4.5); // Adjust values as needed
-  //       } else {
-  //         doc.rect(optionX + 1, nextY + 4.5, 4.5, 4.5); // Adjust values as needed
-  //       }
-  //       // Set font for checkbox symbols
-  //       doc.setFont("Zapfdingbats"); // Set Zapfdingbats font
-
-  //       // Use symbol for checked ('4') and unchecked ('o')
-  //       const symbol = isChecked ? "4" : ""; // '4' for tick, 'o' for empty
-  //       doc.text(`${symbol}`, optionX + 1.3, nextY + 8);
-
-  //       doc.setFont("helvetica", "normal");
-
-  //       doc.text(option, optionX + 6, nextY + 8);
-  //       optionX += spaceBetweenOptions;
-  //     });
-
-  //     nextY += 18;
-  //     // nextY = checkPageLimit(nextY);
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Description of work/of defect/failure mode", 20, nextY);
-  //     nextY -= 1;
-  //     const maxDescriptionWidth = 170;
-  //     doc.setFont("helvetica", "normal");
-  //     const description = doc.splitTextToSize(
-  //       formData.description?.toString() || "N/A",
-  //       maxDescriptionWidth
-  //     );
-  //     let descriptionStartY = nextY + 6;
-  //     let descriptionLineHeight = 7;
-  //     doc.setFont("helvetica", "normal");
-
-  //     description.forEach((line, index) => {
-  //       nextY = checkPageLimit(nextY + 7); // Check if it fits, else add new page
-  //       doc.text(line, 20, nextY);
-  //     });
-
-  //     nextY += 10;
-
-  //     // Check if the notes section fits on the current page
-
-  //     if (nextY + 20 > pageHeight) {
-  //       doc.addPage(); // Add a new page if there's not enough space
-  //       nextY = 15; // Reset Y position for new page
-  //       addPageNumber();
-  //     }
-  //     nextY = checkPageLimit(nextY, 30);
-
-  //     // Now add the Notes section
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Notes/Further action required", 20, nextY);
-  //     nextY -= 1;
-
-  //     // Ensure notes are properly split into lines
-  //     const maxNotesWidth = 170;
-  //     doc.setFont("helvetica", "normal");
-
-  //     const notesText = formData.notes?.toString() || "N/A";
-
-  //     const notesLines = doc.splitTextToSize(notesText, maxNotesWidth);
-
-  //     let notesStartY = nextY + 6; // Add extra space below the title
-  //     let notesLineHeight = 7;
-
-  //     notesLines.forEach((line, index) => {
-  //       nextY = checkPageLimit(nextY + 7); // Check if it fits, else add new page
-  //       doc.text(line, 20, nextY);
-  //     });
-
-  //     nextY += 10;
-
-  //     // Check if the notes section fits on the current page
-
-  //     if (nextY + 20 > pageHeight) {
-  //       doc.addPage(); // Add a new page if there's not enough space
-  //       nextY = 15; // Reset Y position for new page
-  //       addPageNumber();
-  //     }
-  //     nextY = checkPageLimit(nextY, 30);
-
-  //     // Now add the Notes section
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Cause of Failure", 20, nextY);
-  //     nextY -= 1;
-
-  //     // Ensure notes are properly split into lines
-  //     const maxcauseOfFailureWidth = 170;
-  //     doc.setFont("helvetica", "normal");
-
-  //     const causeOfFailureText = formData.causeOfFailure?.toString() || "N/A";
-
-  //     const causeOfFailureLines = doc.splitTextToSize(
-  //       causeOfFailureText,
-  //       maxcauseOfFailureWidth
-  //     );
-
-  //     let causeOfFailureStartY = nextY + 6; // Add extra space below the title
-  //     let causeOfFailureLineHeight = 7;
-
-  //     causeOfFailureLines.forEach((line, index) => {
-  //       nextY = checkPageLimit(nextY + 7); // Check if it fits, else add new page
-  //       doc.text(line, 20, nextY);
-  //     });
-
-  //     const addPageNumber = () => {
-  //       doc.setFontSize(10);
-  //       doc.setFont("helvetica", "normal");
-
-  //       doc.text(
-  //         `Page ${pageNumber}`,
-  //         doc.internal.pageSize.width / 2,
-  //         pageHeight - 10,
-  //         { align: "center" }
-  //       );
-  //       pageNumber++;
-  //       doc.setFont("helvetica", "normal");
-  //     };
-
-  //     // Function to draw table headers
-  //     const drawTableHeaders = () => {
-  //       doc.setFontSize(12);
-  //       doc.setFont("helvetica", "bold");
-
-  //       doc.text("Part Number", startX + 2, nextY + 5);
-  //       doc.text("Description", startX + colWidths[0] + 2, nextY + 5);
-  //       doc.text(
-  //         "Quantity",
-  //         startX + colWidths[0] + colWidths[1] + 2,
-  //         nextY + 5
-  //       );
-  //       doc.text(
-  //         "Note",
-  //         startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
-  //         nextY + 5
-  //       );
-
-  //       doc.rect(startX, nextY, colWidths[0], rowHeight);
-  //       doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
-  //       doc.rect(
-  //         startX + colWidths[0] + colWidths[1],
-  //         nextY,
-  //         colWidths[2],
-  //         rowHeight
-  //       );
-  //       doc.rect(
-  //         startX + colWidths[0] + colWidths[1] + colWidths[2],
-  //         nextY,
-  //         colWidths[3],
-  //         rowHeight
-  //       );
-
-  //       nextY += rowHeight;
-  //     };
-
-  //     // **Ensure space before table starts**
-  //     if (nextY + 20 > pageHeight) {
-  //       doc.addPage();
-  //       doc.setFont("helvetica", "normal");
-  //       nextY = 25;
-  //       resetHeader();
-  //       addPageNumber();
-  //     }
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Parts Used", startX, nextY + 10);
-  //     nextY += 13;
-  //     drawTableHeaders();
-
-  //     doc.setFont("helvetica", "normal");
-
-  //     //100% Working code
-
-  //     partsUsed.forEach((part) => {
-  //       let partNumberLines = doc.splitTextToSize(
-  //         part.partNumber || "N/A",
-  //         colWidths[0] - 5
-  //       );
-  //       let descriptionLines = doc.splitTextToSize(
-  //         part.description || "N/A",
-  //         colWidths[1] - 5
-  //       );
-  //       let quantityLines = doc.splitTextToSize(
-  //         part.quantity.toString() || "N/A",
-  //         colWidths[2] - 5
-  //       );
-  //       let noteLines = doc.splitTextToSize(
-  //         part.note || "N/A",
-  //         colWidths[3] - 5
-  //       );
-
-  //       let maxLines = Math.max(
-  //         partNumberLines.length,
-  //         descriptionLines.length,
-  //         quantityLines.length,
-  //         noteLines.length
-  //       );
-  //       let rowHeightTotal = maxLines * rowHeight;
-
-  //       // **Ensure bottom margin of 30px is maintained**
-  //       if (nextY + rowHeightTotal > pageHeight - 30) {
-  //         addPageNumber();
-  //         doc.addPage();
-  //         nextY = 25;
-  //         resetHeader();
-  //         drawTableHeaders();
-  //       }
-
-  //       // ✅ Print each wrapped line dynamically with borders
-  //       for (let i = 0; i < maxLines; i++) {
-  //         // ✅ Check if we need to add a new page before printing each line
-  //         if (nextY + rowHeight > pageHeight - 30) {
-  //           doc.setFontSize(12);
-  //           doc.setFont("helvetica", "normal");
-  //           addPageNumber();
-  //           doc.addPage();
-  //           nextY = 25;
-  //           resetHeader();
-  //           drawTableHeaders();
-  //         }
-  //         doc.setFontSize(12);
-  //         doc.setFont("helvetica", "normal");
-
-  //         // ✅ Print the text in the correct column positions
-  //         if (partNumberLines[i])
-  //           doc.text(partNumberLines[i], startX + 2, nextY + 5);
-  //         if (descriptionLines[i])
-  //           doc.text(descriptionLines[i], startX + colWidths[0] + 2, nextY + 5);
-  //         if (quantityLines[i])
-  //           doc.text(
-  //             quantityLines[i],
-  //             startX + colWidths[0] + colWidths[1] + 2,
-  //             nextY + 5
-  //           );
-  //         if (noteLines[i])
-  //           doc.text(
-  //             noteLines[i],
-  //             startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
-  //             nextY + 5
-  //           );
-
-  //         // ✅ Draw borders for the current line
-  //         doc.rect(startX, nextY, colWidths[0], rowHeight);
-  //         doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
-  //         doc.rect(
-  //           startX + colWidths[0] + colWidths[1],
-  //           nextY,
-  //           colWidths[2],
-  //           rowHeight
-  //         );
-  //         doc.rect(
-  //           startX + colWidths[0] + colWidths[1] + colWidths[2],
-  //           nextY,
-  //           colWidths[3],
-  //           rowHeight
-  //         );
-
-  //         nextY += rowHeight; // Move Y position down
-  //       }
-  //     });
-
-  //     const serviceOptions = [
-  //       "F.O.C Commissioning",
-  //       "F.O.C Maintenance",
-  //       "Guarantee",
-  //       "Chargeable Commissioning",
-  //       "Customer Visit",
-  //       "Service contract",
-  //       "Goodwill",
-  //     ];
-
-  //     // Move down for spacing before the section
-  //     nextY += 12;
-
-  //     // Calculate total height for the Service Type section
-  //     const serviceTypeTitleHeight = 14; // Title height
-  //     const checkboxLineHeight = 7; // Height for each line of checkboxes
-  //     const numberOfLines = Math.ceil(serviceOptions.length / 3); // Calculate how many lines of checkboxes are needed
-  //     const estimatedHeight =
-  //       serviceTypeTitleHeight + numberOfLines * checkboxLineHeight + 5; // Extra space
-
-  //     // Check if the entire "Service Type" section will fit on the current page
-  //     if (nextY + estimatedHeight > pageHeight - 30) {
-  //       addPageNumber(); // ✅ Add page number before a new page
-  //       doc.addPage(); // ✅ Add a new page if there's not enough space
-  //       nextY = 25; // ✅ Reset Y position for new page
-  //       resetHeader(); // ✅ Reset the header on the new page
-  //     }
-
-  //     // Service Type Section
-  //     doc.setFontSize(14);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text("Service Type", 20, nextY + 5);
-  //     nextY += 4; // Space after the title
-
-  //     doc.setFontSize(12);
-  //     doc.setFont("helvetica", "normal");
-
-  //     let optionServiceX = 20;
-  //     const spaceBetweenServiceOptions = 65;
-  //     const checkboxSize = 4.5;
-
-  //     serviceOptions.forEach((option, index) => {
-  //       // Check for line break after every 3 options
-  //       if (index % 3 === 0 && index !== 0) {
-  //         nextY += 7; // Move down for the next line of options
-  //         optionServiceX = 20;
-
-  //         // Ensure the entire line fits within the page
-  //         if (nextY + 20 > pageHeight - 30) {
-  //           addPageNumber(); // ✅ Add page number before a new page
-  //           doc.addPage(); // ✅ Add a new page if there's not enough space
-  //           nextY = 25; // ✅ Reset Y position for new page
-  //           resetHeader(); // ✅ Reset the header on the new page
-  //           doc.setFontSize(14);
-  //           doc.setFont("helvetica", "bold");
-  //           doc.text("Service Type (Continued)", 20, nextY); // ✅ Continued title
-  //           nextY += 4;
-  //         }
-  //       }
-
-  //       // Draw the checkbox border
-  //       doc.rect(optionServiceX + 1, nextY + 4.5, checkboxSize, checkboxSize);
-
-  //       // Draw the checkmark inside the box (if selected)
-  //       const isChecked = checkboxValues[option] || false;
-  //       if (isChecked) {
-  //         doc.setFont("Zapfdingbats");
-  //         doc.text("4", optionServiceX + 1.5, nextY + 8);
-  //         doc.setFont("helvetica", "normal");
-  //       }
-
-  //       // Draw the text next to the checkbox
-  //       doc.text(option, optionServiceX + checkboxSize + 2, nextY + 8);
-
-  //       optionServiceX += spaceBetweenServiceOptions;
-  //     });
-
-  //     // Add Signatures Section
-  //     nextY += 9;
-  //     if (nextY + 20 > pageHeight) {
-  //       doc.addPage(); // Add a new page if there's not enough space
-  //       nextY = 15; // Reset Y position for new page
-  //       addPageNumber();
-  //     }
-  //     nextY = checkPageLimit(nextY, 10);
-
-  //     const addSignatures = (signatures, nextY) => {
-  //       doc.setFontSize(14);
-  //       doc.setFont("helvetica", "bold");
-
-  //       // Title for Signatures Section
-  //       const signatureHeight = 30; // Signature height
-  //       const signatureWidth = 60; // Signature width
-  //       const spacing = 5; // Space between rows and signatures
-  //       const titleHeight = 14; // Height for the title
-
-  //       const estimatedHeight = titleHeight + signatureHeight * 2 + spacing * 3;
-
-  //       // Check if the entire signature section fits on the current page
-  //       if (nextY + estimatedHeight > pageHeight - 30) {
-  //         addPageNumber(); // Add page number before creating a new page
-  //         doc.addPage(); // Create a new page
-  //         nextY = 25; // Reset Y position for new page
-  //         resetHeader(); // Reset header for the new page
-  //       }
-
-  //       // Print the Signatures title
-  //       nextY += spacing;
-
-  //       // Column positions for the signatures
-  //       const col1X = 20; // Technician signature position
-  //       const col2X = 110; // Manager signature position
-  //       const col3X = 20; // Customer signature position (centered below)
-
-  //       let baseY = nextY + 5; // Adjusted Y position for images
-  //       doc.setFontSize(14);
-  //       doc.setFont("helvetica", "bold");
-  //       // Row 1: Technician and Manager Signatures
-  //       if (signatures.technician) {
-  //         doc.text("Signature of service technician:", col1X, nextY);
-  //         doc.addImage(
-  //           signatures.technician,
-  //           "PNG",
-  //           col1X,
-  //           baseY,
-  //           signatureWidth,
-  //           signatureHeight
-  //         );
-  //       }
-  //       doc.setFontSize(14);
-  //       doc.setFont("helvetica", "bold");
-  //       if (signatures.manager) {
-  //         doc.text("Signature of service manager:", col2X, nextY);
-  //         doc.addImage(
-  //           signatures.manager,
-  //           "PNG",
-  //           col2X,
-  //           baseY,
-  //           signatureWidth,
-  //           signatureHeight
-  //         );
-  //       }
-
-  //       // Adjust Y for the next row based on the tallest signature in Row 1
-  //       nextY = baseY + signatureHeight + spacing;
-  //       doc.setFontSize(14);
-  //       doc.setFont("helvetica", "bold");
-  //       // Row 2: Customer Signature
-  //       if (signatures.customer) {
-  //         // Check if the customer signature fits on the current page
-  //         if (nextY + signatureHeight + spacing > pageHeight - 30) {
-  //           addPageNumber(); // Add page number before breaking
-  //           doc.addPage(); // Add new page if space is insufficient
-  //           nextY = 25; // Reset Y position for new page
-  //           resetHeader(); // Reset header for the new page
-  //         }
-
-  //         doc.text("Customer signature:", col3X, nextY);
-  //         doc.addImage(
-  //           signatures.customer,
-  //           "PNG",
-  //           col3X,
-  //           nextY + 5,
-  //           signatureWidth,
-  //           signatureHeight
-  //         );
-  //         nextY += signatureHeight + spacing;
-  //       }
-
-  //       return nextY; // Return updated Y position for further content
-  //     };
-
-  //     // Call the function to add signatures
-  //     nextY = addSignatures(formData.signatures, nextY);
-
-  //     resetHeader();
-  //     addPageNumber();
-
-  //     doc.save();
-  //   });
-  // };
-
-  //Code changed for extra space and single page
-  // const generatePDF = (formData, checkboxValues, partsUsed) => {
-  //   const doc = new jsPDF();
-  //   // const startX = 10;
-  //   const pageWidth = doc.internal.pageSize.width;
-  //   const pageHeight = doc.internal.pageSize.height;
-  //   const maxWidth = pageWidth - 20;
-  //   // let nextY = 20;
-
-  //   const labelWidths = {
-  //     Customer: 35,
-  //     Address: 35,
-  //     Contact: 35,
-  //     Telephone: 35,
-  //     "Service Technician": 35,
-  //     "Machine Type": 30,
-  //     "Serial No.": 30,
-  //     "Work Time": 30,
-  //     "Departure Date": 35,
-  //     "Return Date": 30,
-  //     "Installation Date": 30,
-  //   };
-
-  //   // const addField = (label, value, x, y) => {
-  //   //   // const labelWidth = 25; // Adjust spacing for consistent alignment
-  //   //   const labelWidth = labelWidths[label] || 30; // Default width if not defined
-
-  //   //   doc.setFontSize(10);
-
-  //   //   doc.setFont("helvetica", "bold");
-  //   //   doc.text(`${label}:`, x, y);
-  //   //   doc.setFontSize(10);
-
-  //   //   doc.setFont("helvetica", "normal");
-  //   //   doc.text(value?.toString() || "N/A", x + labelWidth, y);
-  //   //   const wrappedText = doc.splitTextToSize(
-  //   //     value?.toString() || "N/A",
-  //   //     maxWidth
-  //   //   );
-  //   //   doc.text(wrappedText, x + labelWidth, y);
-
-  //   //   return wrappedText.length * 5;
-  //   // };
-
-  //   // const addField = (label, value, x, y, maxWidth = 80) => {
-  //   //   const labelWidth = labelWidths[label] || 30; // Label width based on field type
-  //   //   const wrappedText = doc.splitTextToSize(
-  //   //     value?.toString() || "N/A",
-  //   //     maxWidth
-  //   //   ); // Wrap text
-
-  //   //   doc.setFontSize(11);
-  //   //   doc.setFont("helvetica", "bold");
-  //   //   doc.text(`${label}:`, x, y);
-  //   //   doc.setFont("helvetica", "normal");
-  //   //   doc.text(wrappedText, x + labelWidth, y); // Print text
-
-  //   //   return wrappedText.length * 4; // Return space occupied for dynamic adjustments
-  //   // };
-
-  //   const addField = (
-  //     label,
-  //     value,
-  //     x,
-  //     y,
-  //     maxWidth = 80,
-  //     sameLine = false,
-  //     nextColumnX = null
-  //   ) => {
-  //     const labelWidth = labelWidths[label] || 30; // Label width
-  //     const wrappedText = doc.splitTextToSize(
-  //       value?.toString() || "N/A",
-  //       maxWidth
-  //     ); // Wrap text
-
-  //     doc.setFontSize(10);
-  //     doc.setFont("helvetica", "bold");
-  //     doc.text(`${label}:`, x, y);
-
-  //     doc.setFont("helvetica", "normal");
-
-  //     if (sameLine && nextColumnX) {
-  //       doc.text(wrappedText, nextColumnX, y); // Print in the same row (for Telephone & Installation Date)
-  //     } else {
-  //       doc.text(wrappedText, x + labelWidth, y); // Print in the normal format
-  //     }
-
-  //     return wrappedText.length * 4; // Return space occupied for dynamic adjustments
-  //   };
-
-  //   // Define positions
-  //   const startX = 10; // Left side
-  //   const rightX = 110; // Right side for machine details
-  //   let nextY = 25; // Starting Y position
-
-  //   // Header
-  //   doc.addImage(HaitianLogo, "PNG", startX, 5, 40, 15);
-  //   doc.setFont("helvetica", "bold");
-  //   doc.setFontSize(11);
-  //   doc.text("Service Report", pageWidth - 60, 12);
-  //   doc.setFontSize(11);
-  //   doc.text(`No. ${srn  || "N/A"}`, pageWidth - 60, 18);
-  //   doc.setDrawColor(0, 0, 0);
-  //   doc.setLineWidth(0.5);
-  //   doc.line(0, 22, 210, 22);
-
-  //   nextY += 1;
-  //   // Left Side: Customer Details
-  //   addField("Customer", formData.customerName, startX, nextY);
-  //   addField("Machine Type", formData.machineType, rightX, nextY);
-  //   nextY += 5;
-
-  //   // addField("Address", formData.address, startX, nextY + 5);
-  //   let addressSpaceUsed = addField(
-  //     "Address",
-  //     formData.address,
-  //     startX,
-  //     nextY + 5,
-  //     60
-  //   );
-  //   // nextY += addressSpaceUsed;
-
-  //   // addField("Serial No.", formData.serialNumber, rightX, nextY+5);
-  //   // nextY += 6;
-  //   let serialSpaceUsed = addField(
-  //     "Serial No.",
-  //     formData.serialNumber,
-  //     rightX,
-  //     nextY + 5,
-  //     60
-  //   );
-  //   // nextY += serialSpaceUsed + 3; // Move down based on space used
-  //   nextY += Math.max(addressSpaceUsed, serialSpaceUsed) + 6;
-
-  //   addField("Contact", formData.contact, startX, nextY + 4);
-  //   nextY += 5;
-  //   addField("Installation Date", formData.installationDate, rightX, nextY + 8);
-  //   nextY += 5;
-
-  //   addField("Telephone", formData.telephone, startX, nextY + 4);
-  //   nextY += 6;
-
-  //   addField("Work Time", formData.workTime, rightX, nextY + 7);
-  //   nextY += 6;
-
-  //   addField(
-  //     "Service Technician",
-  //     formData.serviceTechnician,
-  //     startX,
-  //     nextY + 2
-  //   );
-  //   nextY += 6;
-  //   addField("Departure Date", formData.departureDate, startX, nextY + 5);
-  //   nextY += 6;
-  //   addField("Return Date", formData.returnDate, rightX, nextY);
-
-  //   nextY += 9;
-
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Report Type", startX, nextY);
-  //   doc.setFont("helvetica", "normal");
-
-  //   const reportOptions = [
-  //     "Installation/Commission",
-  //     "Maintenance",
-  //     "Defect",
-  //     "Customer Visit",
-  //     "Other"
-  //   ];
-  //   const spacing = [48, 33, 25, 35, 10];
-  //   let optionX = startX;
-  //   reportOptions.forEach((option,index) => {
-  //     // doc.rect(optionX, nextY + 2, 4, 4);
-  //     // if (checkboxValues[option])
-  //     //   doc.setFont("Zapfdingbats");
-  //     //   doc.text("✔", optionX + 1, nextY + 5);
-  //     // doc.text(option, optionX + 5, nextY + 5);
-  //     // optionX += 40;
-  //     const spaceBetweenOptions = spacing[index]; ;
-  //     const isChecked = checkboxValues[option];
-  //     if (isChecked) {
-  //       // Draw a border around the checkbox
-  //       doc.rect(optionX, nextY + 2.5, 4, 4); // Adjust values as needed
-  //     } else {
-  //       doc.rect(optionX, nextY + 2.5, 4, 4); // Adjust values as needed
-  //     }
-  //     doc.setFont("Zapfdingbats");
-
-  //     const symbol = isChecked ? "4" : ""; // '4' for tick, 'o' for empty
-  //     doc.text(`${symbol}`, optionX + 0.6, nextY + 5.5);
-
-  //     doc.setFont("helvetica", "normal");
-
-  //     doc.text(option, optionX + 4.5, nextY + 5.5);
-  //     optionX += spaceBetweenOptions;
-  //   });
-
-  //   nextY += 15;
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Description of Work / Defect / Failure Mode:", startX, nextY);
-  //   doc.setFont("helvetica", "normal");
-  //   nextY += 4;
-  //   const description = doc.splitTextToSize(
-  //     formData.description || "N/A",
-  //     maxWidth
-  //   );
-  //   doc.text(description, startX, nextY);
-  //   nextY += description.length * 2;
-
-  //   nextY += 18;
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Cause of failure:", startX, nextY);
-  //   doc.setFont("helvetica", "normal");
-  //   nextY += 4;
-  //   const causeOfFailure = doc.splitTextToSize(
-  //     formData.causeOfFailure || "N/A",
-  //     maxWidth
-  //   );
-  //   doc.text(causeOfFailure, startX, nextY);
-  //   nextY += causeOfFailure.length * 2;
-
-  //   nextY += 10;
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Notes/Further action required:", startX, nextY);
-  //   doc.setFont("helvetica", "normal");
-  //   nextY += 4;
-  //   const notes = doc.splitTextToSize(formData.notes || "N/A", maxWidth);
-  //   doc.text(notes, startX, nextY);
-  //   nextY += notes.length * 2;
-
-  //   // doc.setFont("helvetica", "bold");
-  //   // doc.text("Parts Used:", startX, nextY);
-  //   // doc.setFont("helvetica", "normal");
-  //   // nextY += 5;
-  //   // partsUsed.forEach((part, index) => {
-  //   //   doc.text(
-  //   //     `${part.partNumber} - ${part.description} (Qty: ${part.qty})`,
-  //   //     startX,
-  //   //     nextY
-  //   //   );
-  //   //   nextY += 5;
-  //   // });
-
-  //   const colWidths = [40, 65, 18, 65]; // Column widths
-  //   const rowHeight = 8; // Row height
-
-  //   const drawTableHeaders = () => {
-  //     doc.setFont("helvetica", "bold");
-
-  //     doc.text("Part Number", startX + 2, nextY + 5);
-  //     doc.text("Description", startX + colWidths[0] + 2, nextY + 5);
-  //     doc.text("Quantity", startX + colWidths[0] + colWidths[1] + 2, nextY + 5);
-  //     doc.text(
-  //       "Note",
-  //       startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
-  //       nextY + 5
-  //     );
-
-  //     doc.rect(startX, nextY, colWidths[0], rowHeight);
-  //     doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
-  //     doc.rect(
-  //       startX + colWidths[0] + colWidths[1],
-  //       nextY,
-  //       colWidths[2],
-  //       rowHeight
-  //     );
-  //     doc.rect(
-  //       startX + colWidths[0] + colWidths[1] + colWidths[2],
-  //       nextY,
-  //       colWidths[3],
-  //       rowHeight
-  //     );
-
-  //     nextY += rowHeight;
-  //   };
-
-  //   // **Ensure space before table starts**
-  //   // if (nextY + 20 > pageHeight) {
-  //   //   doc.addPage();
-  //   //   doc.setFont("helvetica", "normal");
-  //   //   nextY = 25;
-  //   //   resetHeader();
-  //   //   addPageNumber();
-  //   // }
-  //   doc.setFont("helvetica", "bold");
-  //   doc.text("Parts Used", startX, nextY + 10);
-  //   nextY += 12;
-  //   drawTableHeaders();
-
-  //   doc.setFont("helvetica", "normal");
-
-  //   //100% Working code
-
-  //   // partsUsed.forEach((part) => {
-  //   //   let partNumberLines = doc.splitTextToSize(
-  //   //     part.partNumber || "N/A",
-  //   //     colWidths[0] - 5
-  //   //   );
-  //   //   let descriptionLines = doc.splitTextToSize(
-  //   //     part.description || "N/A",
-  //   //     colWidths[1] - 5
-  //   //   );
-  //   //   let quantityLines = doc.splitTextToSize(
-  //   //     part.quantity.toString() || "N/A",
-  //   //     colWidths[2] - 5
-  //   //   );
-  //   //   let noteLines = doc.splitTextToSize(part.note || "N/A", colWidths[3] - 5);
-
-  //   //   let maxLines = Math.max(
-  //   //     partNumberLines.length,
-  //   //     descriptionLines.length,
-  //   //     quantityLines.length,
-  //   //     noteLines.length
-  //   //   );
-  //   //   let rowHeightTotal = maxLines * rowHeight;
-
-  //   //   // **Ensure bottom margin of 30px is maintained**
-  //   //   // if (nextY + rowHeightTotal > pageHeight - 30) {
-  //   //   //   addPageNumber();
-  //   //   //   doc.addPage();
-  //   //   //   nextY = 25;
-  //   //   //   resetHeader();
-  //   //   //   drawTableHeaders();
-  //   //   // }
-
-  //   //   // ✅ Print each wrapped line dynamically with borders
-  //   //   for (let i = 0; i < maxLines; i++) {
-  //   //     // ✅ Check if we need to add a new page before printing each line
-  //   //     // if (nextY + rowHeight > pageHeight - 30) {
-  //   //     //   doc.setFontSize(12);
-  //   //     //   doc.setFont("helvetica", "normal");
-  //   //     //   addPageNumber();
-  //   //     //   doc.addPage();
-  //   //     //   nextY = 25;
-  //   //     //   resetHeader();
-  //   //     //   drawTableHeaders();
-  //   //     // }
-  //   //     doc.setFont("helvetica", "normal");
-
-  //   //     // ✅ Print the text in the correct column positions
-  //   //     if (partNumberLines[i])
-  //   //       doc.text(partNumberLines[i], startX + 2, nextY + 5);
-  //   //     if (descriptionLines[i])
-  //   //       doc.text(descriptionLines[i], startX + colWidths[0] + 2, nextY + 5);
-  //   //     if (quantityLines[i])
-  //   //       doc.text(
-  //   //         quantityLines[i],
-  //   //         startX + colWidths[0] + colWidths[1] + 2,
-  //   //         nextY + 5
-  //   //       );
-  //   //     if (noteLines[i])
-  //   //       doc.text(
-  //   //         noteLines[i],
-  //   //         startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
-  //   //         nextY + 5
-  //   //       );
-
-  //   //     // ✅ Draw borders for the current line
-  //   //     doc.rect(startX, nextY, colWidths[0], rowHeight);
-  //   //     doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
-  //   //     doc.rect(
-  //   //       startX + colWidths[0] + colWidths[1],
-  //   //       nextY,
-  //   //       colWidths[2],
-  //   //       rowHeight
-  //   //     );
-  //   //     doc.rect(
-  //   //       startX + colWidths[0] + colWidths[1] + colWidths[2],
-  //   //       nextY,
-  //   //       colWidths[3],
-  //   //       rowHeight
-  //   //     );
-
-  //   //     nextY += rowHeight; // Move Y position down
-  //   //   }
-  //   // });
-
-  //   const maxRows = 12; // Limit to 12 rows
-  //   let rowCount = 0; // Track number of printed rows
-
-  //   for (let i = 0; i < partsUsed.length; i++) {
-  //     if (rowCount >= maxRows) break; // Stop adding rows after 5
-
-  //     let part = partsUsed[i];
-
-  //     let partNumberLines = doc.splitTextToSize(
-  //       part.partNumber || "N/A",
-  //       colWidths[0] - 5
-  //     );
-  //     let descriptionLines = doc.splitTextToSize(
-  //       part.description || "N/A",
-  //       colWidths[1] - 5
-  //     );
-  //     let quantityLines = doc.splitTextToSize(
-  //       part.quantity?.toString() || "N/A",
-  //       colWidths[2] - 5
-  //     );
-  //     let noteLines = doc.splitTextToSize(part.note || "N/A", colWidths[3] - 5);
-
-  //     let maxLines = Math.max(
-  //       partNumberLines.length,
-  //       descriptionLines.length,
-  //       quantityLines.length,
-  //       noteLines.length
-  //     );
-
-  //     // Ensure total rows do not exceed 5
-  //     if (rowCount + maxLines > maxRows) break;
-
-  //     for (let j = 0; j < maxLines; j++) {
-  //       if (rowCount >= maxRows) break; // Stop adding rows after 5
-
-  //       doc.setFont("helvetica", "normal");
-
-  //       if (partNumberLines[j])
-  //         doc.text(partNumberLines[j], startX + 2, nextY + 5);
-  //       if (descriptionLines[j])
-  //         doc.text(descriptionLines[j], startX + colWidths[0] + 2, nextY + 5);
-  //       if (quantityLines[j])
-  //         doc.text(
-  //           quantityLines[j],
-  //           startX + colWidths[0] + colWidths[1] + 2,
-  //           nextY + 5
-  //         );
-  //       if (noteLines[j])
-  //         doc.text(
-  //           noteLines[j],
-  //           startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
-  //           nextY + 5
-  //         );
-
-  //       // ✅ Draw borders for each row
-  //       doc.rect(startX, nextY, colWidths[0], rowHeight);
-  //       doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
-  //       doc.rect(
-  //         startX + colWidths[0] + colWidths[1],
-  //         nextY,
-  //         colWidths[2],
-  //         rowHeight
-  //       );
-  //       doc.rect(
-  //         startX + colWidths[0] + colWidths[1] + colWidths[2],
-  //         nextY,
-  //         colWidths[3],
-  //         rowHeight
-  //       );
-
-  //       nextY += rowHeight; // Move Y position down
-  //       rowCount++; // Increment row count
-  //     }
-  //   }
-
-  //   // Service Type Section
-  //   // doc.setFont("helvetica", "bold");
-  //   // doc.text("Service Type", 10, nextY + 5);
-  //   // nextY += 6; // Space after the title
-
-  //   // doc.setFont("helvetica", "normal");
-  //   // doc.setFontSize(9);
-
-  //   // const serviceStartX = 10;
-  //   // const checkboxSize = 4;
-  //   // let optionServiceX = serviceStartX;
-  //   // const spaceBetweenOptions = 29; // Space between each option
-  //   // const serviceRowHeight = 10; // Height per row (for 2-line text)
-  //   // let maxServiceRowHeight = serviceRowHeight; // Track max row height
-
-  //   // // Function to split service options into two lines
-  //   // const splitServiceText = (option) => {
-  //   //     const words = option.split(" ");
-  //   //     if (words.length > 1) {
-  //   //         return [words[0], words.slice(1).join(" ")]; // First word on one line, rest on second
-  //   //     } else {
-  //   //         return [option]; // Single-word options remain single-line
-  //   //     }
-  //   // };
-
-  //   // // **Now, draw checkboxes and text in a single row**
-  //   // serviceOptions.forEach((option) => {
-  //   //     const wrappedText = splitServiceText(option); // Split into two lines
-
-  //   //     // **Draw checkbox centered to row height**
-  //   //     let checkboxY = nextY + (maxServiceRowHeight / 2 - checkboxSize / 2);
-  //   //     doc.rect(optionServiceX, checkboxY, checkboxSize, checkboxSize);
-
-  //   //     // **Check if the option is selected**
-  //   //     const isChecked = checkboxValues[option] || false;
-  //   //     if (isChecked) {
-  //   //         doc.setFont("Zapfdingbats");
-  //   //         doc.text("4", optionServiceX + 0.8, checkboxY + 3);
-  //   //         doc.setFont("helvetica", "normal");
-  //   //     }
-
-  //   //     // **Draw text below the checkbox**
-  //   //     let textY = checkboxY + 2;
-  //   //     wrappedText.forEach((line, index) => {
-  //   //         doc.text(line, optionServiceX + checkboxSize+1, textY + index * 3);
-  //   //     });
-
-  //   //     // **Move X position for the next checkbox**
-  //   //     optionServiceX += spaceBetweenOptions;
-  //   // });
-
-  //   // // Move Y to the next section after full row
-  //   // nextY += maxServiceRowHeight + 5;
-
-  //   doc.setFont("helvetica", "bold");
-  //   nextY = 220;
-  //   doc.text("Service Type", 10, nextY);
-  //   nextY-= 2; // Space after the title
-
-  //   doc.setFont("helvetica", "normal");
-
-  //   const serviceStartX = 10;
-  //   const checkboxSize = 4;
-  //   let optionServiceX = serviceStartX;
-  //   const serviceRowHeight = 10; // Height per row (for 2-line text)
-  //   let maxServiceRowHeight = serviceRowHeight; // Track max row height
-
-  //   // Define manual spacing for each option
-  //   const serviceOptionSpacing = {
-  //     "F.O.C Commissioning": 33,
-  //     "F.O.C Maintenance": 28,
-  //     Guarantee: 26,
-  //     "Chargeable Commissioning": 33,
-  //     "Customer Visit": 25,
-  //     "Service contract": 25,
-  //     Goodwill: 25,
-  //   };
-
-  //   // Function to split service options into two lines
-  //   const splitServiceText = (option) => {
-  //     const words = option.split(" ");
-  //     if (words.length > 1) {
-  //       return [words[0], words.slice(1).join(" ")]; // First word on one line, rest on second
-  //     } else {
-  //       return [option]; // Single-word options remain single-line
-  //     }
-  //   };
-
-  //   // Now, draw checkboxes and text in a single row
-  //   serviceOptions.forEach((option) => {
-  //     const wrappedText = splitServiceText(option); // Split into two lines
-  //     let optionSpacing = serviceOptionSpacing[option] || 30; // Get manual spacing
-
-  //     // Center "Guarantee" & "Goodwill" inside the checkbox
-  //     let textX = optionServiceX + checkboxSize + 1;
-
-  //     // Draw checkbox centered to row height
-  //     let checkboxY = nextY + (maxServiceRowHeight / 2 - checkboxSize / 1.5);
-  //     doc.rect(optionServiceX, checkboxY+3, checkboxSize, checkboxSize);
-
-  //     // Check if the option is selected
-  //     const isChecked = checkboxValues[option] || false;
-  //     if (isChecked) {
-  //       doc.setFont("Zapfdingbats");
-  //       doc.text("4", optionServiceX + 0.6, checkboxY + 6);
-  //       doc.setFont("helvetica", "normal");
-  //     }
-
-  //     // Draw text below the checkbox
-  //     let textY = checkboxY + 5;
-  //     if (option === "Guarantee" || option === "Goodwill") {
-  //       textY += 1; // Adjust to center text manually
-  //     }
-  //     wrappedText.forEach((line, index) => {
-  //       doc.text(line, textX, textY + index * 3.3);
-  //     });
-
-  //     // Move X position for the next checkbox
-  //     optionServiceX += optionSpacing;
-  //   });
-
-  //   // Move Y to the next section after full row
-  //   nextY += maxServiceRowHeight + 10;
-
-  //   const addSignatures = (signatures, nextY) => {
-  //     doc.setFont("helvetica", "bold");
-
-  //     // Title for Signatures Section
-  //     const signatureHeight = 30; // Signature height
-  //     const signatureWidth = 55; // Signature width
-  //     const spacing = 5; // Space between rows and signatures
-  //     const titleHeight = 14; // Height for the title
-
-  //     const estimatedHeight = titleHeight + signatureHeight * 2 + spacing * 3;
-
-  //     // Check if the entire signature section fits on the current page
-
-  //     // Print the Signatures title
-
-  //     // Column positions for the signatures
-  //     const col1X = 10; // Technician signature position
-  //     const col2X = 78; // Manager signature position
-  //     const col3X = 145; // Customer signature position (centered below)
-
-  //     let baseY = nextY + 1; // Adjusted Y position for images
-  //     doc.setFont("helvetica", "bold");
-  //     // Row 1: Technician and Manager Signatures
-  //     if (signatures.technician) {
-  //       doc.text("Signature of service technician:", col1X, nextY);
-  //       doc.addImage(
-  //         signatures.technician,
-  //         "PNG",
-  //         col1X,
-  //         baseY + 1,
-  //         signatureWidth,
-  //         signatureHeight
-  //       );
-  //     }
-  //     doc.setFont("helvetica", "bold");
-  //     if (signatures.manager) {
-  //       doc.text("Signature of service manager:", col2X, nextY);
-  //       doc.addImage(
-  //         signatures.manager,
-  //         "PNG",
-  //         col2X,
-  //         baseY + 1,
-  //         signatureWidth,
-  //         signatureHeight
-  //       );
-  //     }
-
-  //     // Adjust Y for the next row based on the tallest signature in Row 1
-  //     nextY = baseY;
-  //     doc.setFont("helvetica", "bold");
-  //     // Row 2: Customer Signature
-  //     if (signatures.customer) {
-  //       // Check if the customer signature fits on the current page
-
-  //       doc.text("Customer signature:", col3X, nextY);
-  //       doc.addImage(
-  //         signatures.customer,
-  //         "PNG",
-  //         col3X,
-  //         nextY + 2,
-  //         signatureWidth,
-  //         signatureHeight
-  //       );
-  //       nextY += signatureHeight + spacing;
-  //     }
-
-  //     return nextY; // Return updated Y position for further content
-  //   };
-
-  //   // Call the function to add signatures
-  //   nextY = addSignatures(formData.signatures, nextY);
-
-  //   // addField("Work Time", formData.workTime, rightX, nextY);
-  //   // nextY += 8;
-
-  //   // addField("Departure Date", formData.departureDate, startX, nextY);
-  //   // addField("Return Date", formData.returnDate, rightX, nextY);
-
-  //   // Report Type
-  //   // doc.setFontSize(11);
-  //   // doc.setFont("helvetica", "bold");
-  //   // doc.text("Report Type", startX, nextY);
-  //   // doc.setFont("helvetica", "normal");
-
-  //   // const reportOptions = ["Installation", "Maintenance", "Defect", "Customer Visit"];
-  //   // let optionX = startX;
-  //   // reportOptions.forEach((option) => {
-  //   //     doc.rect(optionX, nextY + 2, 4, 4);
-  //   //     if (checkboxValues[option]) doc.text("✔", optionX + 1, nextY + 5);
-  //   //     doc.text(option, optionX + 6, nextY + 5);
-  //   //     optionX += 40;
-  //   // });
-  //   // nextY += 10;
-
-  //   // Work Description
-  //   // doc.setFont("helvetica", "bold");
-  //   // doc.text("Description of Work / Defect / Failure Mode:", startX, nextY);
-  //   // doc.setFont("helvetica", "normal");
-  //   // nextY += 5;
-  //   // const description = doc.splitTextToSize(formData.description || "N/A", maxWidth);
-  //   // doc.text(description, startX, nextY);
-  //   // nextY += description.length * 5;
-
-  //   // Parts Used
-  //   // doc.setFont("helvetica", "bold");
-  //   // doc.text("Parts Used:", startX, nextY);
-  //   // doc.setFont("helvetica", "normal");
-  //   // nextY += 5;
-  //   // partsUsed.forEach((part, index) => {
-  //   //     doc.text(`${part.partNumber} - ${part.description} (Qty: ${part.qty})`, startX, nextY);
-  //   //     nextY += 5;
-  //   // });
-
-  //   // Signatures
-  //   // nextY += 10;
-  //   // doc.text("Signature of Service Technician:", startX, nextY);
-  //   // doc.text("Signature of Service Manager:", pageWidth / 3, nextY);
-  //   // doc.text("Customer Signature:", (2 * pageWidth) / 3, nextY);
-
-  //   // doc.line(startX, nextY + 5, startX + 50, nextY + 5);
-  //   // doc.line(pageWidth / 3, nextY + 5, pageWidth / 3 + 50, nextY + 5);
-  //   // doc.line((2 * pageWidth) / 3, nextY + 5, (2 * pageWidth) / 3 + 50, nextY + 5);
-
-  //   // nextY = addSignatures(formData.signatures, nextY);
-
-  //   // doc.setFont("helvetica", "bold");
-  //   // doc.setFontSize(11); // Set font size for company name
-  //   // doc.text("Haitian Middle East F2E", doc.internal.pageSize.width / 2, nextY + 10, { align: "center" });
-
-  //   // doc.setFontSize(9);
-  //   // doc.text("Sharjah - U.A.E", doc.internal.pageSize.width / 2, nextY + 16, { align: "center" });
-
-  //   // doc.setFontSize(10);
-  //   // doc.text("+971 65 622 238", doc.internal.pageSize.width / 2, nextY + 22, { align: "center" });
-
-  //   // doc.setFontSize(9);
-  //   // doc.text("Email: cso@haitianme.com", doc.internal.pageSize.width / 2, nextY + 28, { align: "center" });
-  //   // doc.text("Web: www.haitianme.com", doc.internal.pageSize.width / 2, nextY + 34, { align: "center" });
-
-  //   // const centerX = doc.internal.pageSize.width / 2; // Get center alignment
-
-  //   // doc.setFont("helvetica", "bold");
-  //   // doc.setFontSize(10);
-  //   // doc.text("Haitian Middle East F2E", centerX, nextY + 5, { align: "center" });
-
-  //   // doc.setFontSize(9);
-  //   // doc.text("Sharjah - U.A.E", centerX, nextY + 10, { align: "center" });
-
-  //   // doc.setFontSize(10);
-  //   // doc.text("+971 65 622 238", centerX, nextY + 14, { align: "center" });
-
-  //   // doc.setFontSize(9);
-  //   // doc.text("Email: cso@haitianme.com", centerX, nextY + 18, { align: "center" });
-  //   // doc.text("Web: www.haitianme.com", centerX, nextY + 22, { align: "center" });
-
-  //   // const centerX = doc.internal.pageSize.width / 2; // Get center alignment
-  //   // const leftAlignX = 80;  // Adjust for left-side text
-  //   // const rightAlignX = doc.internal.pageSize.width - 50;  // Adjust for right-side text
-
-  //   // // **Company Name - Centered**
-  //   // doc.setFont("helvetica", "bold");
-  //   // doc.setFontSize(10);
-  //   // doc.text("Haitian Middle East F2E", centerX, nextY + 5, { align: "center" });
-
-  //   // // **Second Row: "Sharjah - U.A.E" (left) and "+971 65 622 238" (right)**
-  //   // doc.setFontSize(9);
-  //   // doc.text("Sharjah - U.A.E", leftAlignX, nextY + 10);
-  //   // doc.text("+971 65 622 238", rightAlignX-43, nextY + 10, { align: "center" });
-
-  //   // // **Third Row: "Email" (left) and "Web" (right)**
-  //   // doc.text("Email: cso@haitianme.com", leftAlignX-10, nextY + 15);
-  //   // doc.text("Web: www.haitianme.com", rightAlignX-7, nextY + 15, { align: "right" });
-
-  //   // const pageHeight = doc.internal.pageSize.height; // Get page height
-  //   const footerY = pageHeight - 20; // Adjust footer position from bottom
-  //   const centerX = doc.internal.pageSize.width / 2; // Get center alignment
-  //   const leftAlignX = 40; // Adjust for left-side text
-  //   const rightAlignX = doc.internal.pageSize.width - 80; // Adjust for right-side text
-
-  //   // **Company Name - Centered**
-  //   doc.setFont("helvetica", "bold");
-  //   doc.setFontSize(10);
-  //   doc.text("Haitian Middle East F2E", centerX, footerY, { align: "center" });
-
-  //   // **Second Row: "Sharjah - U.A.E" (left) and "+971 65 622 238" (right)**
-  //   doc.setFontSize(9);
-  //   doc.text("Sharjah - U.A.E", leftAlignX + 40, footerY + 6);
-  //   doc.text("+971 65 622 238", rightAlignX, footerY + 6, { align: "right" });
-
-  //   // **Third Row: "Email" (left) and "Web" (right)**
-  //   doc.text("Email: cso@haitianme.com", leftAlignX + 22, footerY + 12);
-  //   doc.text("Web: www.haitianme.com", rightAlignX + 15, footerY + 12, {
-  //     align: "right",
-  //   });
-
-  //   const now = new Date();
-  //   const year = now.getUTCFullYear();
-  //   const month = String(now.getUTCMonth() + 1).padStart(2, "0"); // Months are 0-indexed
-  //   const day = String(now.getUTCDate()).padStart(2, "0");
-
-  //   let hours = now.getUTCHours();
-  //   const minutes = String(now.getUTCMinutes()).padStart(2, "0");
-  //   const seconds = String(now.getUTCSeconds()).padStart(2, "0");
-
-  //   // Convert to 12-hour format with AM/PM
-  //   const amPm = hours >= 12 ? "PM" : "AM";
-  //   hours = hours % 12 || 12; // Convert 0 (midnight) and 12 (noon) properly
-
-  //   // Format: YYYY-MM-DD_HH-MM-SS_AMPM (UTC)
-  //   // const dateTimeUTC = `${year}-${month}-${day}_${hours}:${minutes}:${seconds}_${amPm}`;
-  //   const dateTimeUTC = `${year}-${month}-${day}_${hours}`;
-
-  //   // Construct filename: "2025-03-14_02-30-45_PM_Service_Report_1001.pdf"
-  //   const fileName = `${dateTimeUTC}_Service_Report_${srn || "N/A"}.pdf`;
-
-  //   // doc.save("Service_Report.pdf");
-  //   doc.save(fileName);
-  // };
 
   const generatePDF = (formData, checkboxValues, partsUsed) => {
     const doc = new jsPDF();
@@ -3314,43 +513,6 @@ export default function FormComponent() {
       "Return Date": 30,
       "Installation Date": 30,
     };
-
-    // const addField = (label, value, x, y) => {
-    //   // const labelWidth = 25; // Adjust spacing for consistent alignment
-    //   const labelWidth = labelWidths[label] || 30; // Default width if not defined
-
-    //   doc.setFontSize(10);
-
-    //   doc.setFont("helvetica", "bold");
-    //   doc.text(`${label}:`, x, y);
-    //   doc.setFontSize(10);
-
-    //   doc.setFont("helvetica", "normal");
-    //   doc.text(value?.toString() || "N/A", x + labelWidth, y);
-    //   const wrappedText = doc.splitTextToSize(
-    //     value?.toString() || "N/A",
-    //     maxWidth
-    //   );
-    //   doc.text(wrappedText, x + labelWidth, y);
-
-    //   return wrappedText.length * 5;
-    // };
-
-    // const addField = (label, value, x, y, maxWidth = 80) => {
-    //   const labelWidth = labelWidths[label] || 30; // Label width based on field type
-    //   const wrappedText = doc.splitTextToSize(
-    //     value?.toString() || "N/A",
-    //     maxWidth
-    //   ); // Wrap text
-
-    //   doc.setFontSize(11);
-    //   doc.setFont("helvetica", "bold");
-    //   doc.text(`${label}:`, x, y);
-    //   doc.setFont("helvetica", "normal");
-    //   doc.text(wrappedText, x + labelWidth, y); // Print text
-
-    //   return wrappedText.length * 4; // Return space occupied for dynamic adjustments
-    // };
 
     const addField = (
       label,
@@ -3396,8 +558,7 @@ export default function FormComponent() {
     doc.setTextColor("#0C3C74");
     doc.text("Service Report", pageWidth - 60, 12);
     doc.setFontSize(11);
-    // doc.text(`No. ${srn  || "N/A"}`, pageWidth - 60, 18);
-    // doc.setTextColor("#0C3C74");
+
     doc.setTextColor(255, 0, 0); // Red color for SRN number
     doc.text("No.", 150, 18);
 
@@ -3409,12 +570,10 @@ export default function FormComponent() {
     doc.setTextColor("#0C3C74");
 
     nextY += 2;
-    // Left Side: Customer Details
     addField("Customer", formData.customerName, startX, nextY);
     addField("Machine Type", formData.machineType, rightX, nextY);
     nextY = 29;
 
-    // addField("Address", formData.address, startX, nextY + 5);
     let addressSpaceUsed = addField(
       "Address",
       formData.address,
@@ -3422,10 +581,7 @@ export default function FormComponent() {
       nextY + 5,
       60
     );
-    // nextY += addressSpaceUsed;
 
-    // addField("Serial No.", formData.serialNumber, rightX, nextY+5);
-    // nextY += 6;
     let serialSpaceUsed = addField(
       "Serial No.",
       formData.serialNumber,
@@ -3433,8 +589,7 @@ export default function FormComponent() {
       nextY + 5,
       60
     );
-    // nextY += serialSpaceUsed + 3; // Move down based on space used
-    // nextY += Math.max(addressSpaceUsed, serialSpaceUsed) + 6;
+
     nextY = 45;
     addField("Contact", formData.contact, startX, nextY + 4);
     nextY = 49;
@@ -3474,12 +629,6 @@ export default function FormComponent() {
     const spacing = [48, 33, 25, 35, 10];
     let optionX = startX;
     reportOptions.forEach((option, index) => {
-      // doc.rect(optionX, nextY + 2, 4, 4);
-      // if (checkboxValues[option])
-      //   doc.setFont("Zapfdingbats");
-      //   doc.text("✔", optionX + 1, nextY + 5);
-      // doc.text(option, optionX + 5, nextY + 5);
-      // optionX += 40;
       const spaceBetweenOptions = spacing[index];
       const isChecked = checkboxValues[option];
 
@@ -3543,20 +692,7 @@ export default function FormComponent() {
     nextY += 4;
     const notes = doc.splitTextToSize(formData.notes || "N/A", maxWidth);
     doc.text(notes, startX, nextY);
-    // nextY += notes.length * 2;
 
-    // doc.setFont("helvetica", "bold");
-    // doc.text("Parts Used:", startX, nextY);
-    // doc.setFont("helvetica", "normal");
-    // nextY += 5;
-    // partsUsed.forEach((part, index) => {
-    //   doc.text(
-    //     `${part.partNumber} - ${part.description} (Qty: ${part.qty})`,
-    //     startX,
-    //     nextY
-    //   );
-    //   nextY += 5;
-    // });
     nextY = 137;
     const colWidths = [40, 65, 18, 65]; // Column widths
     const rowHeight = 8; // Row height
@@ -3592,14 +728,6 @@ export default function FormComponent() {
       nextY += rowHeight;
     };
 
-    // **Ensure space before table starts**
-    // if (nextY + 20 > pageHeight) {
-    //   doc.addPage();
-    //   doc.setFont("helvetica", "normal");
-    //   nextY = 25;
-    //   resetHeader();
-    //   addPageNumber();
-    // }
     doc.setFont("Emirates", "bold");
     doc.setTextColor("#0C3C74");
 
@@ -3608,168 +736,6 @@ export default function FormComponent() {
     drawTableHeaders();
 
     doc.setFont("Emirates", "normal");
-
-    //100% Working code
-
-    // partsUsed.forEach((part) => {
-    //   let partNumberLines = doc.splitTextToSize(
-    //     part.partNumber || "N/A",
-    //     colWidths[0] - 5
-    //   );
-    //   let descriptionLines = doc.splitTextToSize(
-    //     part.description || "N/A",
-    //     colWidths[1] - 5
-    //   );
-    //   let quantityLines = doc.splitTextToSize(
-    //     part.quantity.toString() || "N/A",
-    //     colWidths[2] - 5
-    //   );
-    //   let noteLines = doc.splitTextToSize(part.note || "N/A", colWidths[3] - 5);
-
-    //   let maxLines = Math.max(
-    //     partNumberLines.length,
-    //     descriptionLines.length,
-    //     quantityLines.length,
-    //     noteLines.length
-    //   );
-    //   let rowHeightTotal = maxLines * rowHeight;
-
-    //   // **Ensure bottom margin of 30px is maintained**
-    //   // if (nextY + rowHeightTotal > pageHeight - 30) {
-    //   //   addPageNumber();
-    //   //   doc.addPage();
-    //   //   nextY = 25;
-    //   //   resetHeader();
-    //   //   drawTableHeaders();
-    //   // }
-
-    //   // ✅ Print each wrapped line dynamically with borders
-    //   for (let i = 0; i < maxLines; i++) {
-    //     // ✅ Check if we need to add a new page before printing each line
-    //     // if (nextY + rowHeight > pageHeight - 30) {
-    //     //   doc.setFontSize(12);
-    //     //   doc.setFont("helvetica", "normal");
-    //     //   addPageNumber();
-    //     //   doc.addPage();
-    //     //   nextY = 25;
-    //     //   resetHeader();
-    //     //   drawTableHeaders();
-    //     // }
-    //     doc.setFont("helvetica", "normal");
-
-    //     // ✅ Print the text in the correct column positions
-    //     if (partNumberLines[i])
-    //       doc.text(partNumberLines[i], startX + 2, nextY + 5);
-    //     if (descriptionLines[i])
-    //       doc.text(descriptionLines[i], startX + colWidths[0] + 2, nextY + 5);
-    //     if (quantityLines[i])
-    //       doc.text(
-    //         quantityLines[i],
-    //         startX + colWidths[0] + colWidths[1] + 2,
-    //         nextY + 5
-    //       );
-    //     if (noteLines[i])
-    //       doc.text(
-    //         noteLines[i],
-    //         startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
-    //         nextY + 5
-    //       );
-
-    //     // ✅ Draw borders for the current line
-    //     doc.rect(startX, nextY, colWidths[0], rowHeight);
-    //     doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
-    //     doc.rect(
-    //       startX + colWidths[0] + colWidths[1],
-    //       nextY,
-    //       colWidths[2],
-    //       rowHeight
-    //     );
-    //     doc.rect(
-    //       startX + colWidths[0] + colWidths[1] + colWidths[2],
-    //       nextY,
-    //       colWidths[3],
-    //       rowHeight
-    //     );
-
-    //     nextY += rowHeight; // Move Y position down
-    //   }
-    // });
-
-    // //100% WORKING CODE ON THE ENTER INPUT BORDER ONLY PRINTED NOT ALL BORDER PRINTED
-    // const maxRows = 12; // Limit to 12 rows
-    // let rowCount = 0; // Track number of printed rows
-
-    // for (let i = 0; i < partsUsed.length; i++) {
-    //   if (rowCount >= maxRows) break; // Stop adding rows after 5
-
-    //   let part = partsUsed[i];
-
-    //   let partNumberLines = doc.splitTextToSize(
-    //     part.partNumber || "N/A",
-    //     colWidths[0] - 5
-    //   );
-    //   let descriptionLines = doc.splitTextToSize(
-    //     part.description || "N/A",
-    //     colWidths[1] - 5
-    //   );
-    //   let quantityLines = doc.splitTextToSize(
-    //     part.quantity?.toString() || "N/A",
-    //     colWidths[2] - 5
-    //   );
-    //   let noteLines = doc.splitTextToSize(part.note || "N/A", colWidths[3] - 5);
-
-    //   let maxLines = Math.max(
-    //     partNumberLines.length,
-    //     descriptionLines.length,
-    //     quantityLines.length,
-    //     noteLines.length
-    //   );
-
-    //   // Ensure total rows do not exceed 5
-    //   if (rowCount + maxLines > maxRows) break;
-
-    //   for (let j = 0; j < maxLines; j++) {
-    //     if (rowCount >= maxRows) break; // Stop adding rows after 5
-
-    //     doc.setFont("helvetica", "normal");
-
-    //     if (partNumberLines[j])
-    //       doc.text(partNumberLines[j], startX + 2, nextY + 5);
-    //     if (descriptionLines[j])
-    //       doc.text(descriptionLines[j], startX + colWidths[0] + 2, nextY + 5);
-    //     if (quantityLines[j])
-    //       doc.text(
-    //         quantityLines[j],
-    //         startX + colWidths[0] + colWidths[1] + 2,
-    //         nextY + 5
-    //       );
-    //     if (noteLines[j])
-    //       doc.text(
-    //         noteLines[j],
-    //         startX + colWidths[0] + colWidths[1] + colWidths[2] + 2,
-    //         nextY + 5
-    //       );
-
-    //     // ✅ Draw borders for each row
-    //     doc.rect(startX, nextY, colWidths[0], rowHeight);
-    //     doc.rect(startX + colWidths[0], nextY, colWidths[1], rowHeight);
-    //     doc.rect(
-    //       startX + colWidths[0] + colWidths[1],
-    //       nextY,
-    //       colWidths[2],
-    //       rowHeight
-    //     );
-    //     doc.rect(
-    //       startX + colWidths[0] + colWidths[1] + colWidths[2],
-    //       nextY,
-    //       colWidths[3],
-    //       rowHeight
-    //     );
-
-    //     nextY += rowHeight; // Move Y position down
-    //     rowCount++; // Increment row count
-    //   }
-    // }
 
     const maxRows = 6; // Fixed row count
     let rowCount = 0; // Track how many total rows are printed
@@ -3848,60 +814,6 @@ export default function FormComponent() {
       }
     }
 
-    // Service Type Section
-    // doc.setFont("helvetica", "bold");
-    // doc.text("Service Type", 10, nextY + 5);
-    // nextY += 6; // Space after the title
-
-    // doc.setFont("helvetica", "normal");
-    // doc.setFontSize(9);
-
-    // const serviceStartX = 10;
-    // const checkboxSize = 4;
-    // let optionServiceX = serviceStartX;
-    // const spaceBetweenOptions = 29; // Space between each option
-    // const serviceRowHeight = 10; // Height per row (for 2-line text)
-    // let maxServiceRowHeight = serviceRowHeight; // Track max row height
-
-    // // Function to split service options into two lines
-    // const splitServiceText = (option) => {
-    //     const words = option.split(" ");
-    //     if (words.length > 1) {
-    //         return [words[0], words.slice(1).join(" ")]; // First word on one line, rest on second
-    //     } else {
-    //         return [option]; // Single-word options remain single-line
-    //     }
-    // };
-
-    // // **Now, draw checkboxes and text in a single row**
-    // serviceOptions.forEach((option) => {
-    //     const wrappedText = splitServiceText(option); // Split into two lines
-
-    //     // **Draw checkbox centered to row height**
-    //     let checkboxY = nextY + (maxServiceRowHeight / 2 - checkboxSize / 2);
-    //     doc.rect(optionServiceX, checkboxY, checkboxSize, checkboxSize);
-
-    //     // **Check if the option is selected**
-    //     const isChecked = checkboxValues[option] || false;
-    //     if (isChecked) {
-    //         doc.setFont("Zapfdingbats");
-    //         doc.text("4", optionServiceX + 0.8, checkboxY + 3);
-    //         doc.setFont("helvetica", "normal");
-    //     }
-
-    //     // **Draw text below the checkbox**
-    //     let textY = checkboxY + 2;
-    //     wrappedText.forEach((line, index) => {
-    //         doc.text(line, optionServiceX + checkboxSize+1, textY + index * 3);
-    //     });
-
-    //     // **Move X position for the next checkbox**
-    //     optionServiceX += spaceBetweenOptions;
-    // });
-
-    // // Move Y to the next section after full row
-    // nextY += maxServiceRowHeight + 5;
-
     doc.setFont("Emirates", "bold");
     nextY = 213;
     doc.setTextColor("#0C3C74");
@@ -3975,9 +887,6 @@ export default function FormComponent() {
       optionServiceX += optionSpacing;
     });
 
-    // Move Y to the next section after full row
-    // nextY += maxServiceRowHeight + 10;
-
     nextY = 229;
     const addSignatures = (signatures, nextY) => {
       doc.setFont("Emirates", "bold");
@@ -3989,10 +898,6 @@ export default function FormComponent() {
       const titleHeight = 14; // Height for the title
 
       const estimatedHeight = titleHeight + signatureHeight * 2 + spacing * 3;
-
-      // Check if the entire signature section fits on the current page
-
-      // Print the Signatures title
 
       // Column positions for the signatures
       const col1X = 10; // Technician signature position
@@ -4062,200 +967,37 @@ export default function FormComponent() {
     // Call the function to add signatures
     nextY = addSignatures(formData.signatures, nextY);
 
-    // addField("Work Time", formData.workTime, rightX, nextY);
-    // nextY += 8;
-
-    // addField("Departure Date", formData.departureDate, startX, nextY);
-    // addField("Return Date", formData.returnDate, rightX, nextY);
-
-    // Report Type
-    // doc.setFontSize(11);
-    // doc.setFont("helvetica", "bold");
-    // doc.text("Report Type", startX, nextY);
-    // doc.setFont("helvetica", "normal");
-
-    // const reportOptions = ["Installation", "Maintenance", "Defect", "Customer Visit"];
-    // let optionX = startX;
-    // reportOptions.forEach((option) => {
-    //     doc.rect(optionX, nextY + 2, 4, 4);
-    //     if (checkboxValues[option]) doc.text("✔", optionX + 1, nextY + 5);
-    //     doc.text(option, optionX + 6, nextY + 5);
-    //     optionX += 40;
-    // });
-    // nextY += 10;
-
-    // Work Description
-    // doc.setFont("helvetica", "bold");
-    // doc.text("Description of Work / Defect / Failure Mode:", startX, nextY);
-    // doc.setFont("helvetica", "normal");
-    // nextY += 5;
-    // const description = doc.splitTextToSize(formData.description || "N/A", maxWidth);
-    // doc.text(description, startX, nextY);
-    // nextY += description.length * 5;
-
-    // Parts Used
-    // doc.setFont("helvetica", "bold");
-    // doc.text("Parts Used:", startX, nextY);
-    // doc.setFont("helvetica", "normal");
-    // nextY += 5;
-    // partsUsed.forEach((part, index) => {
-    //     doc.text(`${part.partNumber} - ${part.description} (Qty: ${part.qty})`, startX, nextY);
-    //     nextY += 5;
-    // });
-
-    // Signatures
-    // nextY += 10;
-    // doc.text("Signature of Service Technician:", startX, nextY);
-    // doc.text("Signature of Service Manager:", pageWidth / 3, nextY);
-    // doc.text("Customer Signature:", (2 * pageWidth) / 3, nextY);
-
-    // doc.line(startX, nextY + 5, startX + 50, nextY + 5);
-    // doc.line(pageWidth / 3, nextY + 5, pageWidth / 3 + 50, nextY + 5);
-    // doc.line((2 * pageWidth) / 3, nextY + 5, (2 * pageWidth) / 3 + 50, nextY + 5);
-
-    // nextY = addSignatures(formData.signatures, nextY);
-
-    // doc.setFont("helvetica", "bold");
-    // doc.setFontSize(11); // Set font size for company name
-    // doc.text("Haitian Middle East F2E", doc.internal.pageSize.width / 2, nextY + 10, { align: "center" });
-
-    // doc.setFontSize(9);
-    // doc.text("Sharjah - U.A.E", doc.internal.pageSize.width / 2, nextY + 16, { align: "center" });
-
-    // doc.setFontSize(10);
-    // doc.text("+971 65 622 238", doc.internal.pageSize.width / 2, nextY + 22, { align: "center" });
-
-    // doc.setFontSize(9);
-    // doc.text("Email: cso@haitianme.com", doc.internal.pageSize.width / 2, nextY + 28, { align: "center" });
-    // doc.text("Web: www.haitianme.com", doc.internal.pageSize.width / 2, nextY + 34, { align: "center" });
-
-    // const centerX = doc.internal.pageSize.width / 2; // Get center alignment
-
-    // doc.setFont("helvetica", "bold");
-    // doc.setFontSize(10);
-    // doc.text("Haitian Middle East F2E", centerX, nextY + 5, { align: "center" });
-
-    // doc.setFontSize(9);
-    // doc.text("Sharjah - U.A.E", centerX, nextY + 10, { align: "center" });
-
-    // doc.setFontSize(10);
-    // doc.text("+971 65 622 238", centerX, nextY + 14, { align: "center" });
-
-    // doc.setFontSize(9);
-    // doc.text("Email: cso@haitianme.com", centerX, nextY + 18, { align: "center" });
-    // doc.text("Web: www.haitianme.com", centerX, nextY + 22, { align: "center" });
-
-    // const centerX = doc.internal.pageSize.width / 2; // Get center alignment
-    // const leftAlignX = 80;  // Adjust for left-side text
-    // const rightAlignX = doc.internal.pageSize.width - 50;  // Adjust for right-side text
-
-    // // **Company Name - Centered**
-    // doc.setFont("helvetica", "bold");
-    // doc.setFontSize(10);
-    // doc.text("Haitian Middle East F2E", centerX, nextY + 5, { align: "center" });
-
-    // // **Second Row: "Sharjah - U.A.E" (left) and "+971 65 622 238" (right)**
-    // doc.setFontSize(9);
-    // doc.text("Sharjah - U.A.E", leftAlignX, nextY + 10);
-    // doc.text("+971 65 622 238", rightAlignX-43, nextY + 10, { align: "center" });
-
-    // // **Third Row: "Email" (left) and "Web" (right)**
-    // doc.text("Email: cso@haitianme.com", leftAlignX-10, nextY + 15);
-    // doc.text("Web: www.haitianme.com", rightAlignX-7, nextY + 15, { align: "right" });
-
-    // const pageHeight = doc.internal.pageSize.height; // Get page height
     const footerY = pageHeight - 20; // Adjust footer position from bottom
     const centerX = doc.internal.pageSize.width / 2; // Get center alignment
     const leftAlignX = 40; // Adjust for left-side text
     const rightAlignX = doc.internal.pageSize.width - 80; // Adjust for right-side text
     doc.setTextColor("#0C3C74");
 
-    // const borderX = centerX - 65; // Adjust to align with text
-    // const borderY = footerY - 5; // Start slightly above the title
-    // const borderWidth = 130; // Width to enclose the whole section
-    // const borderHeight = 23; // Height to cover all address lines
-    // const borderRadius = 2;
-    // doc.setDrawColor(12, 60, 116); // Blue border
-    // doc.setFillColor("26476E");
-    // console.log(borderX, borderY, borderWidth, borderHeight, borderRadius);
-
-    // doc.roundedRect(borderX, borderY, borderWidth, borderHeight, borderRadius, borderRadius); // Draw border
-
-  
-
-
-
-    // doc.roundedRect(borderX, borderY, borderWidth); 
-
     // **Company Name - Centered**
     const lineY = footerY - 5; // Adjust 5 units above the text
-doc.setDrawColor(12, 60, 116); // Set color
-doc.setLineWidth(0.5); // Set thickness
-doc.line(10, lineY, doc.internal.pageSize.width - 10, lineY);
+    doc.setDrawColor(12, 60, 116); // Set color
+    doc.setLineWidth(0.5); // Set thickness
+    doc.line(10, lineY, doc.internal.pageSize.width - 10, lineY);
     doc.setFont("Emirates", "bold");
     doc.setFontSize(13);
-    doc.text("Haitian Middle East", centerX, footerY+1, { align: "center" });
+    doc.text("Haitian Middle East", centerX, footerY + 1, { align: "center" });
 
-    // **Second Row: "Sharjah - U.A.E" (left) and "+971 65 622 238" (right)**
-    // doc.setFontSize(9);
-    // doc.text("PO BOX: 49648, Phase 1, Hamriya Free Zone Sharjah, United Arab Emirates", leftAlignX + 60, footerY + 5, {
-    //   align: "center",
-    // });
-    // // doc.text("Phase 1, Hamriya Free Zone Sharjah, United Arab Emirates", rightAlignX, footerY + 5, { align: "center" });
-    // doc.setFontSize(9);
-
-    // // doc.text(
-    // //   "Phase 1, Hamriya Free Zone Sharjah, United Arab Emirates",
-    // //   rightAlignX + 12,
-    // //   footerY + 10
-    // // );
-
-    // doc.setFontSize(9);
-
-    // // **Third Row: "Email" (left) and "Web" (right)**
-   
-    // doc.text("Phone: +971 656 222 38  Email: ask@haitianme.com  Web: www.haitianme.com", leftAlignX+7, footerY + 10, {
-    //   align: "center",
-    // } );
-    // // doc.text("Email: ask@haitianme.com", leftAlignX+90, footerY + 10);
-    // // doc.text("Web: www.haitianme.com", rightAlignX+25, footerY + 10, {
-    // //   align: "right",
-    // // });
     doc.setFontSize(9);
-doc.text(
-  "PO BOX: 49648, Phase 1, Hamriya Free Zone Sharjah, United Arab Emirates",
-  centerX, // Proper centering
-  footerY + 6,
-  { align: "center" }
-);
+    doc.text(
+      "PO BOX: 49648, Phase 1, Hamriya Free Zone Sharjah, United Arab Emirates",
+      centerX, // Proper centering
+      footerY + 6,
+      { align: "center" }
+    );
 
-// **Third Row: Contact Information - Centered**
-doc.text(
-  "Phone: +971 656 222 38  Email: ask@haitianme.com  Web: www.haitianme.com",
-  centerX, // Proper centering
-  footerY + 11,
-  { align: "center" }
-);
+    // **Third Row: Contact Information - Centered**
+    doc.text(
+      "Phone: +971 656 222 38  Email: ask@haitianme.com  Web: www.haitianme.com",
+      centerX, // Proper centering
+      footerY + 11,
+      { align: "center" }
+    );
 
-    const now = new Date();
-    const year = now.getUTCFullYear();
-    const month = String(now.getUTCMonth() + 1).padStart(2, "0"); // Months are 0-indexed
-    const day = String(now.getUTCDate()).padStart(2, "0");
-
-    let hours = now.getUTCHours();
-    const minutes = String(now.getUTCMinutes()).padStart(2, "0");
-    const seconds = String(now.getUTCSeconds()).padStart(2, "0");
-
-    // Convert to 12-hour format with AM/PM
-    const amPm = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12 || 12; // Convert 0 (midnight) and 12 (noon) properly
-
-    // Format: YYYY-MM-DD_HH-MM-SS_AMPM (UTC)
-    // const dateTimeUTC = `${year}-${month}-${day}_${hours}:${minutes}:${seconds}_${amPm}`;
-    const dateTimeUTC = `${year}-${month}-${day}_${hours}`;
-
-    // Construct filename: "2025-03-14_02-30-45_PM_Service_Report_1001.pdf"
-    // const fileName = `${dateTimeUTC}_Service_Report_${srn || "N/A"}.pdf`;
     const fileName = `HT_Service_Report_${srn || "N/A"}.pdf`;
 
     // doc.save("Service_Report.pdf");
@@ -4270,11 +1012,6 @@ doc.text(
 
   const nowDubai = dayjs().tz("Asia/Dubai").format("YYYY-MM-DD hh:mm A");
   console.log("Dubai Time:", nowDubai);
-  // const nowUTC = moment.utc().format("YYYY-MM-DD HH:mm:ss"); // Current time in UTC
-  // const nowDubai = moment().tz("Asia/Dubai").format("YYYY-MM-DD hh:mm A"); // Current time in Dubai (12-hour format)
-
-  // console.log("UTC Time:", nowUTC);
-  // console.log("Dubai Time:", nowDubai);
 
   const handleSubmit = async (values) => {
     //  if (isSubmitting) return;
@@ -4352,12 +1089,10 @@ doc.text(
         return;
       }
 
-      // const convertToDubaiTime = (date) => {
-      //   return date ? dayjs(date).tz("Asia/Dubai").format("YYYY-MM-DD HH:mm:ss") : "N/A";
-      // };
-
-        const convertToDubaiTime = (date) => {
-        return date ? dayjs(date).tz("Asia/Dubai").format("YYYY-MM-DD HH:mm:ss") : "N/A";
+      const convertToDubaiTime = (date) => {
+        return date
+          ? dayjs(date).tz("Asia/Dubai").format("YYYY-MM-DD HH:mm:ss")
+          : "N/A";
       };
 
       // ✅ Prepare final form data
@@ -4398,8 +1133,8 @@ doc.text(
 
       console.log("Final formData:", JSON.stringify(formData, null, 2)); // ✅ Debugging
       console.log("Installation Date:", formData.installationDate);
-console.log("Departure Date:", formData.departureDate);
-console.log("Return Date:", formData.returnDate);
+      console.log("Departure Date:", formData.departureDate);
+      console.log("Return Date:", formData.returnDate);
 
       setLoading(true);
 
@@ -4421,25 +1156,25 @@ console.log("Return Date:", formData.returnDate);
         setSRN(result.srn);
         generatePDF(formData, checkboxValues, partsUsed);
 
-        // form.resetFields();
-        // setAddress("");
-        // setSerialNumber("");
-        // setDescriptionText("");
-        // setcauseOfFailure("");
-        // setNotes("");
+        form.resetFields();
+        setAddress("");
+        setSerialNumber("");
+        setDescriptionText("");
+        setcauseOfFailure("");
+        setNotes("");
 
-        // setData([
-        //   {
-        //     key: Date.now(),
-        //     partNumber: "",
-        //     description: "",
-        //     quantity: "",
-        //     note: "",
-        //   },
-        // ]);
-        // sigTechnician.current?.clear();
-        // sigManager.current?.clear();
-        // sigCustomer.current?.clear();
+        setData([
+          {
+            key: Date.now(),
+            partNumber: "",
+            description: "",
+            quantity: "",
+            note: "",
+          },
+        ]);
+        sigTechnician.current?.clear();
+        sigManager.current?.clear();
+        sigCustomer.current?.clear();
         await fetchSRN();
       } else {
         throw new Error(result.message);
@@ -4453,7 +1188,6 @@ console.log("Return Date:", formData.returnDate);
       isSubmittingRef.current = false;
     }
   };
-  
 
   return (
     <>
@@ -4582,7 +1316,6 @@ console.log("Return Date:", formData.returnDate);
                           },
                         ]}
                       >
-                        {/* <TextArea placeholder="Enter serial number" /> */}
                         <TextArea
                           placeholder="Enter serial number"
                           value={serialNumber}
@@ -4603,40 +1336,30 @@ console.log("Return Date:", formData.returnDate);
                           },
                         ]}
                       >
-                        {/* <DatePicker className="w-100" /> */}
-                        {/*SHOWING DUBAI TIME CORRECTLY*/}
-                        {/* <DatePicker
-  className="w-100"
-  showTime
-  format="YYYY-MM-DD hh:mm A"
-  value={form.getFieldValue("installationDate") 
-    ? dayjs(form.getFieldValue("installationDate")).tz("Asia/Dubai") 
-    : null}
-  onChange={(date) => {
-    if (date) {
-      const dubaiTime = dayjs(date).tz("Asia/Dubai");
-      console.log("Selected Dubai Time:", dubaiTime.format("YYYY-MM-DD hh:mm A"));
-      form.setFieldsValue({ installationDate: dubaiTime });
-    }
-  }}
-/> */}                
-
-<DatePicker
-      className="w-100"
-      showTime
-      format="YYYY-MM-DD hh:mm A" // Dubai Time Format
-      value={form.getFieldValue("installationDate") 
-        ? dayjs(form.getFieldValue("installationDate")).tz("Asia/Dubai") 
-        : dayjs().tz("Asia/Dubai") // Default to Dubai Time
-      }
-      onChange={(date) => {
-        if (date) {
-          const dubaiTime = dayjs(date).tz("Asia/Dubai");
-          console.log("Selected Dubai Time:", dubaiTime.format("YYYY-MM-DD hh:mm A"));
-          form.setFieldsValue({ installationDate: dubaiTime });
-        }
-      }}
-    />
+                        <DatePicker
+                          className="w-100"
+                          showTime
+                          format="YYYY-MM-DD hh:mm A" // Dubai Time Format
+                          value={
+                            form.getFieldValue("installationDate")
+                              ? dayjs(
+                                  form.getFieldValue("installationDate")
+                                ).tz("Asia/Dubai")
+                              : dayjs().tz("Asia/Dubai") // Default to Dubai Time
+                          }
+                          onChange={(date) => {
+                            if (date) {
+                              const dubaiTime = dayjs(date).tz("Asia/Dubai");
+                              console.log(
+                                "Selected Dubai Time:",
+                                dubaiTime.format("YYYY-MM-DD hh:mm A")
+                              );
+                              form.setFieldsValue({
+                                installationDate: dubaiTime,
+                              });
+                            }
+                          }}
+                        />
                       </Form.Item>
 
                       <Form.Item
@@ -4681,24 +1404,28 @@ console.log("Return Date:", formData.returnDate);
                           },
                         ]}
                       >
-                        {/* <DatePicker className="w-100" /> */}
-
                         <DatePicker
-      className="w-100"
-      showTime
-      format="YYYY-MM-DD hh:mm A" // Dubai Time Format
-      value={form.getFieldValue("departureDate") 
-        ? dayjs(form.getFieldValue("departureDate")).tz("Asia/Dubai") 
-        : dayjs().tz("Asia/Dubai") // Default to Dubai Time
-      }
-      onChange={(date) => {
-        if (date) {
-          const dubaiTime = dayjs(date).tz("Asia/Dubai");
-          console.log("Selected Dubai Time:", dubaiTime.format("YYYY-MM-DD hh:mm A"));
-          form.setFieldsValue({ departureDate: dubaiTime });
-        }
-      }}
-    />
+                          className="w-100"
+                          showTime
+                          format="YYYY-MM-DD hh:mm A" // Dubai Time Format
+                          value={
+                            form.getFieldValue("departureDate")
+                              ? dayjs(form.getFieldValue("departureDate")).tz(
+                                  "Asia/Dubai"
+                                )
+                              : dayjs().tz("Asia/Dubai") // Default to Dubai Time
+                          }
+                          onChange={(date) => {
+                            if (date) {
+                              const dubaiTime = dayjs(date).tz("Asia/Dubai");
+                              console.log(
+                                "Selected Dubai Time:",
+                                dubaiTime.format("YYYY-MM-DD hh:mm A")
+                              );
+                              form.setFieldsValue({ departureDate: dubaiTime });
+                            }
+                          }}
+                        />
                       </Form.Item>
                     </div>
 
@@ -4713,23 +1440,28 @@ console.log("Return Date:", formData.returnDate);
                           },
                         ]}
                       >
-                        {/* <DatePicker className="w-100" /> */}
                         <DatePicker
-      className="w-100"
-      showTime
-      format="YYYY-MM-DD hh:mm A" // Dubai Time Format
-      value={form.getFieldValue("returnDate") 
-        ? dayjs(form.getFieldValue("returnDate")).tz("Asia/Dubai") 
-        : dayjs().tz("Asia/Dubai") // Default to Dubai Time
-      }
-      onChange={(date) => {
-        if (date) {
-          const dubaiTime = dayjs(date).tz("Asia/Dubai");
-          console.log("Selected Dubai Time:", dubaiTime.format("YYYY-MM-DD hh:mm A"));
-          form.setFieldsValue({ returnDate: dubaiTime });
-        }
-      }}
-    />
+                          className="w-100"
+                          showTime
+                          format="YYYY-MM-DD hh:mm A" // Dubai Time Format
+                          value={
+                            form.getFieldValue("returnDate")
+                              ? dayjs(form.getFieldValue("returnDate")).tz(
+                                  "Asia/Dubai"
+                                )
+                              : dayjs().tz("Asia/Dubai") // Default to Dubai Time
+                          }
+                          onChange={(date) => {
+                            if (date) {
+                              const dubaiTime = dayjs(date).tz("Asia/Dubai");
+                              console.log(
+                                "Selected Dubai Time:",
+                                dubaiTime.format("YYYY-MM-DD hh:mm A")
+                              );
+                              form.setFieldsValue({ returnDate: dubaiTime });
+                            }
+                          }}
+                        />
                       </Form.Item>
                     </div>
 
@@ -4759,12 +1491,6 @@ console.log("Return Date:", formData.returnDate);
                         },
                       ]}
                     >
-                      {/* <TextArea
-                      rows={3}
-                      placeholder="Enter the description of work/of defect/failure mode"
-                      maxLength={200} 
-                      showCount 
-                    /> */}
                       <TextArea
                         placeholder="Enter the description of work/of defect/failure mode"
                         value={descriptionText}
@@ -4785,12 +1511,6 @@ console.log("Return Date:", formData.returnDate);
                         },
                       ]}
                     >
-                      {/* <TextArea
-                        rows={3}
-                        placeholder="Enter the cause of failure"
-                        maxLength={100}
-                        showCount
-                      /> */}
                       <TextArea
                         placeholder="Enter the cause of failure"
                         value={causeOfFailure}
@@ -4811,12 +1531,6 @@ console.log("Return Date:", formData.returnDate);
                         },
                       ]}
                     >
-                      {/* <TextArea
-                        rows={3}
-                        placeholder="Enter the notes/further action required"
-                        maxLength={100}
-                        showCount
-                      /> */}
                       <TextArea
                         placeholder="Enter the notes/further action required"
                         value={notes}
@@ -4827,14 +1541,6 @@ console.log("Return Date:", formData.returnDate);
                       />
                     </Form.Item>
 
-                    {/* <div className="col-12">
-                    <h6>Parts Used</h6>
-                    <Table
-                      columns={columns}
-                      dataSource={data}
-                      pagination={false}
-                    />
-                  </div> */}
                     <div className="col-12">
                       <h6>Parts Used</h6>
                       <Table
@@ -4843,12 +1549,6 @@ console.log("Return Date:", formData.returnDate);
                         pagination={false}
                       />
                     </div>
-
-                    {/* <div className="col-12 mt-4">
-                    <Form.Item>
-                      <Checkbox.Group options={serviceOptions} />
-                    </Form.Item>
-                  </div> */}
 
                     <div className="col-12 mt-4">
                       <Form.Item
