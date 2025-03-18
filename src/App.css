@@ -87,6 +87,9 @@ font-weight: bolder;
   .haitianLogo{
     width:50% !important;
     }
+    .submitbutton {
+      width: 50%;
+    }
 }
 
 @media only screen and (max-width: 427px) {

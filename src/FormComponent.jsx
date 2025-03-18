@@ -81,15 +81,15 @@ export default function FormComponent() {
       );
       const data = await response.json(); // ✅ Parse JSON directly
 
-      console.log("Fetched SRN:", data.srn); // ✅ Log SRN in console
+      // console.log("Fetched SRN:", data.srn); // ✅ Log SRN in console
 
       if (data.success) {
         setSRN(data.srn); // ✅ Set state with fetched SRN
       } else {
-        console.error("Error fetching SRN:", data.message);
+        // console.error("Error fetching SRN:", data.message);
       }
     } catch (error) {
-      console.error("Error fetching SRN:", error);
+      // console.error("Error fetching SRN:", error);
     }
   };
   useEffect(() => {
@@ -1011,7 +1011,7 @@ export default function FormComponent() {
   }, []);
 
   const nowDubai = dayjs().tz("Asia/Dubai").format("YYYY-MM-DD hh:mm A");
-  console.log("Dubai Time:", nowDubai);
+  // console.log("Dubai Time:", nowDubai);
 
   const handleSubmit = async (values) => {
     //  if (isSubmitting) return;
@@ -1053,7 +1053,7 @@ export default function FormComponent() {
           checkboxValues[option] = true;
         });
       }
-      console.log("Checkbox Values Before Submission:", checkboxValues);
+      // console.log("Checkbox Values Before Submission:", checkboxValues);
 
       // ✅ Process parts used table data
       const partsUsed = data
@@ -1091,7 +1091,7 @@ export default function FormComponent() {
 
       const convertToDubaiTime = (date) => {
         return date
-          ? dayjs(date).tz("Asia/Dubai").format("YYYY-MM-DD HH:mm:ss")
+          ? dayjs(date).tz("Asia/Dubai").format("YYYY-MM-DD")
           : "N/A";
       };
 
@@ -1131,10 +1131,10 @@ export default function FormComponent() {
         ...checkboxValues, // ✅ Ensures "Yes" for checked and "No" for unchecked
       };
 
-      console.log("Final formData:", JSON.stringify(formData, null, 2)); // ✅ Debugging
-      console.log("Installation Date:", formData.installationDate);
-      console.log("Departure Date:", formData.departureDate);
-      console.log("Return Date:", formData.returnDate);
+      // console.log("Final formData:", JSON.stringify(formData, null, 2)); // ✅ Debugging
+      // console.log("Installation Date:", formData.installationDate);
+      // console.log("Departure Date:", formData.departureDate);
+      // console.log("Return Date:", formData.returnDate);
 
       setLoading(true);
 
@@ -1180,7 +1180,7 @@ export default function FormComponent() {
         throw new Error(result.message);
       }
     } catch (error) {
-      console.error("Error:", error);
+      // console.error("Error:", error);
       message.error("Submission failed. Please try again.");
     } finally {
       setLoading(false);
@@ -1338,8 +1338,8 @@ export default function FormComponent() {
                       >
                         <DatePicker
                           className="w-100"
-                          showTime
-                          format="YYYY-MM-DD hh:mm A" // Dubai Time Format
+                          // showTime
+                          format="YYYY-MM-DD" // Dubai Time Format
                           value={
                             form.getFieldValue("installationDate")
                               ? dayjs(
@@ -1350,10 +1350,10 @@ export default function FormComponent() {
                           onChange={(date) => {
                             if (date) {
                               const dubaiTime = dayjs(date).tz("Asia/Dubai");
-                              console.log(
-                                "Selected Dubai Time:",
-                                dubaiTime.format("YYYY-MM-DD hh:mm A")
-                              );
+                              // console.log(
+                              //   "Selected Dubai Time:",
+                              //   dubaiTime.format("YYYY-MM-DD hh:mm A")
+                              // );
                               form.setFieldsValue({
                                 installationDate: dubaiTime,
                               });
@@ -1406,8 +1406,8 @@ export default function FormComponent() {
                       >
                         <DatePicker
                           className="w-100"
-                          showTime
-                          format="YYYY-MM-DD hh:mm A" // Dubai Time Format
+                          // showTime
+                          format="YYYY-MM-DD" // Dubai Time Format
                           value={
                             form.getFieldValue("departureDate")
                               ? dayjs(form.getFieldValue("departureDate")).tz(
@@ -1418,10 +1418,10 @@ export default function FormComponent() {
                           onChange={(date) => {
                             if (date) {
                               const dubaiTime = dayjs(date).tz("Asia/Dubai");
-                              console.log(
-                                "Selected Dubai Time:",
-                                dubaiTime.format("YYYY-MM-DD hh:mm A")
-                              );
+                              // console.log(
+                              //   "Selected Dubai Time:",
+                              //   dubaiTime.format("YYYY-MM-DD hh:mm A")
+                              // );
                               form.setFieldsValue({ departureDate: dubaiTime });
                             }
                           }}
@@ -1442,8 +1442,8 @@ export default function FormComponent() {
                       >
                         <DatePicker
                           className="w-100"
-                          showTime
-                          format="YYYY-MM-DD hh:mm A" // Dubai Time Format
+                          // showTime
+                          format="YYYY-MM-DD" // Dubai Time Format
                           value={
                             form.getFieldValue("returnDate")
                               ? dayjs(form.getFieldValue("returnDate")).tz(
@@ -1454,10 +1454,10 @@ export default function FormComponent() {
                           onChange={(date) => {
                             if (date) {
                               const dubaiTime = dayjs(date).tz("Asia/Dubai");
-                              console.log(
-                                "Selected Dubai Time:",
-                                dubaiTime.format("YYYY-MM-DD hh:mm A")
-                              );
+                              // console.log(
+                              //   "Selected Dubai Time:",
+                              //   dubaiTime.format("YYYY-MM-DD hh:mm A")
+                              // );
                               form.setFieldsValue({ returnDate: dubaiTime });
                             }
                           }}
