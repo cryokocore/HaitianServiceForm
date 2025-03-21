@@ -1018,7 +1018,7 @@ export default function FormComponent() {
     //  setIsSubmitting(true);
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true; // Block further clicks
-    // setIsSubmitting(true);
+    setIsSubmitting(true);
     try {
       // await form.validateFields();
       if (!srn) {
@@ -1184,7 +1184,7 @@ export default function FormComponent() {
       message.error("Submission failed. Please try again.");
     } finally {
       setLoading(false);
-      // setIsSubmitting(false);
+      setIsSubmitting(false);
       isSubmittingRef.current = false;
     }
   };
