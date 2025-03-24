@@ -11,6 +11,7 @@ import {
   Tag,
   InputNumber,
   Tooltip,
+  Select,
 } from "antd";
 import SignatureCanvas from "react-signature-canvas";
 import jsPDF from "jspdf";
@@ -77,7 +78,8 @@ export default function FormComponent() {
   const fetchSRN = async () => {
     try {
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbyNY5d3SHNbeBM3uP-KtUuh7nQ6hUhzCsYUdF8B84OfA6H26HF-J5OPzC-ByO-3Mr8Syg/exec"
+        // "https://script.google.com/macros/s/AKfycbyNY5d3SHNbeBM3uP-KtUuh7nQ6hUhzCsYUdF8B84OfA6H26HF-J5OPzC-ByO-3Mr8Syg/exec"
+        "https://script.google.com/macros/s/AKfycbyo_ZmwWNNsgkEmlBss3STbpTcYSqf_2xQgIdQazU6U3lLgW4bTMkQyhOOnhqEotZStIg/exec"
       );
       const data = await response.json(); // ✅ Parse JSON directly
 
@@ -1090,9 +1092,7 @@ export default function FormComponent() {
       }
 
       const convertToDubaiTime = (date) => {
-        return date
-          ? dayjs(date).tz("Asia/Dubai").format("YYYY-MM-DD")
-          : "N/A";
+        return date ? dayjs(date).tz("Asia/Dubai").format("YYYY-MM-DD") : "N/A";
       };
 
       // ✅ Prepare final form data
@@ -1139,7 +1139,8 @@ export default function FormComponent() {
       setLoading(true);
 
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbyNY5d3SHNbeBM3uP-KtUuh7nQ6hUhzCsYUdF8B84OfA6H26HF-J5OPzC-ByO-3Mr8Syg/exec",
+        // "https://script.google.com/macros/s/AKfycbyNY5d3SHNbeBM3uP-KtUuh7nQ6hUhzCsYUdF8B84OfA6H26HF-J5OPzC-ByO-3Mr8Syg/exec",
+        "https://script.google.com/macros/s/AKfycbyo_ZmwWNNsgkEmlBss3STbpTcYSqf_2xQgIdQazU6U3lLgW4bTMkQyhOOnhqEotZStIg/exec",
         {
           method: "POST",
           // headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -1380,16 +1381,28 @@ export default function FormComponent() {
                         rules={[
                           {
                             required: true,
-                            message: "Please enter service technician",
+                            message: "Please select a service technician",
                           },
-                          {
-                            pattern: /^[A-Za-z. ]+$/,
-                            message:
-                              "Only letters, spaces, and '.' are allowed",
-                          },
+                          // {
+                          //   pattern: /^[A-Za-z. ]+$/,
+                          //   message:
+                          //     "Only letters, spaces, and '.' are allowed",
+                          // },
                         ]}
                       >
-                        <Input placeholder="Enter service technician name" />
+                        {/* <Input placeholder="Enter service technician name" /> */}
+                        <Select placeholder="Select a service technician">
+                          <Select.Option value="Palani">Palani</Select.Option>
+                          <Select.Option value="Sampath">Sampath</Select.Option>
+                          <Select.Option value="Karpagaraj">
+                            Karpagaraj
+                          </Select.Option>
+                          <Select.Option value="Balaji">Balaji</Select.Option>
+                          <Select.Option value="Eshwar">Eshwar</Select.Option>
+                          <Select.Option value="ShivaSundar">
+                            ShivaSundar
+                          </Select.Option>
+                        </Select>
                       </Form.Item>
                     </div>
 
