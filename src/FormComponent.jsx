@@ -12,7 +12,10 @@ import {
   InputNumber,
   Tooltip,
   Select,
+  Upload,
+  Image,
 } from "antd";
+import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 import SignatureCanvas from "react-signature-canvas";
 import jsPDF from "jspdf";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -133,9 +136,9 @@ export default function FormComponent() {
     let lines = value.split("\n");
 
     // Limit strictly to 5 rows
-    if (lines.length > 2 || value.length > 150) {
+    if (lines.length > 10 || value.length > 1000) {
       message.warning(
-        "Input limited to 2 lines, 150 characters. Excess text won't be included."
+        "Input limited to 10 lines, 1000 characters. Excess text won't be included."
       );
       value = lines.slice(0, 2).join("\n"); // Trim excess lines
     }
@@ -408,6 +411,38 @@ export default function FormComponent() {
   const [signatureManager, setSignatureManager] = useState("");
   const [signatureCustomer, setSignatureCustomer] = useState("");
 
+  // const handleUpload = (info) => {
+  //   const file = info.file.originFileObj;
+  //   const reader = new FileReader();
+
+  //   reader.onloadend = () => {
+  //     setSignatureManager(reader.result); // Store Base64 URL
+  //     message.success("Manager Signature uploaded successfully!");
+  //   };
+
+  //   if (file) {
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
+  const handleUpload = ({ file }) => {
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      console.log("Uploaded Image (Base64):", reader.result); // Debugging
+      setSignatureManager(reader.result); // ✅ Convert image to Base64 and store it
+      message.success("Manager Signature uploaded successfully!");
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearManagerSignature = () => {
+    setSignatureManager(""); // Remove signature
+    message.success("Signature removed.");
+  };
+
   const updateCanvasSize = () => {
     setCanvasSize({ width: window.innerWidth < 768 ? 300 : 400, height: 200 });
   };
@@ -435,20 +470,20 @@ export default function FormComponent() {
   };
 
   // Service Manager Signature
-  const saveManagerSignature = () => {
-    if (sigManager.current && !sigManager.current.isEmpty()) {
-      setSignatureManager(
-        sigManager.current.getCanvas().toDataURL("image/png")
-      );
-      message.success("Manager Signature saved successfully!");
-    } else {
-      message.error("Please draw a signature before saving.");
-    }
-  };
-  const clearManagerSignature = () => {
-    sigManager.current.clear();
-    setSignatureManager("");
-  };
+  // const saveManagerSignature = () => {
+  //   if (sigManager.current && !sigManager.current.isEmpty()) {
+  //     setSignatureManager(
+  //       sigManager.current.getCanvas().toDataURL("image/png")
+  //     );
+  //     message.success("Manager Signature saved successfully!");
+  //   } else {
+  //     message.error("Please draw a signature before saving.");
+  //   }
+  // };
+  // const clearManagerSignature = () => {
+  //   sigManager.current.clear();
+  //   setSignatureManager("");
+  // };
 
   // Customer Signature
   const saveCustomerSignature = () => {
@@ -925,21 +960,39 @@ export default function FormComponent() {
         );
       }
       doc.setFont("Emirates", "bold");
-      if (signatures.manager) {
-        doc.setTextColor("#0C3C74");
+      // if (signatures.manager) {
+      //   doc.setTextColor("#0C3C74");
 
+      //   doc.text("Signature of service manager:", col2X, nextY);
+      //   doc.setTextColor(0, 0, 0);
+
+      //   doc.addImage(
+      //     signatures.manager,
+      //     "PNG",
+      //     col2X,
+      //     baseY + 2,
+      //     signatureWidth,
+      //     signatureHeight
+      //   );
+      // }
+
+      if (signatureManager) {
+        doc.setTextColor("#0C3C74");
         doc.text("Signature of service manager:", col2X, nextY);
         doc.setTextColor(0, 0, 0);
-
+    
         doc.addImage(
-          signatures.manager,
-          "PNG",
-          col2X,
-          baseY + 2,
-          signatureWidth,
-          signatureHeight
+          signatureManager, // ✅ Use uploaded image (Base64)
+            "PNG",
+            col2X,
+            baseY + 2,
+            signatureWidth,
+            signatureHeight
         );
-      }
+    }
+    else {
+      doc.text("No signature uploaded", 10, 80);
+    }
 
       // Adjust Y for the next row based on the tallest signature in Row 1
       nextY = baseY;
@@ -1074,19 +1127,19 @@ export default function FormComponent() {
 
       if (!signatureTechnician) {
         message.error(
-          "Please provide the Service Technician signature and click 'Save Signature'."
+          "Please provide the Service Technician signature and click 'Save Signature."
         );
         return;
       }
       if (!signatureManager) {
         message.error(
-          "Please provide the Service Manager signature and click 'Save Signature'."
+          "Please upload the service manager's signature."
         );
         return;
       }
       if (!signatureCustomer) {
         message.error(
-          "Please provide the Customer signature and click 'Save Signature'."
+          "Please provide the Customer signature and click 'Save Signature."
         );
         return;
       }
@@ -1157,25 +1210,25 @@ export default function FormComponent() {
         setSRN(result.srn);
         generatePDF(formData, checkboxValues, partsUsed);
 
-        form.resetFields();
-        setAddress("");
-        setSerialNumber("");
-        setDescriptionText("");
-        setcauseOfFailure("");
-        setNotes("");
+        // form.resetFields();
+        // setAddress("");
+        // setSerialNumber("");
+        // setDescriptionText("");
+        // setcauseOfFailure("");
+        // setNotes("");
 
-        setData([
-          {
-            key: Date.now(),
-            partNumber: "",
-            description: "",
-            quantity: "",
-            note: "",
-          },
-        ]);
-        sigTechnician.current?.clear();
-        sigManager.current?.clear();
-        sigCustomer.current?.clear();
+        // setData([
+        //   {
+        //     key: Date.now(),
+        //     partNumber: "",
+        //     description: "",
+        //     quantity: "",
+        //     note: "",
+        //   },
+        // ]);
+        // sigTechnician.current?.clear();
+        // sigManager.current?.clear();
+        // sigCustomer.current?.clear();
         await fetchSRN();
       } else {
         throw new Error(result.message);
@@ -1509,7 +1562,7 @@ export default function FormComponent() {
                         value={descriptionText}
                         onChange={handleDescriptionTextChange}
                         autoSize={{ minRows: 5, maxRows: 5 }}
-                        maxLength={150}
+                        maxLength={1000}
                         showCount
                       />
                     </Form.Item>
@@ -1613,7 +1666,7 @@ export default function FormComponent() {
                     </div>
 
                     {/* Service Manager Signature */}
-                    <div className="col-12  col-lg-6 col-xl-4  mt-2 d-flex justify-content-center">
+                    {/* <div className="col-12  col-lg-6 col-xl-4  mt-2 d-flex justify-content-center">
                       <Form.Item label="Signature of service manager" required>
                         <SignatureCanvas
                           ref={sigManager}
@@ -1642,6 +1695,78 @@ export default function FormComponent() {
                           </Button>
                         </div>
                       </Form.Item>
+                    </div> */}
+
+<div className="col-12 col-lg-6 col-xl-4 mt-2 d-flex justify-content-center">
+                      <div>
+                        {/* <label className="form-label">
+                          Signature of Service Manager
+                        </label> */}
+                        <Form.Item
+  label="Signature of Service Manager"
+  name="serviceManagerSignature" required
+  // rules={[
+  //   {
+  //     required: true,
+  //     message: "Service Manager's signature is required.",
+  //   },
+  // ]}
+>
+
+                        <div
+                          className="border rounded border-3 p-2 d-flex flex-column align-items-center"
+                          style={{
+                            width: canvasSize.width, // ✅ Same width as other signatures
+                            height: canvasSize.height, // ✅ Same height as other signatures
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: "#fff",
+                            overflow: "hidden", // ✅ Ensures image fits nicely
+                          }}
+                        >
+                          {signatureManager ? (
+                            // ✅ Show uploaded image inside border
+                            <Image
+                              src={signatureManager}
+                              alt="Manager Signature"
+                              width="100%"
+                              height="100%"
+                              style={{ objectFit: "contain" }}
+                            />
+                          ) : (
+                            // ✅ Show Upload Button when no image
+                            <Upload
+                              showUploadList={false} // ✅ Hide default file name list
+                              accept="image/png, image/jpeg"
+                              beforeUpload={(file) => {
+                                handleUpload({ file }); // ✅ Handle upload manually
+                                return false; // ✅ Prevent automatic upload
+                              }}
+                              className="d-flex"
+                            >
+                              <Button icon={<UploadOutlined />}>
+                                Upload Signature
+                              </Button>
+                            </Upload>
+                          )}
+                        </div>
+
+                        {/* Clear Button (Only visible when image is uploaded) */}
+                        {signatureManager && (
+                          <Button
+                            type="primary"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={clearManagerSignature}
+                            className="mt-2"
+                          >
+                            Clear Signature
+                          </Button>
+                        )}
+                        </Form.Item>
+                      </div>
+                      
                     </div>
 
                     {/* Customer Signature */}
@@ -1675,17 +1800,102 @@ export default function FormComponent() {
                         </div>
                       </Form.Item>
                     </div>
-                    <div className="text-center mt-4 ">
-                      <Button
-                        htmlType="submit"
-                        className="submitbutton p-3"
-                        style={{ fontSize: "1.2rem" }}
-                        loading={loading}
-                        disabled={loading || isSubmittingRef.current}
-                      >
-                        {loading ? "Submitting..." : "Submit"}
-                      </Button>
-                    </div>
+
+                    {/* <div className="col-12 col-lg-6 col-xl-4 mt-2 d-flex justify-content-center">
+                      <div>
+                        <label className="form-label">
+                          Signature of Service Manager
+                        </label>
+
+                        {signatureManager ? (
+                          // Show uploaded signature
+                          // <div className="border rounded border-3 p-2 d-flex flex-column align-items-center">
+                          //   <Image
+                          //     src={signatureManager}
+                          //     alt="Manager Signature"
+                          //     width={canvasSize.width} // ✅ Set width same as other signatures
+                          //     height={canvasSize.height} // ✅ Set height same as other signatures
+                          //     style={{ objectFit: "contain" }}
+                          //      />
+                          //   <Button
+                          //     type="primary"
+                          //     danger
+                          //     icon={<DeleteOutlined />}
+                          //     onClick={clearManagerSignature}
+                          //     className="mt-2"
+                          //   >
+                          //     Clear Signature
+                          //   </Button>
+                          // </div>
+                          <div
+                            className="border rounded border-3 p-2 d-flex flex-column align-items-center"
+                            style={{
+                              width: canvasSize.width, // ✅ Ensure same width as other signature boxes
+                              height: canvasSize.height, // ✅ Ensure same height as other signature boxes
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              backgroundColor: "#fff",
+                            }}
+                          >
+                            <Image
+                              src={signatureManager}
+                              alt="Manager Signature"
+                              width="100%"
+                              height="100%"
+                              style={{ objectFit: "contain" }} // ✅ Keeps image proportionate
+                            />
+                            <Button
+                              type="primary"
+                              danger
+                              icon={<DeleteOutlined />}
+                              onClick={clearManagerSignature}
+                              className="mt-2"
+                            >
+                              Clear Signature
+                            </Button>
+                          </div>
+                        ) : (
+                          // Show upload button when no signature is uploaded
+                          // <Upload
+                          //   showUploadList={true}
+                          //   accept="image/png, image/jpeg"
+                          //   beforeUpload={() => true}
+                          //   onChange={handleUpload}
+                          //   className="d-flex"
+                          // >
+                          //   <Button icon={<UploadOutlined />}>
+                          //     Upload Signature
+                          //   </Button>
+                          // </Upload>
+                          <Upload
+                          showUploadList={true} // ❌ Hide file name display
+                          accept="image/png, image/jpeg"
+                          // beforeUpload={() => false} // Prevent auto-upload
+                          beforeUpload={(file) => {
+                            handleUpload({ file }); // ✅ Handle upload manually
+                            return false; // ✅ Prevent automatic upload
+                          }}
+                          className="d-flex"
+                        >
+                          <Button icon={<UploadOutlined />}>Upload Signature</Button>
+                        </Upload>
+                        )}
+                      </div>
+                    </div> */}
+                  
+                    
+                  </div>
+                  <div className="text-center mt-4 ">
+                    <Button
+                      htmlType="submit"
+                      className="submitbutton p-3"
+                      style={{ fontSize: "1.2rem" }}
+                      loading={loading}
+                      disabled={loading || isSubmittingRef.current}
+                    >
+                      {loading ? "Submitting..." : "Submit"}
+                    </Button>
                   </div>
                 </Form>
               </div>
