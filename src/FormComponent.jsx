@@ -40,7 +40,8 @@ const reportOptions = [
   "Installation/Commission",
   "Maintenance",
   "Defect",
-  "Customer Visit",
+  // "Customer Visit",
+  "Customer Visit (Report)", 
   "Other",
 ];
 
@@ -49,7 +50,8 @@ const serviceOptions = [
   "F.O.C Maintenance",
   "Guarantee",
   "Chargeable Commissioning",
-  "Customer Visit",
+  // "Customer Visit",
+  "Customer Visit (Service)", 
   "Service contract",
   "Goodwill",
 ];
@@ -81,8 +83,7 @@ export default function FormComponent() {
   const fetchSRN = async () => {
     try {
       const response = await fetch(
-        // "https://script.google.com/macros/s/AKfycbyNY5d3SHNbeBM3uP-KtUuh7nQ6hUhzCsYUdF8B84OfA6H26HF-J5OPzC-ByO-3Mr8Syg/exec"
-        "https://script.google.com/macros/s/AKfycbyo_ZmwWNNsgkEmlBss3STbpTcYSqf_2xQgIdQazU6U3lLgW4bTMkQyhOOnhqEotZStIg/exec"
+        "https://script.google.com/macros/s/AKfycbyb3Ou8FvEaKjfMkkt7BDbhObdm0cZitvIgHUiXzfrqDxRMjSpcgAYzZMBAZuVM5TvmiA/exec"
       );
       const data = await response.json(); // ✅ Parse JSON directly
 
@@ -136,11 +137,11 @@ export default function FormComponent() {
     let lines = value.split("\n");
 
     // Limit strictly to 5 rows
-    if (lines.length > 10 || value.length > 1000) {
+    if (lines.length > 5 || value.length > 1000) {
       message.warning(
-        "Input limited to 10 lines, 1000 characters. Excess text won't be included."
+        "Input limited to 5 lines, 1000 characters. Excess text won't be included."
       );
-      value = lines.slice(0, 2).join("\n"); // Trim excess lines
+      value = lines.slice(0, 5).join("\n"); // Trim excess lines
     }
 
     setDescriptionText(value); // Update state only if within limits
@@ -150,11 +151,11 @@ export default function FormComponent() {
     let value = e.target.value;
     let lines = value.split("\n");
 
-    if (lines.length > 1 || value.length > 100) {
+    if (lines.length > 2 || value.length > 500) {
       message.warning(
-        "Input limited to 1 line, 100 characters. Excess text won't be included."
+        "Input limited to 2 lines, 500 characters. Excess text won't be included."
       );
-      value = lines.slice(0, 1).join("\n"); // Trim excess lines
+      value = lines.slice(0, 2).join("\n"); // Trim excess lines
     }
 
     setcauseOfFailure(value); // Update state only if within limits
@@ -165,9 +166,9 @@ export default function FormComponent() {
     let lines = value.split("\n");
 
     // Limit strictly to 5 rows
-    if (lines.length > 1 || value.length > 100) {
+    if (lines.length > 1 || value.length > 200) {
       message.warning(
-        "Input limited to 1 line, 100 characters. Excess text won't be included."
+        "Input limited to 1 line, 200 characters. Excess text won't be included."
       );
       value = lines.slice(0, 1).join("\n"); // Trim excess lines
     }
@@ -243,7 +244,7 @@ export default function FormComponent() {
   };
 
   const handleAddRow = () => {
-    if (data.length < 3) {
+    if (data.length < 2) {
       const newRow = {
         key: Date.now().toString(), // Use a unique identifier
         partNumber: "",
@@ -253,7 +254,7 @@ export default function FormComponent() {
       };
       setData([...data, newRow]);
     } else {
-      message.warning("Rows cannot exceed more than 3!");
+      message.warning("Rows cannot exceed more than 2!");
     }
   };
 
@@ -263,20 +264,20 @@ export default function FormComponent() {
     }
   };
 
-  const validateFields = () => {
-    for (const row of data) {
-      if (
-        !row.partNumber ||
-        !row.description ||
-        row.quantity === "" ||
-        !row.note
-      ) {
-        message.error("Please fill all required fields!");
-        return false;
-      }
-    }
-    return true;
-  };
+  // const validateFields = () => {
+  //   for (const row of data) {
+  //     if (
+  //       !row.partNumber ||
+  //       !row.description ||
+  //       row.quantity === "" ||
+  //       !row.note
+  //     ) {
+  //       message.error("Please fill all required fields!");
+  //       return false;
+  //     }
+  //   }
+  //   return true;
+  // };
 
   const columns = [
     {
@@ -299,7 +300,7 @@ export default function FormComponent() {
               handleInputChange(record.key, "partNumber", record.partNumber)
             }
             placeholder="Enter part number"
-            maxLength={50}
+            maxLength={19}
           />
         </Tooltip>
       ),
@@ -325,7 +326,7 @@ export default function FormComponent() {
             }
             rows={1}
             placeholder="Enter description"
-            maxLength={100}
+            maxLength={41}
           />
         </Tooltip>
       ),
@@ -374,7 +375,7 @@ export default function FormComponent() {
             onBlur={() => handleTooltipHide(record.key, "note")}
             onFocus={() => handleInputChange(record.key, "note", record.note)}
             placeholder="Enter note"
-            maxLength={100}
+            maxLength={41}
             rows={1}
           />
         </Tooltip>
@@ -629,28 +630,34 @@ export default function FormComponent() {
 
     nextY = 45;
     addField("Contact", formData.contact, startX, nextY + 4);
-    nextY = 49;
+    // nextY = 49;
+    nextY = 47;
+
     addField("Installation Date", formData.installationDate, rightX, nextY + 8);
-    nextY = 53;
+    // nextY = 53;
+    nextY = 51;
 
     addField("Telephone", formData.telephone, startX, nextY + 4);
-    nextY = 58;
+      // nextY = 58;
+      nextY = 54;
 
     addField("Work Time", formData.workTime, rightX, nextY + 7);
-    nextY = 63;
-
+    // nextY = 63;
+    nextY = 59;
     addField(
       "Service Technician",
       formData.serviceTechnician,
       startX,
       nextY + 2
     );
-    nextY = 68;
+    // nextY = 68;
+    nextY = 62;
     addField("Departure Date", formData.departureDate, startX, nextY + 5);
-    nextY += 5;
+    nextY += 4.5;
     addField("Return Date", formData.returnDate, rightX, nextY);
 
-    nextY = 81;
+    // nextY = 81;
+    nextY = 73;
     doc.setFont("Emirates", "bold");
     doc.setTextColor("#0C3C74");
     doc.text("Report Type", startX, nextY);
@@ -660,10 +667,11 @@ export default function FormComponent() {
       "Installation/Commission",
       "Maintenance",
       "Defect",
-      "Customer Visit",
+      // "Customer Visit",
+      "Customer Visit (Report)", 
       "Other",
     ];
-    const spacing = [48, 33, 25, 35, 10];
+    const spacing = [48, 33, 25, 48, 20];
     let optionX = startX;
     reportOptions.forEach((option, index) => {
       const spaceBetweenOptions = spacing[index];
@@ -690,7 +698,8 @@ export default function FormComponent() {
       optionX += spaceBetweenOptions;
     });
 
-    nextY += 15;
+    // nextY += 15;
+    nextY += 12;
     doc.setFont("Emirates", "bold");
     doc.setTextColor("#0C3C74");
 
@@ -706,7 +715,7 @@ export default function FormComponent() {
     doc.text(description, startX, nextY);
     // nextY += description.length * 2;
 
-    nextY = 119;
+    nextY = 140;
     doc.setFont("Emirates", "bold");
     doc.setTextColor("#0C3C74");
     doc.text("Cause of failure:", startX, nextY);
@@ -720,7 +729,7 @@ export default function FormComponent() {
     doc.text(causeOfFailure, startX, nextY);
     // nextY += causeOfFailure.length * 2;
 
-    nextY = 133;
+    nextY = 166;
     doc.setTextColor("#0C3C74");
     doc.setFont("Emirates", "bold");
     doc.text("Notes/Further action required:", startX, nextY);
@@ -730,7 +739,7 @@ export default function FormComponent() {
     const notes = doc.splitTextToSize(formData.notes || "N/A", maxWidth);
     doc.text(notes, startX, nextY);
 
-    nextY = 137;
+    nextY = 170;
     const colWidths = [40, 65, 18, 65]; // Column widths
     const rowHeight = 8; // Row height
 
@@ -774,7 +783,7 @@ export default function FormComponent() {
 
     doc.setFont("Emirates", "normal");
 
-    const maxRows = 6; // Fixed row count
+    const maxRows = 2; // Fixed row count
     let rowCount = 0; // Track how many total rows are printed
 
     for (let i = 0; i < maxRows; i++) {
@@ -871,7 +880,7 @@ export default function FormComponent() {
       "F.O.C Maintenance": 28,
       Guarantee: 26,
       "Chargeable Commissioning": 33,
-      "Customer Visit": 25,
+      "Customer Visit  (Service)": 25,
       "Service contract": 25,
       Goodwill: 25,
     };
@@ -1082,15 +1091,15 @@ export default function FormComponent() {
         );
         return;
       }
-      const emptyRows = data.some(
-        (row) =>
-          !row.partNumber?.trim() || !row.description?.trim() || !row.quantity
-      );
+      // const emptyRows = data.some(
+      //   (row) =>
+      //     !row.partNumber?.trim() || !row.description?.trim() || !row.quantity
+      // );
 
-      if (data.length === 0 || emptyRows) {
-        message.error("Please fill in all fields in the 'Parts Used' table.");
-        return; // ✅ Prevent submission
-      }
+      // if (data.length === 0 || emptyRows) {
+      //   message.error("Please fill in all fields in the 'Parts Used' table.");
+      //   return; // ✅ Prevent submission
+      // }
 
       let checkboxValues = {};
       [...reportOptions, ...serviceOptions].forEach((option) => {
@@ -1110,20 +1119,47 @@ export default function FormComponent() {
       }
       // console.log("Checkbox Values Before Submission:", checkboxValues);
 
-      // ✅ Process parts used table data
-      const partsUsed = data
-        .filter((row) => row.partNumber && row.description && row.quantity)
-        .map((row) => ({
-          partNumber: row.partNumber.trim(),
-          description: row.description.trim(),
-          quantity: isNaN(Number(row.quantity)) ? 0 : Number(row.quantity),
-          note: row.note?.trim() || "",
-        }));
+      // ✅ Process parts used table data code working correctly
+      // const partsUsed = data
+      //   .filter((row) => row.partNumber && row.description && row.quantity)
+      //   .map((row) => ({
+      //     partNumber: row.partNumber.trim(),
+      //     description: row.description.trim(),
+      //     quantity: isNaN(Number(row.quantity)) ? 0 : Number(row.quantity),
+      //     note: row.note?.trim() || "",
+      //   }));
 
-      if (partsUsed.length === 0) {
-        message.error("Please fill in the fields in the Parts Used table");
-        return;
-      }
+      //Parts used table changed code after haitian call
+      // const partsUsed = data
+      //   .filter((row) => row.partNumber || row.description || row.quantity)
+      //   .map((row) => ({
+      //     partNumber: row.partNumber.trim(),
+      //     description: row.description.trim(),
+      //     quantity: isNaN(Number(row.quantity)) ? 0 : Number(row.quantity),
+      //     note: row.note?.trim() || "",
+      //   }));
+      const partsUsed = data
+      .filter((row) => row.partNumber?.trim() || row.description?.trim() || row.quantity) 
+      .map((row) => ({
+        partNumber: row.partNumber?.trim() || "", 
+        description: row.description?.trim() || "", 
+        // quantity: isNaN(Number(row.quantity)) ? 0 : Number(row.quantity), 
+        quantity: isNaN(Number(row.quantity)) || row.quantity === "" ? "" : Number(row.quantity),
+
+        note: row.note?.trim() || "",
+      }));
+    
+    // ✅ Show warning but allow submission
+    if (partsUsed.length === 0) {
+      // message.warning("Parts Used table is empty. Proceeding with submission.");
+    }
+    
+
+
+      // if (partsUsed.length === 0) {
+      //   message.error("Please fill in the fields in the Parts Used table");
+      //   return;
+      // }
 
       if (!signatureTechnician) {
         message.error(
@@ -1175,7 +1211,8 @@ export default function FormComponent() {
         notes: notes,
         // causeOfFailure: values["cause of failure"],
         causeOfFailure: causeOfFailure,
-        partsUsed: partsUsed,
+        // partsUsed: partsUsed,
+        partsUsed: partsUsed.length > 0 ? partsUsed : [], 
         signatures: {
           technician: sigTechnician.current?.toDataURL(),
           manager: sigManager.current?.toDataURL(),
@@ -1192,8 +1229,7 @@ export default function FormComponent() {
       setLoading(true);
 
       const response = await fetch(
-        // "https://script.google.com/macros/s/AKfycbyNY5d3SHNbeBM3uP-KtUuh7nQ6hUhzCsYUdF8B84OfA6H26HF-J5OPzC-ByO-3Mr8Syg/exec",
-        "https://script.google.com/macros/s/AKfycbyo_ZmwWNNsgkEmlBss3STbpTcYSqf_2xQgIdQazU6U3lLgW4bTMkQyhOOnhqEotZStIg/exec",
+        "https://script.google.com/macros/s/AKfycbyb3Ou8FvEaKjfMkkt7BDbhObdm0cZitvIgHUiXzfrqDxRMjSpcgAYzZMBAZuVM5TvmiA/exec",
         {
           method: "POST",
           // headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -1582,7 +1618,7 @@ export default function FormComponent() {
                         value={causeOfFailure}
                         onChange={handleCauseTextChange}
                         autoSize={{ minRows: 3, maxRows: 3 }}
-                        maxLength={100}
+                        maxLength={500}
                         showCount
                       />
                     </Form.Item>
@@ -1602,7 +1638,7 @@ export default function FormComponent() {
                         value={notes}
                         onChange={handleNotesChange}
                         autoSize={{ minRows: 3, maxRows: 3 }}
-                        maxLength={100}
+                        maxLength={200}
                         showCount
                       />
                     </Form.Item>
