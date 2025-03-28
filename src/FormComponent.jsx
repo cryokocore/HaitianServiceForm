@@ -326,7 +326,7 @@ export default function FormComponent() {
             }
             rows={1}
             placeholder="Enter description"
-            maxLength={41}
+            maxLength={30}
           />
         </Tooltip>
       ),
@@ -375,7 +375,7 @@ export default function FormComponent() {
             onBlur={() => handleTooltipHide(record.key, "note")}
             onFocus={() => handleInputChange(record.key, "note", record.note)}
             placeholder="Enter note"
-            maxLength={41}
+            maxLength={30}
             rows={1}
           />
         </Tooltip>
@@ -409,7 +409,9 @@ export default function FormComponent() {
 
   // Separate state for each signature
   const [signatureTechnician, setSignatureTechnician] = useState("");
-  const [signatureManager, setSignatureManager] = useState("");
+  // const [signatureManager, setSignatureManager] = useState("");
+  const [signatureManager, setSignatureManager] = useState(null);
+
   const [signatureCustomer, setSignatureCustomer] = useState("");
 
   // const handleUpload = (info) => {
@@ -440,7 +442,9 @@ export default function FormComponent() {
   };
 
   const clearManagerSignature = () => {
-    setSignatureManager(""); // Remove signature
+    // setSignatureManager(""); // Remove signature
+    setSignatureManager(null); // Remove signature
+
     message.success("Signature removed.");
   };
 
@@ -1246,25 +1250,26 @@ export default function FormComponent() {
         setSRN(result.srn);
         generatePDF(formData, checkboxValues, partsUsed);
 
-        // form.resetFields();
-        // setAddress("");
-        // setSerialNumber("");
-        // setDescriptionText("");
-        // setcauseOfFailure("");
-        // setNotes("");
+        form.resetFields();
+        setAddress("");
+        setSerialNumber("");
+        setDescriptionText("");
+        setcauseOfFailure("");
+        setNotes("");
 
-        // setData([
-        //   {
-        //     key: Date.now(),
-        //     partNumber: "",
-        //     description: "",
-        //     quantity: "",
-        //     note: "",
-        //   },
-        // ]);
-        // sigTechnician.current?.clear();
-        // sigManager.current?.clear();
-        // sigCustomer.current?.clear();
+        setData([
+          {
+            key: Date.now(),
+            partNumber: "",
+            description: "",
+            quantity: "",
+            note: "",
+          },
+        ]);
+        sigTechnician.current?.clear();
+        sigManager.current?.clear();
+        sigCustomer.current?.clear();
+        setSignatureManager(null); 
         await fetchSRN();
       } else {
         throw new Error(result.message);
