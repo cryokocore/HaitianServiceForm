@@ -137,11 +137,11 @@ export default function FormComponent() {
     let lines = value.split("\n");
 
     // Limit strictly to 5 rows
-    if (lines.length > 5 || value.length > 1000) {
+    if (lines.length > 4 || value.length > 1000) {
       message.warning(
-        "Input limited to 5 lines, 1000 characters. Excess text won't be included."
+        "Input limited to 4 lines, 1000 characters. Excess text won't be included."
       );
-      value = lines.slice(0, 5).join("\n"); // Trim excess lines
+      value = lines.slice(0, 4).join("\n"); // Trim excess lines
     }
 
     setDescriptionText(value); // Update state only if within limits
@@ -733,7 +733,7 @@ export default function FormComponent() {
     doc.text(causeOfFailure, startX, nextY);
     // nextY += causeOfFailure.length * 2;
 
-    nextY = 166;
+    nextY = 169;
     doc.setTextColor("#0C3C74");
     doc.setFont("Emirates", "bold");
     doc.text("Notes/Further action required:", startX, nextY);
@@ -743,7 +743,7 @@ export default function FormComponent() {
     const notes = doc.splitTextToSize(formData.notes || "N/A", maxWidth);
     doc.text(notes, startX, nextY);
 
-    nextY = 170;
+    nextY = 173;
     const colWidths = [40, 65, 18, 65]; // Column widths
     const rowHeight = 8; // Row height
 
@@ -865,7 +865,7 @@ export default function FormComponent() {
     }
 
     doc.setFont("Emirates", "bold");
-    nextY = 213;
+    nextY = 214;
     doc.setTextColor("#0C3C74");
     doc.text("Service Type", 10, nextY);
     nextY -= 2; // Space after the title
@@ -879,13 +879,23 @@ export default function FormComponent() {
     let maxServiceRowHeight = serviceRowHeight; // Track max row height
 
     // Define manual spacing for each option
+    // const serviceOptionSpacing = {
+    //   "F.O.C Commissioning": 33,
+    //   "F.O.C Maintenance": 28,
+    //   Guarantee: 26,
+    //   "Chargeable Commissioning": 33,
+    //   "Customer Visit  (Service)": 25,
+    //   "Service contract": 25,
+    //   Goodwill: 25,
+    // };
+
     const serviceOptionSpacing = {
       "F.O.C Commissioning": 33,
       "F.O.C Maintenance": 28,
       Guarantee: 26,
       "Chargeable Commissioning": 33,
       "Customer Visit  (Service)": 25,
-      "Service contract": 25,
+      "Service contract": 21,
       Goodwill: 25,
     };
 
