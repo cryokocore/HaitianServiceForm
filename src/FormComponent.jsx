@@ -83,7 +83,7 @@ export default function FormComponent() {
   const fetchSRN = async () => {
     try {
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbyb3Ou8FvEaKjfMkkt7BDbhObdm0cZitvIgHUiXzfrqDxRMjSpcgAYzZMBAZuVM5TvmiA/exec"
+        "https://script.google.com/macros/s/AKfycbwHzTUlg7n8A3IXgsZLte-s66lKTK2REWkwVPTVfv82SYscF7OYDzFAH0KSbREh5ut1LA/exec"
       );
       const data = await response.json(); // ✅ Parse JSON directly
 
@@ -1243,7 +1243,7 @@ export default function FormComponent() {
       setLoading(true);
 
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbyb3Ou8FvEaKjfMkkt7BDbhObdm0cZitvIgHUiXzfrqDxRMjSpcgAYzZMBAZuVM5TvmiA/exec",
+        "https://script.google.com/macros/s/AKfycbwHzTUlg7n8A3IXgsZLte-s66lKTK2REWkwVPTVfv82SYscF7OYDzFAH0KSbREh5ut1LA/exec",
         {
           method: "POST",
           // headers: { "Content-Type": "application/x-www-form-urlencoded" },
