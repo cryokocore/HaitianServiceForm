@@ -14,8 +14,17 @@ import {
   Select,
   Upload,
   Image,
+  AutoComplete,
+  Card,
+  Modal,
+  Descriptions,
 } from "antd";
-import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+  UploadOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  EditOutlined,
+} from "@ant-design/icons";
 import SignatureCanvas from "react-signature-canvas";
 import jsPDF from "jspdf";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -41,7 +50,7 @@ const reportOptions = [
   "Maintenance",
   "Defect",
   // "Customer Visit",
-  "Customer Visit (Report)", 
+  "Customer Visit (Report)",
   "Other",
 ];
 
@@ -51,7 +60,7 @@ const serviceOptions = [
   "Guarantee",
   "Chargeable Commissioning",
   // "Customer Visit",
-  "Customer Visit (Service)", 
+  "Customer Visit (Service)",
   "Service contract",
   "Goodwill",
 ];
@@ -70,6 +79,16 @@ export default function FormComponent() {
   const [srn, setSRN] = useState(null);
   const [tooltipVisibility, setTooltipVisibility] = useState({});
   const isSubmittingRef = useRef(false);
+  const [customerOptions, setCustomerOptions] = useState([]);
+  const [customerDataList, setCustomerDataList] = useState([]); // full objects
+  const [inputCustomer, setInputCustomer] = useState("");
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [viewForm] = Form.useForm();
+  const [editForm] = Form.useForm();
+  const [viewTabledata, setViewTableData] = useState([]);
+
   const [data, setData] = useState([
     {
       key: Date.now(),
@@ -80,10 +99,224 @@ export default function FormComponent() {
     },
   ]);
 
+  // useEffect(() => {
+  //   // Deduplicate customer names (keep most recent)
+  //   const uniqueCustomers = [];
+  //   const seenNames = new Set();
+
+  //   for (let i = customerDataList.length - 1; i >= 0; i--) {
+  //     const customer = customerDataList[i];
+  //     const name = customer["Customer Name"]?.trim();
+  //     if (name && !seenNames.has(name.toLowerCase())) {
+  //       seenNames.add(name.toLowerCase());
+  //       uniqueCustomers.unshift(customer); // unshift to preserve original order
+  //     }
+  //   }
+
+  //   setCustomerOptions(uniqueCustomers.map((c) => c["Customer Name"]));
+  // }, [customerDataList]);
+
+  // Load everything ONCE on mount
+
+  useEffect(() => {
+    if (selectedRecord && viewModalOpen) {
+      const reportOptions = [
+        "Installation/Commission",
+        "Maintenance",
+        "Defect",
+        "Customer Visit (Report)",
+        "Other",
+      ];
+
+      const serviceOptions = [
+        "F.O.C Commissioning",
+        "F.O.C Maintenance",
+        "Chargeable Commissioning",
+        "Goodwill",
+        "Guarantee",
+        "Service contract",
+        "Customer Visit (Service)",
+        "Installation/Commission",
+      ];
+
+      const checkedReports = reportOptions.filter(
+        (option) => selectedRecord[option] === "Yes"
+      );
+
+      const checkedServices = serviceOptions.filter(
+        (option) => selectedRecord[option] === "Yes"
+      );
+
+      viewForm.setFieldsValue({
+        srn:selectedRecord["Service Request Number"],
+        customerName: selectedRecord["Customer Name"],
+        address: selectedRecord["Address"],
+        contact: selectedRecord["Contact"],
+        telephone: selectedRecord["Telephone"],
+        machineType: selectedRecord["Machine Type"],
+        serialNumber: selectedRecord["Serial Number"],
+        installationDate: selectedRecord["Installation Date"]
+          ? dayjs(selectedRecord["Installation Date"])
+          : null,
+        departureDate: selectedRecord["Departure Date"]
+          ? dayjs(selectedRecord["Departure Date"])
+          : null,
+        returnDate: selectedRecord["Return Date"]
+          ? dayjs(selectedRecord["Return Date"])
+          : null,
+        workTime: selectedRecord["Work Time"],
+        serviceTechnician: selectedRecord["Service Technician"],
+        report: checkedReports,
+        serviceType: checkedServices,
+        ["description of work/of defect/failure mode"]:
+          selectedRecord["Description of work/of defect/failure mode"],
+        ["cause of failure"]: selectedRecord["Cause of Failure"],
+        ["notes/further action required"]:
+          selectedRecord["Notes/Further action required"] ||
+          selectedRecord["Note "] ||
+          selectedRecord["Note\t"], // all variants
+      });
+
+      // ✅ Set "Parts Used" table data
+      setViewTableData([
+        {
+          key: Date.now(),
+          partNumber: selectedRecord["Part Number"] ?? "",
+          description: selectedRecord["Description"] ?? "",
+          quantity:
+            selectedRecord["Quantity "] ?? selectedRecord["Quantity"] ?? 1,
+          note: selectedRecord["Note "] ?? selectedRecord["Note\t"] ?? "", // handling weird key
+        },
+      ]);
+    }
+    console.log("Selected Record:", selectedRecord);
+  }, [selectedRecord, viewModalOpen]);
+
+  useEffect(() => {
+    const loadAllCustomerData = async () => {
+      try {
+        const res = await fetch(
+          `https://script.google.com/macros/s/AKfycbycxrt0EVJmPU-3d98tV1l0ExACjOIsI8pM__9n1wRB5-vLas6AAj7hWDAukT-JYGzJHw/exec?action=getAllCustomerData`
+        );
+        const result = await res.json();
+        if (result.success) {
+          const allData = result.customers || [];
+
+          // ✅ For table: keep raw unsorted data
+          setCustomerDataList(allData);
+
+          // ✅ For dropdown: dedupe + sort alphabetically
+          const seenNames = new Set();
+          const dropdownNames = [];
+
+          for (let i = allData.length - 1; i >= 0; i--) {
+            const name = allData[i]["Customer Name"]?.trim();
+            if (name && !seenNames.has(name.toLowerCase())) {
+              seenNames.add(name.toLowerCase());
+              dropdownNames.push(name);
+            }
+          }
+
+          dropdownNames.sort((a, b) => a.localeCompare(b));
+          setCustomerOptions(dropdownNames);
+        }
+      } catch (err) {
+        console.error("Error fetching customers:", err);
+      }
+    };
+
+    loadAllCustomerData();
+    form.setFieldsValue({ customerName: "" });
+    setInputCustomer("");
+  }, []);
+
+  // const fetchCustomerNames = async (searchValue = "") => {
+  //   try {
+  //     const res = await fetch(
+  //       `https://script.google.com/macros/s/AKfycbycxrt0EVJmPU-3d98tV1l0ExACjOIsI8pM__9n1wRB5-vLas6AAj7hWDAukT-JYGzJHw/exec?action=getAllCustomerData`
+  //     );
+  //     const result = await res.json();
+  //     if (result.success) {
+  //       const allData = result.customers || [];
+
+  //       const filtered = allData
+  //         .map((item) => item["Customer Name"])
+  //         .filter(Boolean)
+  //         .filter((name) =>
+  //           name.toLowerCase().includes(searchValue.toLowerCase())
+  //         );
+
+  //       setCustomerOptions(filtered);
+  //       setCustomerDataList(allData);
+  //     }
+  //   } catch (err) {
+  //     console.error("Error fetching customers:", err);
+  //   }
+  // };
+
+  const fetchCustomerNames = async () => {
+    try {
+      const res = await fetch(
+        `https://script.google.com/macros/s/AKfycbycxrt0EVJmPU-3d98tV1l0ExACjOIsI8pM__9n1wRB5-vLas6AAj7hWDAukT-JYGzJHw/exec?action=getAllCustomerData`
+      );
+      const result = await res.json();
+
+      if (result.success) {
+        const allData = result.customers || [];
+
+        const seen = new Map();
+        for (let i = allData.length - 1; i >= 0; i--) {
+          const name = allData[i]["Customer Name"]?.trim();
+          if (name && !seen.has(name.toLowerCase())) {
+            seen.set(name.toLowerCase(), allData[i]);
+          }
+        }
+
+        const uniqueSorted = Array.from(seen.values()).sort((a, b) =>
+          a["Customer Name"].localeCompare(b["Customer Name"])
+        );
+
+        setCustomerDataList(uniqueSorted);
+        setCustomerOptions(uniqueSorted.map((c) => c["Customer Name"]));
+      }
+    } catch (err) {
+      console.error("Error fetching customers:", err);
+    }
+  };
+
+  const handleCustomerSelect = async (selectedName) => {
+    try {
+      const res = await fetch(
+        `https://script.google.com/macros/s/AKfycbycxrt0EVJmPU-3d98tV1l0ExACjOIsI8pM__9n1wRB5-vLas6AAj7hWDAukT-JYGzJHw/exec?action=getCustomerData&name=${encodeURIComponent(
+          selectedName
+        )}`
+      );
+      const result = await res.json();
+      if (result.success) {
+        const data = result.customerData;
+        form.setFieldsValue({
+          customerName: data["Customer Name"] || selectedName,
+          address: data["Address"] || "",
+          contact: data["Contact"] || "",
+          telephone: data["Telephone"] || "",
+          machineType: data["Machine Type"] || "",
+          serialNumber: data["Serial Number"] || "",
+          // add more mappings as needed
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching customer data:", err);
+    }
+  };
+
+  const handleSearch = (value) => {
+    fetchCustomerNames(value);
+  };
+
   const fetchSRN = async () => {
     try {
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbwHzTUlg7n8A3IXgsZLte-s66lKTK2REWkwVPTVfv82SYscF7OYDzFAH0KSbREh5ut1LA/exec"
+        "https://script.google.com/macros/s/AKfycbycxrt0EVJmPU-3d98tV1l0ExACjOIsI8pM__9n1wRB5-vLas6AAj7hWDAukT-JYGzJHw/exec"
       );
       const data = await response.json(); // ✅ Parse JSON directly
 
@@ -279,6 +512,100 @@ export default function FormComponent() {
   //   return true;
   // };
 
+  const formatDate = (date) => (date ? dayjs(date).format("DD MMM YYYY") : "");
+
+  const Tablecolumns = [
+    { title: "Service Request Number", dataIndex: "Service Request Number" },
+    { title: "Customer Name", dataIndex: "Customer Name" },
+    { title: "Machine Type", dataIndex: "Machine Type" },
+    { title: "Address", dataIndex: "Address" },
+    { title: "Serial Number", dataIndex: "Serial Number" },
+    { title: "Contact", dataIndex: "Contact" },
+    {
+      title: "Installation Date",
+      dataIndex: "Installation Date",
+      render: formatDate,
+    },
+    { title: "Telephone", dataIndex: "Telephone" },
+    { title: "Work Time", dataIndex: "Work Time" },
+    { title: "Service Technician", dataIndex: "Service Technician" },
+    {
+      title: "Departure Date",
+      dataIndex: "Departure Date",
+      render: formatDate,
+    },
+    {
+      title: "Return Date",
+      dataIndex: "Return Date",
+      render: formatDate,
+    },
+    { title: "Installation/Commission", dataIndex: "Installation/Commission" },
+    { title: "Maintenance", dataIndex: "Maintenance" },
+    { title: "Defect", dataIndex: "Defect" },
+    { title: "Customer Visit (Report)", dataIndex: "Customer Visit (Report)" },
+    { title: "Other", dataIndex: "Other" },
+    {
+      title: "Description of work/of defect/failure mode",
+      dataIndex: "Description of work/of defect/failure mode",
+    },
+    {
+      title: "Notes/Further action required",
+      dataIndex: "Notes/Further action required",
+    },
+    { title: "Cause of Failure", dataIndex: "Cause of Failure" },
+    { title: "Part Number", dataIndex: "Part Number" },
+    { title: "Description", dataIndex: "Description" },
+    { title: "Quantity", dataIndex: "Quantity\t" },
+    { title: "Note", dataIndex: "Note\t" },
+    { title: "F.O.C Commissioning", dataIndex: "F.O.C Commissioning" },
+    { title: "F.O.C Maintenance", dataIndex: "F.O.C Maintenance" },
+    { title: "Guarantee", dataIndex: "Guarantee" },
+    {
+      title: "Chargeable Commissioning",
+      dataIndex: "Chargeable Commissioning\r",
+    },
+    {
+      title: "Customer Visit (Service)",
+      dataIndex: "Customer Visit (Service)",
+    },
+    { title: "Service contract", dataIndex: "Service contract" },
+    { title: "Goodwill", dataIndex: "Goodwill" },
+    {
+      title: "Action",
+      key: "action",
+      fixed: "right",
+      render: (_, record) => (
+        <Space>
+          <Button
+            color="primary"
+            variant="filled"
+            size="large"
+            icon={<EyeOutlined />}
+            onClick={() => {
+              setSelectedRecord(record);
+              setViewModalOpen(true);
+            }}
+          >
+            View
+          </Button>
+          <Button
+            color="danger"
+            variant="filled"
+            size="large"
+            icon={<EditOutlined />}
+            onClick={() => {
+              setSelectedRecord(record);
+              editForm.setFieldsValue(record);
+              setEditModalOpen(true);
+            }}
+          >
+            Edit
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
   const columns = [
     {
       title: "Part Number",
@@ -399,6 +726,110 @@ export default function FormComponent() {
             Delete
           </Button>
         </Space>
+      ),
+    },
+  ];
+
+  const viewModalcolumns = [
+    {
+      title: "Part Number",
+      dataIndex: "partNumber",
+      key: "partNumber",
+      width: "25%", // Adjust as needed
+      render: (_, record) => (
+        <Tooltip
+          title={record.partNumber}
+          open={tooltipVisibility[record.key]?.partNumber}
+        >
+          <Input
+            value={record.partNumber}
+            onChange={(e) =>
+              handleInputChange(record.key, "partNumber", e.target.value)
+            }
+            onBlur={() => handleTooltipHide(record.key, "partNumber")}
+            onFocus={() =>
+              handleInputChange(record.key, "partNumber", record.partNumber)
+            }
+            placeholder="Enter part number"
+            maxLength={19}
+          />
+        </Tooltip>
+      ),
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+      width: "35%", // Increased size
+      render: (_, record) => (
+        <Tooltip
+          title={record.description}
+          open={tooltipVisibility[record.key]?.description}
+        >
+          <TextArea
+            value={record.description}
+            onChange={(e) =>
+              handleInputChange(record.key, "description", e.target.value)
+            }
+            onBlur={() => handleTooltipHide(record.key, "description")}
+            onFocus={() =>
+              handleInputChange(record.key, "description", record.description)
+            }
+            rows={1}
+            placeholder="Enter description"
+            maxLength={30}
+          />
+        </Tooltip>
+      ),
+    },
+    {
+      title: "Quantity",
+      dataIndex: "quantity",
+      key: "quantity",
+      width: "10%", // Reduced size
+      render: (_, record) => (
+        <Tooltip
+          title={record.quantity}
+          open={tooltipVisibility[record.key]?.quantity}
+        >
+          <InputNumber
+            min={1}
+            value={record.quantity}
+            onChange={
+              (value) => handleInputChange(record.key, "quantity", value ?? 1) // Prevent null issues
+            }
+            onFocus={() =>
+              setTooltipVisibility((prev) => ({
+                ...prev,
+                [record.key]: { ...prev[record.key], quantity: true },
+              }))
+            }
+            onBlur={() => handleTooltipHide(record.key, "quantity")}
+            style={{ width: "100%" }}
+            placeholder="Qty"
+          />
+        </Tooltip>
+      ),
+    },
+    {
+      title: "Note",
+      dataIndex: "note",
+      key: "note",
+      width: "30%", // Increased size
+      render: (_, record) => (
+        <Tooltip title={record.note} open={tooltipVisibility[record.key]?.note}>
+          <TextArea
+            value={record.note}
+            onChange={(e) =>
+              handleInputChange(record.key, "note", e.target.value)
+            }
+            onBlur={() => handleTooltipHide(record.key, "note")}
+            onFocus={() => handleInputChange(record.key, "note", record.note)}
+            placeholder="Enter note"
+            maxLength={30}
+            rows={1}
+          />
+        </Tooltip>
       ),
     },
   ];
@@ -642,8 +1073,8 @@ export default function FormComponent() {
     nextY = 51;
 
     addField("Telephone", formData.telephone, startX, nextY + 4);
-      // nextY = 58;
-      nextY = 54;
+    // nextY = 58;
+    nextY = 54;
 
     addField("Work Time", formData.workTime, rightX, nextY + 7);
     // nextY = 63;
@@ -672,7 +1103,7 @@ export default function FormComponent() {
       "Maintenance",
       "Defect",
       // "Customer Visit",
-      "Customer Visit (Report)", 
+      "Customer Visit (Report)",
       "Other",
     ];
     const spacing = [48, 33, 25, 48, 20];
@@ -1003,19 +1434,18 @@ export default function FormComponent() {
         doc.setTextColor("#0C3C74");
         doc.text("Signature of service manager:", col2X, nextY);
         doc.setTextColor(0, 0, 0);
-    
+
         doc.addImage(
           signatureManager, // ✅ Use uploaded image (Base64)
-            "PNG",
-            col2X,
-            baseY + 2,
-            signatureWidth,
-            signatureHeight
+          "PNG",
+          col2X,
+          baseY + 2,
+          signatureWidth,
+          signatureHeight
         );
-    }
-    else {
-      doc.text("No signature uploaded", 10, 80);
-    }
+      } else {
+        doc.text("No signature uploaded", 10, 80);
+      }
 
       // Adjust Y for the next row based on the tallest signature in Row 1
       nextY = baseY;
@@ -1088,7 +1518,9 @@ export default function FormComponent() {
     };
   }, []);
 
-  const nowDubai = dayjs().tz("Asia/Dubai").format("YYYY-MM-DD hh:mm A");
+  // const nowDubai = dayjs().tz("Asia/Dubai").format("YYYY-MM-DD hh:mm A");
+  const nowDubai = dayjs().tz("Asia/Dubai").format("DD-MM-YYYY hh:mm A");
+
   // console.log("Dubai Time:", nowDubai);
 
   const handleSubmit = async (values) => {
@@ -1153,22 +1585,26 @@ export default function FormComponent() {
       //     note: row.note?.trim() || "",
       //   }));
       const partsUsed = data
-      .filter((row) => row.partNumber?.trim() || row.description?.trim() || row.quantity) 
-      .map((row) => ({
-        partNumber: row.partNumber?.trim() || "", 
-        description: row.description?.trim() || "", 
-        // quantity: isNaN(Number(row.quantity)) ? 0 : Number(row.quantity), 
-        quantity: isNaN(Number(row.quantity)) || row.quantity === "" ? "" : Number(row.quantity),
+        .filter(
+          (row) =>
+            row.partNumber?.trim() || row.description?.trim() || row.quantity
+        )
+        .map((row) => ({
+          partNumber: row.partNumber?.trim() || "",
+          description: row.description?.trim() || "",
+          // quantity: isNaN(Number(row.quantity)) ? 0 : Number(row.quantity),
+          quantity:
+            isNaN(Number(row.quantity)) || row.quantity === ""
+              ? ""
+              : Number(row.quantity),
 
-        note: row.note?.trim() || "",
-      }));
-    
-    // ✅ Show warning but allow submission
-    if (partsUsed.length === 0) {
-      // message.warning("Parts Used table is empty. Proceeding with submission.");
-    }
-    
+          note: row.note?.trim() || "",
+        }));
 
+      // ✅ Show warning but allow submission
+      if (partsUsed.length === 0) {
+        // message.warning("Parts Used table is empty. Proceeding with submission.");
+      }
 
       // if (partsUsed.length === 0) {
       //   message.error("Please fill in the fields in the Parts Used table");
@@ -1182,9 +1618,7 @@ export default function FormComponent() {
         return;
       }
       if (!signatureManager) {
-        message.error(
-          "Please upload the service manager's signature."
-        );
+        message.error("Please upload the service manager's signature.");
         return;
       }
       if (!signatureCustomer) {
@@ -1195,7 +1629,7 @@ export default function FormComponent() {
       }
 
       const convertToDubaiTime = (date) => {
-        return date ? dayjs(date).tz("Asia/Dubai").format("YYYY-MM-DD") : "N/A";
+        return date ? dayjs(date).tz("Asia/Dubai").format("DD-MM-YYYY") : "N/A";
       };
 
       // ✅ Prepare final form data
@@ -1226,7 +1660,7 @@ export default function FormComponent() {
         // causeOfFailure: values["cause of failure"],
         causeOfFailure: causeOfFailure,
         // partsUsed: partsUsed,
-        partsUsed: partsUsed.length > 0 ? partsUsed : [], 
+        partsUsed: partsUsed.length > 0 ? partsUsed : [],
         signatures: {
           technician: sigTechnician.current?.toDataURL(),
           manager: sigManager.current?.toDataURL(),
@@ -1243,7 +1677,7 @@ export default function FormComponent() {
       setLoading(true);
 
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbwHzTUlg7n8A3IXgsZLte-s66lKTK2REWkwVPTVfv82SYscF7OYDzFAH0KSbREh5ut1LA/exec",
+        "https://script.google.com/macros/s/AKfycbycxrt0EVJmPU-3d98tV1l0ExACjOIsI8pM__9n1wRB5-vLas6AAj7hWDAukT-JYGzJHw/exec",
         {
           method: "POST",
           // headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -1279,7 +1713,7 @@ export default function FormComponent() {
         sigTechnician.current?.clear();
         sigManager.current?.clear();
         sigCustomer.current?.clear();
-        setSignatureManager(null); 
+        setSignatureManager(null);
         await fetchSRN();
       } else {
         throw new Error(result.message);
@@ -1332,14 +1766,87 @@ export default function FormComponent() {
                             required: true,
                             message: "Please enter customer name",
                           },
-                          {
-                            pattern: /^[A-Za-z. ]+$/,
-                            message:
-                              "Only letters, spaces, and '.' are allowed",
-                          },
                         ]}
                       >
-                        <Input placeholder="Enter customer name" />
+                        <AutoComplete
+                          allowClear
+                          showSearch
+                          placeholder="Type or select customer name"
+                          onSearch={(value) => {
+                            const filtered = customerDataList
+                              .map((item) => item["Customer Name"])
+                              .filter(Boolean)
+                              .filter(
+                                (name, index, self) =>
+                                  self.findIndex(
+                                    (n) =>
+                                      n.toLowerCase() === name.toLowerCase()
+                                  ) === index
+                              )
+                              .filter((name) =>
+                                name.toLowerCase().includes(value.toLowerCase())
+                              )
+                              .sort((a, b) => a.localeCompare(b));
+
+                            setCustomerOptions(filtered);
+                          }}
+                          onChange={(value) => {
+                            form.setFieldsValue({ customerName: value });
+
+                            if (!value || typeof value !== "string") {
+                              form.setFieldsValue({
+                                address: "",
+                                contact: "",
+                                telephone: "",
+                                machineType: "",
+                                serialNumber: "",
+                              });
+                              setAddress("");
+                              setSerialNumber("");
+                              return;
+                            }
+
+                            const matched = customerDataList.find(
+                              (c) =>
+                                c["Customer Name"]?.toLowerCase() ===
+                                value.toLowerCase()
+                            );
+
+                            if (matched) {
+                              form.setFieldsValue({
+                                address: matched["Address"] || "",
+                                contact: matched["Contact"] || "",
+                                telephone: matched["Telephone"] || "",
+                                machineType: matched["Machine Type"] || "",
+                                serialNumber: matched["Serial Number"] || "",
+                                installationDate: matched["Installation Date"]
+                                  ? dayjs(matched["Installation Date"])
+                                  : null,
+                              });
+                              setAddress(matched["Address"] || "");
+                              setSerialNumber(matched["Serial Number"] || "");
+                            } else {
+                              form.setFieldsValue({
+                                address: "",
+                                contact: "",
+                                telephone: "",
+                                machineType: "",
+                                serialNumber: "",
+                              });
+                              setAddress("");
+                              setSerialNumber("");
+                            }
+                          }}
+                          options={customerOptions.map((name) => ({
+                            label: name,
+                            value: name,
+                          }))}
+                          filterOption={(inputValue, option) =>
+                            option?.value
+                              ?.toLowerCase()
+                              .includes(inputValue.toLowerCase())
+                          }
+                        />
                       </Form.Item>
 
                       <Form.Item
@@ -1444,7 +1951,7 @@ export default function FormComponent() {
                         <DatePicker
                           className="w-100"
                           // showTime
-                          format="YYYY-MM-DD" // Dubai Time Format
+                          format="DD-MM-YYYY" // Dubai Time Format
                           value={
                             form.getFieldValue("installationDate")
                               ? dayjs(
@@ -1524,7 +2031,8 @@ export default function FormComponent() {
                         <DatePicker
                           className="w-100"
                           // showTime
-                          format="YYYY-MM-DD" // Dubai Time Format
+                          // format="YYYY-MM-DD" // Dubai Time Format
+                          format="DD-MM-YYYY" // Dubai Time Format
                           value={
                             form.getFieldValue("departureDate")
                               ? dayjs(form.getFieldValue("departureDate")).tz(
@@ -1560,7 +2068,8 @@ export default function FormComponent() {
                         <DatePicker
                           className="w-100"
                           // showTime
-                          format="YYYY-MM-DD" // Dubai Time Format
+                          // format="YYYY-MM-DD" // Dubai Time Format
+                          format="DD-MM-YYYY"
                           value={
                             form.getFieldValue("returnDate")
                               ? dayjs(form.getFieldValue("returnDate")).tz(
@@ -1748,76 +2257,75 @@ export default function FormComponent() {
                       </Form.Item>
                     </div> */}
 
-<div className="col-12 col-lg-6 col-xl-4 mt-2 d-flex justify-content-center">
+                    <div className="col-12 col-lg-6 col-xl-4 mt-2 d-flex justify-content-center">
                       <div>
                         {/* <label className="form-label">
                           Signature of Service Manager
                         </label> */}
                         <Form.Item
-  label="Signature of Service Manager"
-  name="serviceManagerSignature" required
-  // rules={[
-  //   {
-  //     required: true,
-  //     message: "Service Manager's signature is required.",
-  //   },
-  // ]}
->
-
-                        <div
-                          className="border rounded border-3 p-2 d-flex flex-column align-items-center"
-                          style={{
-                            width: canvasSize.width, // ✅ Same width as other signatures
-                            height: canvasSize.height, // ✅ Same height as other signatures
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            backgroundColor: "#fff",
-                            overflow: "hidden", // ✅ Ensures image fits nicely
-                          }}
+                          label="Signature of Service Manager"
+                          name="serviceManagerSignature"
+                          required
+                          // rules={[
+                          //   {
+                          //     required: true,
+                          //     message: "Service Manager's signature is required.",
+                          //   },
+                          // ]}
                         >
-                          {signatureManager ? (
-                            // ✅ Show uploaded image inside border
-                            <Image
-                              src={signatureManager}
-                              alt="Manager Signature"
-                              width="100%"
-                              height="100%"
-                              style={{ objectFit: "contain" }}
-                            />
-                          ) : (
-                            // ✅ Show Upload Button when no image
-                            <Upload
-                              showUploadList={false} // ✅ Hide default file name list
-                              accept="image/png, image/jpeg"
-                              beforeUpload={(file) => {
-                                handleUpload({ file }); // ✅ Handle upload manually
-                                return false; // ✅ Prevent automatic upload
-                              }}
-                              className="d-flex"
-                            >
-                              <Button icon={<UploadOutlined />}>
-                                Upload Signature
-                              </Button>
-                            </Upload>
-                          )}
-                        </div>
-
-                        {/* Clear Button (Only visible when image is uploaded) */}
-                        {signatureManager && (
-                          <Button
-                            type="primary"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={clearManagerSignature}
-                            className="mt-2"
+                          <div
+                            className="border rounded border-3 p-2 d-flex flex-column align-items-center"
+                            style={{
+                              width: canvasSize.width, // ✅ Same width as other signatures
+                              height: canvasSize.height, // ✅ Same height as other signatures
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              backgroundColor: "#fff",
+                              overflow: "hidden", // ✅ Ensures image fits nicely
+                            }}
                           >
-                            Clear Signature
-                          </Button>
-                        )}
+                            {signatureManager ? (
+                              // ✅ Show uploaded image inside border
+                              <Image
+                                src={signatureManager}
+                                alt="Manager Signature"
+                                width="100%"
+                                height="100%"
+                                style={{ objectFit: "contain" }}
+                              />
+                            ) : (
+                              // ✅ Show Upload Button when no image
+                              <Upload
+                                showUploadList={false} // ✅ Hide default file name list
+                                accept="image/png, image/jpeg"
+                                beforeUpload={(file) => {
+                                  handleUpload({ file }); // ✅ Handle upload manually
+                                  return false; // ✅ Prevent automatic upload
+                                }}
+                                className="d-flex"
+                              >
+                                <Button icon={<UploadOutlined />}>
+                                  Upload Signature
+                                </Button>
+                              </Upload>
+                            )}
+                          </div>
+
+                          {/* Clear Button (Only visible when image is uploaded) */}
+                          {signatureManager && (
+                            <Button
+                              type="primary"
+                              danger
+                              icon={<DeleteOutlined />}
+                              onClick={clearManagerSignature}
+                              className="mt-2"
+                            >
+                              Clear Signature
+                            </Button>
+                          )}
                         </Form.Item>
                       </div>
-                      
                     </div>
 
                     {/* Customer Signature */}
@@ -1934,8 +2442,6 @@ export default function FormComponent() {
                         )}
                       </div>
                     </div> */}
-                  
-                    
                   </div>
                   <div className="text-center mt-4 ">
                     <Button
@@ -1950,6 +2456,160 @@ export default function FormComponent() {
                   </div>
                 </Form>
               </div>
+            </div>
+          </div>
+          <div className="container-fluid  mt-3">
+            <div className="row">
+              <div className="col-12">
+                <Card>
+                  <Table
+                    dataSource={customerDataList}
+                    columns={Tablecolumns}
+                    rowKey={(record) => record["Service Request Number"]}
+                    scroll={{ x: "max-content" }}
+                  />
+                </Card>
+              </div>
+              <Modal
+                width={1200}
+                style={{ top: "1px" }}
+                open={viewModalOpen}
+                onCancel={() => setViewModalOpen(false)}
+                footer={null}
+              >
+                <h3>View Service Form Record</h3>
+                <Form form={viewForm} layout="vertical">
+                  <div className="row">
+                    <div className="col-12 col-md-6">
+                      <Form.Item label="Customer Name" name="customerName">
+                        <Input readOnly />
+                      </Form.Item>
+
+                      <Form.Item label="Address" name="address">
+                        <TextArea
+                          readOnly
+                          autoSize={{ minRows: 3, maxRows: 3 }}
+                        />
+                      </Form.Item>
+
+                      <Form.Item label="Contact" name="contact">
+                        <Input readOnly />
+                      </Form.Item>
+
+                      <Form.Item label="Telephone" name="telephone">
+                        <Input readOnly />
+                      </Form.Item>
+                    </div>
+
+                    <div className="col-12 col-md-6">
+                      <Form.Item label="Machine Type" name="machineType">
+                        <Input readOnly />
+                      </Form.Item>
+
+                      <Form.Item label="Serial Number" name="serialNumber">
+                        <TextArea
+                          readOnly
+                          autoSize={{ minRows: 3, maxRows: 3 }}
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Installation Date"
+                        name="installationDate"
+                      >
+                        <DatePicker
+                          className="w-100"
+                          format="DD-MM-YYYY"
+                          disabled
+                        />
+                      </Form.Item>
+
+                      <Form.Item label="Work Time" name="workTime">
+                        <Input readOnly />
+                      </Form.Item>
+                    </div>
+
+                    <div className="col-12 col-lg-4">
+                      <Form.Item
+                        label="Service Technician"
+                        name="serviceTechnician"
+                        readOnly
+                      >
+                        <Input readOnly />
+                        </Form.Item>
+                    </div>
+
+                    <div className="col-12 col-lg-4">
+                      <Form.Item label="Departure Date" name="departureDate">
+                        <DatePicker
+                          className="w-100"
+                          format="DD-MM-YYYY"
+                          disabled
+                        />
+                      </Form.Item>
+                    </div>
+
+                    <div className="col-12 col-lg-4">
+                      <Form.Item label="Return Date" name="returnDate" >
+                        <DatePicker
+                          className="w-100"
+                          format="DD-MM-YYYY"
+                          disabled
+                        />
+                      </Form.Item>
+                    </div>
+
+                    <div className="col-12">
+                      <Form.Item label="Report" name="report">
+                        <Checkbox.Group options={reportOptions} readOnly />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Description of work/of defect/failure mode"
+                        name="description of work/of defect/failure mode"
+                      >
+                        <TextArea
+                          readOnly
+                          autoSize={{ minRows: 5, maxRows: 5 }}
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Cause of Failure"
+                        name="cause of failure"
+                      >
+                        <TextArea
+                          readOnly
+                          autoSize={{ minRows: 3, maxRows: 3 }}
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        label="Notes/Further action required"
+                        name="notes/further action required"
+                      >
+                        <TextArea
+                          readOnly
+                          autoSize={{ minRows: 3, maxRows: 3 }}
+                        />
+                      </Form.Item>
+
+                      <h6>Parts Used</h6>
+                      <Table
+                        columns={viewModalcolumns}
+                        dataSource={viewTabledata}
+                        pagination={false}
+                      />
+                    </div>
+
+                    <div className="col-12 mt-4">
+                      <Form.Item label="Service Type" name="serviceType">
+                        <Checkbox.Group options={serviceOptions} readOnly />
+                      </Form.Item>
+                    </div>
+                  </div>
+                </Form>
+              </Modal>
             </div>
           </div>
         </div>
