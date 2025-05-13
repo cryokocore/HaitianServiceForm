@@ -62,6 +62,20 @@ font-weight: bolder;
   color: #1364AE !important;
   border: 2px solid #1364AE !important; /* Keeps border on hover */
 }
+.editsubmitbutton {
+  width: 30%;
+  font-size: 18px !important;
+  color: white !important;
+  background-color: #1364AE !important;
+  border: 2px solid #1364AE !important; /* Ensures border visibility */
+  transition: all 0.3s ease-in-out; /* Smooth transition */
+}
+
+.editsubmitbutton:hover {
+  background-color: white !important;
+  color: #1364AE !important;
+  border: 2px solid #1364AE !important; /* Keeps border on hover */
+}
 
 /* Media Queries  Style */
 
@@ -89,6 +103,9 @@ font-weight: bolder;
     }
     .submitbutton {
       width: 50%;
+    }
+     .editsubmitbutton {
+      width: 30%;
     }
 }
 
