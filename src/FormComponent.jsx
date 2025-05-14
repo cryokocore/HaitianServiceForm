@@ -122,8 +122,10 @@ export default function FormComponent() {
     }
 
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreviewUrl(reader.result); // base64 preview
+    reader.onload = () => {
+        const base64String = reader.result; // This should be full 'data:image/png;base64,...'
+
+      setPreviewUrl(base64String); // base64 preview
       setCauseOfFailureImage(file); // store actual file
     };
     reader.readAsDataURL(file);
@@ -147,12 +149,31 @@ export default function FormComponent() {
   //   reader.readAsDataURL(file);
   // };
 
-  const handleCauseImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setCauseOfFailureImage(file);
-    }
+  // const handleCauseImageUpload = (event) => {
+  //   const file = event.target.files[0];
+  //   if (file) {
+  //     setCauseOfFailureImage(file);
+  //   }
+  // };
+
+
+
+const handleCauseImageUpload = ({file}) => {
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setCauseOfFailureImage(file);
+    setPreviewUrl(reader.result);
+      const base64 = reader.result;
+  console.log("Sending base64:", base64);
+    setCauseImageBase64(reader.result); // ✅ Needed for backend
+        console.log("Base64 Image URL:", reader.result); // ✅ Console it here
+
   };
+  reader.readAsDataURL(file);
+  return false; // Prevent Upload component from auto-uploading
+};
+
+
 
   useEffect(() => {
     if (selectedRecord && viewModalOpen) {
@@ -183,6 +204,14 @@ export default function FormComponent() {
         (option) => selectedRecord[option] === "Yes"
       );
 
+      const parseDate = (dateStr) => {
+        return dayjs(
+          dateStr,
+          ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
+          true
+        );
+      };
+
       viewForm.setFieldsValue({
         srn: selectedRecord["Service Request Number"],
         customerName: selectedRecord["Customer Name"],
@@ -192,13 +221,19 @@ export default function FormComponent() {
         machineType: selectedRecord["Machine Type"],
         serialNumber: selectedRecord["Serial Number"],
         installationDate: selectedRecord["Installation Date"]
-          ? dayjs(selectedRecord["Installation Date"])
+          ? parseDate(selectedRecord["Installation Date"])
           : null,
+        // departureDate: selectedRecord["Departure Date"]
+        //   ? dayjs(selectedRecord["Departure Date"], "DD-MM-YYYY")
+        //   : null,
+        // returnDate: selectedRecord["Return Date"]
+        //   ? dayjs(selectedRecord["Return Date"])
+        //   : null,
         departureDate: selectedRecord["Departure Date"]
-          ? dayjs(selectedRecord["Departure Date"], "DD-MM-YYYY")
+          ? parseDate(selectedRecord["Departure Date"])
           : null,
         returnDate: selectedRecord["Return Date"]
-          ? dayjs(selectedRecord["Return Date"])
+          ? parseDate(selectedRecord["Return Date"])
           : null,
 
         workTime: selectedRecord["Work Time"],
@@ -269,6 +304,14 @@ export default function FormComponent() {
         (option) => selectedRecord[option] === "Yes"
       );
 
+      const parseDate = (dateStr) => {
+        return dayjs(
+          dateStr,
+          ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
+          true
+        );
+      };
+
       editForm.setFieldsValue({
         editsrn: selectedRecord["Service Request Number"],
         customerName: selectedRecord["Customer Name"],
@@ -278,13 +321,13 @@ export default function FormComponent() {
         machineType: selectedRecord["Machine Type"],
         serialNumber: selectedRecord["Serial Number"],
         installationDate: selectedRecord["Installation Date"]
-          ? dayjs(selectedRecord["Installation Date"])
+          ? parseDate(selectedRecord["Installation Date"])
           : null,
         departureDate: selectedRecord["Departure Date"]
-          ? dayjs(selectedRecord["Departure Date"], "DD-MM-YYYY")
+          ? parseDate(selectedRecord["Departure Date"])
           : null,
         returnDate: selectedRecord["Return Date"]
-          ? dayjs(selectedRecord["Return Date"])
+          ? parseDate(selectedRecord["Return Date"])
           : null,
 
         workTime: selectedRecord["Work Time"],
@@ -294,11 +337,32 @@ export default function FormComponent() {
         ["description of work/of defect/failure mode"]:
           selectedRecord["Description of work/of defect/failure mode"],
         ["cause of failure"]: selectedRecord["Cause of Failure"],
+
         ["notes/further action required"]:
           selectedRecord["Notes/Further action required"] ||
           selectedRecord["Note "] ||
           selectedRecord["Note\t"], // all variants
       });
+
+      const fullCause = selectedRecord["Cause of Failure"] || "";
+
+      // Extract image link
+      const match = fullCause.match(
+        /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/
+      );
+      const fileId = match ? match[1] : null;
+      const previewImage = fileId
+        ? `https://drive.google.com/uc?export=view&id=${fileId}` // direct viewable image
+        : null;
+
+      // Remove image link line from cause text
+      const causeTextOnly = fullCause
+        .replace(/Image:\s*https:\/\/drive\.google\.com\/file\/d\/[^\s]+/i, "")
+        .trim();
+
+      setcauseOfFailure(causeTextOnly);
+      setPreviewUrl(previewImage);
+      setCauseOfFailureImage(null);
 
       // ✅ Set "Parts Used" table data
       const partRows = (selectedRecord.partsUsed || []).map((part, index) => ({
@@ -371,7 +435,7 @@ export default function FormComponent() {
   }, []);
   const loadAllCustomerData = async () => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbzNtcZBy1d26MqjBUGDRPlVCUT0tRDE0mhGtV_20lQehh810CyxV8ntKK7eA0uRXen3uA/exec?action=getAllCustomerData"
+      "https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec?action=getAllCustomerData"
     );
     const result = await res.json();
 
@@ -399,7 +463,7 @@ export default function FormComponent() {
   const fetchCustomerNames = async () => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycbzNtcZBy1d26MqjBUGDRPlVCUT0tRDE0mhGtV_20lQehh810CyxV8ntKK7eA0uRXen3uA/exec?action=getAllCustomerData`
+        `https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec?action=getAllCustomerData`
       );
       const result = await res.json();
 
@@ -429,7 +493,7 @@ export default function FormComponent() {
   const handleCustomerSelect = async (selectedName) => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycbzNtcZBy1d26MqjBUGDRPlVCUT0tRDE0mhGtV_20lQehh810CyxV8ntKK7eA0uRXen3uA/exec?action=getCustomerData&name=${encodeURIComponent(
+        `https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec?action=getCustomerData&name=${encodeURIComponent(
           selectedName
         )}`
       );
@@ -458,7 +522,7 @@ export default function FormComponent() {
   const fetchSRN = async () => {
     try {
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbzNtcZBy1d26MqjBUGDRPlVCUT0tRDE0mhGtV_20lQehh810CyxV8ntKK7eA0uRXen3uA/exec"
+        "https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec"
       );
       const data = await response.json(); // ✅ Parse JSON directly
 
@@ -749,7 +813,14 @@ export default function FormComponent() {
   //   return true;
   // };
 
-  const formatDate = (date) => (date ? dayjs(date).format("DD MMM YYYY") : "");
+  const formatDate = (date) => {
+    const parsed = dayjs(
+      date,
+      ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
+      true
+    );
+    return parsed.isValid() ? parsed.format("DD-MM-YYYY") : "";
+  };
 
   const Tablecolumns = [
     { title: "Service Request Number", dataIndex: "Service Request Number" },
@@ -761,7 +832,7 @@ export default function FormComponent() {
     {
       title: "Installation Date",
       dataIndex: "Installation Date",
-      render: formatDate,
+      render: (date) => formatDate(date),
     },
     { title: "Telephone", dataIndex: "Telephone" },
     { title: "Work Time", dataIndex: "Work Time" },
@@ -769,12 +840,12 @@ export default function FormComponent() {
     {
       title: "Departure Date",
       dataIndex: "Departure Date",
-      render: formatDate,
+      render: (date) => formatDate(date),
     },
     {
       title: "Return Date",
       dataIndex: "Return Date",
-      render: formatDate,
+      render: (date) => formatDate(date),
     },
     { title: "Installation/Commission", dataIndex: "Installation/Commission" },
     { title: "Maintenance", dataIndex: "Maintenance" },
@@ -2675,7 +2746,7 @@ export default function FormComponent() {
 
     // Sending the file to the Google Apps Script for uploading to Drive
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbzNtcZBy1d26MqjBUGDRPlVCUT0tRDE0mhGtV_20lQehh810CyxV8ntKK7eA0uRXen3uA/exec",
+      "https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec",
       {
         method: "POST",
         headers: {
@@ -2870,10 +2941,18 @@ export default function FormComponent() {
       });
 
       // ✅ 3. Build partsUsed
-      const partsUsed = data.filter(
-        (row) =>
-          row.partNumber?.trim() || row.description?.trim() || row.quantity
-      );
+      // const partsUsed = data.filter(
+      //   (row) =>
+      //     row.partNumber?.trim() || row.description?.trim() || row.quantity
+      // );
+
+      const cleanedPartsUsed = data.map(row => ({
+  partNumber: typeof row.partNumber === "string" ? row.partNumber.trim() : "",
+  description: typeof row.description === "string" ? row.description.trim() : "",
+  quantity: row.quantity ? parseFloat(row.quantity) : "",
+  note: typeof row.note === "string" ? row.note.trim() : "",
+}));
+
 
       const convertToDubaiTime = (date) =>
         date ? dayjs(date).tz("Asia/Dubai").format("DD-MM-YYYY") : "N/A";
@@ -2904,7 +2983,9 @@ export default function FormComponent() {
       formData.append("causeOfFailure", causeOfFailurePayload);
       console.log("Base64 image preview:", causeImageBase64?.slice(0, 100));
       formData.append("causeImageBase64", causeImageBase64);
-      formData.append("partsUsed", JSON.stringify(partsUsed));
+      // formData.append("partsUsed", JSON.stringify(partsUsed));
+      formData.append("partsUsed", JSON.stringify(cleanedPartsUsed));
+
 
       // Checkboxes
       [...reportOptions, ...serviceOptions].forEach((option) => {
@@ -2918,9 +2999,11 @@ export default function FormComponent() {
       });
 
       setLoading(true);
+      console.log("Submitting base64:", causeImageBase64);
+
 
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbzNtcZBy1d26MqjBUGDRPlVCUT0tRDE0mhGtV_20lQehh810CyxV8ntKK7eA0uRXen3uA/exec",
+        "https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec",
         {
           method: "POST",
           body: formData,
@@ -2936,77 +3019,82 @@ export default function FormComponent() {
 
       message.success("Form submitted successfully!");
       const signatures = {
-  technician: signatureTechnician,
-  manager: signatureManager,
-  customer: signatureCustomer,
-};
-const checkboxValues = {};
+        technician: signatureTechnician,
+        manager: signatureManager,
+        customer: signatureCustomer,
+      };
+      const checkboxValues = {};
 
-// Initialize all checkboxes with false
-[...reportOptions, ...serviceOptions].forEach((option) => {
-  checkboxValues[option] = false;
-});
+      // Initialize all checkboxes with false
+      [...reportOptions, ...serviceOptions].forEach((option) => {
+        checkboxValues[option] = false;
+      });
 
-// Set the checkboxes that are checked to true
-values.report?.forEach((option) => {
-  if (checkboxValues.hasOwnProperty(option)) checkboxValues[option] = true;
-});
-values.serviceType?.forEach((option) => {
-  if (checkboxValues.hasOwnProperty(option)) checkboxValues[option] = true;
-});
+      // Set the checkboxes that are checked to true
+      values.report?.forEach((option) => {
+        if (checkboxValues.hasOwnProperty(option))
+          checkboxValues[option] = true;
+      });
+      values.serviceType?.forEach((option) => {
+        if (checkboxValues.hasOwnProperty(option))
+          checkboxValues[option] = true;
+      });
 
-          // generatePDF({ ...formData, signatures }, checkboxValues, partsUsed);
-          const pdfPayload = {
-  srn,
-  customerName: values.customerName,
-  machineType: values.machineType,
-  address,
-  serialNumber: values.serialNumber,
-  contact: values.contact,
-  installationDate: convertToDubaiTime(values.installationDate),
-  telephone: values.telephone,
-  workTime: values.workTime,
-  serviceTechnician: values.serviceTechnician,
-  departureDate: convertToDubaiTime(values.departureDate),
-  returnDate: convertToDubaiTime(values.returnDate),
-  description: descriptionText,
-  notes,
-  causeOfFailure: causeOfFailureText,
-  causeImageBase64,
-  partsUsed,
-  signatures,
-};
+      // generatePDF({ ...formData, signatures }, checkboxValues, partsUsed);
+      const pdfPayload = {
+        srn,
+        customerName: values.customerName,
+        machineType: values.machineType,
+        address,
+        serialNumber: values.serialNumber,
+        contact: values.contact,
+        installationDate: convertToDubaiTime(values.installationDate),
+        telephone: values.telephone,
+        workTime: values.workTime,
+        serviceTechnician: values.serviceTechnician,
+        departureDate: convertToDubaiTime(values.departureDate),
+        returnDate: convertToDubaiTime(values.returnDate),
+        description: descriptionText,
+        notes,
+        causeOfFailure: causeOfFailureText,
+        causeImageBase64,
+partsUsed: cleanedPartsUsed,
+        signatures,
+      };
 
-generatePDF(pdfPayload, checkboxValues, partsUsed);
+      // generatePDF(pdfPayload, checkboxValues, partsUsed);
+      generatePDF(pdfPayload, checkboxValues, cleanedPartsUsed);
 
 
-        // ✅ Reset form only on success
-        form.resetFields();
-        setAddress("");
-        setSerialNumber("");
-        setDescriptionText("");
-        // setcauseOfFailure("");
-        setCauseOfFailureText("");
-    setCauseOfFailureImage(null);
-        setNotes("");
+      // ✅ Reset form only on success
+      form.resetFields();
+      setAddress("");
+      setSerialNumber("");
+      setDescriptionText("");
+      // setcauseOfFailure("");
+      setCauseOfFailureText("");
+      setCauseOfFailureImage(null);
+      setPreviewUrl(null);
 
-        setData([
-          {
-            key: Date.now(),
-            partNumber: "",
-            description: "",
-            quantity: "",
-            note: "",
-          },
-        ]);
+      setNotes("");
 
-        sigTechnician.current?.clear();
-        sigManager.current?.clear();
-        sigCustomer.current?.clear();
-        setSignatureManager(null);
+      setData([
+        {
+          key: Date.now(),
+          partNumber: "",
+          description: "",
+          quantity: "",
+          note: "",
+        },
+      ]);
 
-        await fetchSRN();
-        loadAllCustomerData();
+      sigTechnician.current?.clear();
+      sigManager.current?.clear();
+      sigCustomer.current?.clear();
+      setSignatureManager(null);
+
+      await fetchSRN();
+      loadAllCustomerData();
     } catch (err) {
       console.error("Submission error:", err);
       message.error("Something went wrong.");
@@ -3026,138 +3114,249 @@ generatePDF(pdfPayload, checkboxValues, partsUsed);
     loadAllCustomerData();
   };
 
-  const handleEditSubmit = async () => {
-    setIsEditSubmitting(true);
+  // const handleEditSubmit = async () => {
+  //   setIsEditSubmitting(true);
 
+  //   try {
+  //     // Validate fields — stops if required fields are empty
+  //     const values = await editForm.validateFields();
+
+  //     // Additional manual validation for signature
+  //     if (!signatureTechnician) {
+  //       message.error(
+  //         "Please provide the Service Technician signature and click 'Save Signature."
+  //       );
+  //       return;
+  //     }
+  //     if (!signatureManager) {
+  //       message.error("Please upload the service manager's signature.");
+  //       return;
+  //     }
+  //     if (!signatureCustomer) {
+  //       message.error(
+  //         "Please provide the Customer signature and click 'Save Signature."
+  //       );
+  //       return;
+  //     }
+
+  //     let checkboxValues = {};
+  //     [...reportOptions, ...serviceOptions].forEach((option) => {
+  //       checkboxValues[option] = false;
+  //     });
+
+  //     if (values.report) {
+  //       values.report.forEach((option) => {
+  //         checkboxValues[option] = true;
+  //       });
+  //     }
+
+  //     if (values.serviceType) {
+  //       values.serviceType.forEach((option) => {
+  //         checkboxValues[option] = true;
+  //       });
+  //     }
+
+  //     const partsUsed = editTabledata
+  //       .filter(
+  //         (row) =>
+  //           String(row.partNumber || "").trim() ||
+  //           String(row.description || "").trim() ||
+  //           row.quantity
+  //       )
+  //       .map((row) => ({
+  //         partNumber: String(row.partNumber || "").trim(),
+  //         description: String(row.description || "").trim(),
+  //         quantity:
+  //           isNaN(Number(row.quantity)) || row.quantity === ""
+  //             ? ""
+  //             : Number(row.quantity),
+  //         note: String(row.note || "").trim(),
+  //       }));
+
+  //     const payload = {
+  //       action: "updateData",
+  //       srn: selectedRecord["Service Request Number"],
+  //       customerName: values.customerName,
+  //       address: values.address,
+  //       contact: values.contact,
+  //       telephone: values.telephone,
+  //       machineType: values.machineType,
+  //       serialNumber: values.serialNumber,
+  //       installationDate: values.installationDate
+  //         ? values.installationDate.format("DD-MM-YYYY")
+  //         : "",
+  //       departureDate: values.departureDate
+  //         ? values.departureDate.format("DD-MM-YYYY")
+  //         : "",
+  //       returnDate: values.returnDate
+  //         ? values.returnDate.format("DD-MM-YYYY")
+  //         : "",
+  //       workTime: values.workTime,
+  //       serviceTechnician: values.serviceTechnician,
+  //       description: values["description of work/of defect/failure mode"],
+  //       causeOfFailure: values["cause of failure"],
+  //       notes: values["notes/further action required"],
+  //       partsUsed: JSON.stringify(partsUsed),
+  //       signatures: {
+  //         technician: sigTechnician.current?.toDataURL(),
+  //         manager: sigManager.current?.toDataURL(),
+  //         customer: sigCustomer.current?.toDataURL(),
+  //       },
+  //       ...Object.fromEntries(
+  //         Object.entries(checkboxValues).map(([key, value]) => [
+  //           key,
+  //           String(value),
+  //         ])
+  //       ),
+  //     };
+
+  //     const formBody = Object.entries(payload)
+  //       .map(
+  //         ([key, value]) =>
+  //           `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+  //       )
+  //       .join("&");
+  //     setEditLoading(true);
+  //     const res = await fetch(
+  //       "https://script.google.com/macros/s/AKfycbzNtcZBy1d26MqjBUGDRPlVCUT0tRDE0mhGtV_20lQehh810CyxV8ntKK7eA0uRXen3uA/exec",
+  //       {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  //         body: formBody,
+  //       }
+  //     );
+
+  //     const result = await res.json();
+
+  //     if (result.success) {
+  //       message.success("Record updated successfully.");
+  //       generateEditPDF(payload, checkboxValues, partsUsed); // ✅ Use updated payload
+  //       setEditModalOpen(false);
+  //       sigTechnician.current?.clear();
+  //       sigManager.current?.clear();
+  //       sigCustomer.current?.clear();
+  //       setSignatureManager(null);
+  //       loadAllCustomerData();
+  //     } else {
+  //       message.error(result.message || "Failed to update record.");
+  //     }
+  //   } catch (err) {
+  //     console.error("Edit submit error:", err);
+  //     message.error("Error during update.");
+  //   } finally {
+  //     setIsEditSubmitting(false);
+  //     setEditLoading(false);
+  //   }
+  // };
+
+  const handleEditSubmit = async () => {
     try {
-      // Validate fields — stops if required fields are empty
+      setIsEditSubmitting(true);
       const values = await editForm.validateFields();
 
-      // Additional manual validation for signature
-      if (!signatureTechnician) {
-        message.error(
-          "Please provide the Service Technician signature and click 'Save Signature."
-        );
-        return;
-      }
-      if (!signatureManager) {
-        message.error("Please upload the service manager's signature.");
-        return;
-      }
-      if (!signatureCustomer) {
-        message.error(
-          "Please provide the Customer signature and click 'Save Signature."
-        );
-        return;
-      }
+      // Convert dates to proper string format
+      const convertToDubaiTime = (date) =>
+        date ? dayjs(date).tz("Asia/Dubai").format("DD-MM-YYYY") : "N/A";
 
-      let checkboxValues = {};
-      [...reportOptions, ...serviceOptions].forEach((option) => {
-        checkboxValues[option] = false;
-      });
+      const installationDate = convertToDubaiTime(values.installationDate);
+      const departureDate = convertToDubaiTime(values.departureDate);
+      const returnDate = convertToDubaiTime(values.returnDate);
 
-      if (values.report) {
-        values.report.forEach((option) => {
-          checkboxValues[option] = true;
-        });
-      }
-
-      if (values.serviceType) {
-        values.serviceType.forEach((option) => {
-          checkboxValues[option] = true;
-        });
-      }
-
-      const partsUsed = editTabledata
-        .filter(
-          (row) =>
-            String(row.partNumber || "").trim() ||
-            String(row.description || "").trim() ||
-            row.quantity
-        )
-        .map((row) => ({
-          partNumber: String(row.partNumber || "").trim(),
-          description: String(row.description || "").trim(),
-          quantity:
-            isNaN(Number(row.quantity)) || row.quantity === ""
-              ? ""
-              : Number(row.quantity),
-          note: String(row.note || "").trim(),
-        }));
-
-      const payload = {
-        action: "updateData",
-        srn: selectedRecord["Service Request Number"],
-        customerName: values.customerName,
-        address: values.address,
-        contact: values.contact,
-        telephone: values.telephone,
-        machineType: values.machineType,
-        serialNumber: values.serialNumber,
-        installationDate: values.installationDate
-          ? values.installationDate.format("DD-MM-YYYY")
-          : "",
-        departureDate: values.departureDate
-          ? values.departureDate.format("DD-MM-YYYY")
-          : "",
-        returnDate: values.returnDate
-          ? values.returnDate.format("DD-MM-YYYY")
-          : "",
-        workTime: values.workTime,
-        serviceTechnician: values.serviceTechnician,
-        description: values["description of work/of defect/failure mode"],
-        causeOfFailure: values["cause of failure"],
-        notes: values["notes/further action required"],
-        partsUsed: JSON.stringify(partsUsed),
-        signatures: {
-          technician: sigTechnician.current?.toDataURL(),
-          manager: sigManager.current?.toDataURL(),
-          customer: sigCustomer.current?.toDataURL(),
-        },
-        ...Object.fromEntries(
-          Object.entries(checkboxValues).map(([key, value]) => [
-            key,
-            String(value),
-          ])
-        ),
-      };
-
-      const formBody = Object.entries(payload)
-        .map(
-          ([key, value]) =>
-            `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
-        )
-        .join("&");
-      setEditLoading(true);
-      const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbzNtcZBy1d26MqjBUGDRPlVCUT0tRDE0mhGtV_20lQehh810CyxV8ntKK7eA0uRXen3uA/exec",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: formBody,
-        }
+      // Prepare partsUsed
+      const partsUsed = editTabledata.filter(
+        (row) =>
+          row.partNumber?.trim() || row.description?.trim() || row.quantity
       );
 
-      const result = await res.json();
+      // Prepare causeOfFailure text
+      const causeOfFailureTextOnly = causeOfFailure?.trim() || "";
 
-      if (result.success) {
-        message.success("Record updated successfully.");
-        generateEditPDF(payload, checkboxValues, partsUsed); // ✅ Use updated payload
-        setEditModalOpen(false);
-        sigTechnician.current?.clear();
-        sigManager.current?.clear();
-        sigCustomer.current?.clear();
-        setSignatureManager(null);
-        loadAllCustomerData();
+      // Create FormData
+      const formData = new FormData();
+      formData.append("action", "updateData");
+      formData.append("srn", selectedRecord?.["Service Request Number"]);
+      formData.append("customerName", values.customerName);
+      formData.append("machineType", values.machineType);
+      formData.append("address", values.address);
+      formData.append("serialNumber", values.serialNumber);
+      formData.append("contact", values.contact);
+      formData.append("installationDate", installationDate);
+      formData.append("telephone", values.telephone);
+      formData.append("workTime", values.workTime);
+      formData.append("serviceTechnician", values.serviceTechnician);
+      formData.append("departureDate", departureDate);
+      formData.append("returnDate", returnDate);
+      formData.append(
+        "description",
+        values["description of work/of defect/failure mode"]
+      );
+      formData.append("notes", values["notes/further action required"]);
+      formData.append("causeOfFailure", causeOfFailureTextOnly);
+      formData.append("partsUsed", JSON.stringify(partsUsed));
+
+      // ✅ Append checkbox values individually
+      [...reportOptions, ...serviceOptions].forEach((option) => {
+        formData.append(
+          option,
+          values.report?.includes(option) ||
+            values.serviceType?.includes(option)
+            ? "true"
+            : "false"
+        );
+      });
+
+      // ✅ If there's an image, add base64
+      if (causeOfFailureImage) {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          formData.append("causeImageBase64", reader.result);
+          await postUpdate(formData);
+        };
+        reader.readAsDataURL(causeOfFailureImage);
       } else {
-        message.error(result.message || "Failed to update record.");
+        await postUpdate(formData);
       }
     } catch (err) {
-      console.error("Edit submit error:", err);
-      message.error("Error during update.");
+      message.error("Failed to submit update: " + err.message);
     } finally {
       setIsEditSubmitting(false);
-      setEditLoading(false);
+    }
+  };
+
+  const postUpdate = async (formData) => {
+    const res = await fetch(
+      "https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+    const result = await res.json();
+    if (result.success) {
+      message.success("Update successful");
+      setEditModalOpen(false);
+      loadAllCustomerData();
+    } else {
+      message.error("Update failed: " + result.message);
+    }
+  };
+
+  const submitUpdate = async (payload) => {
+    const res = await fetch(
+      "https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec",
+      {
+        method: "POST",
+        body: new URLSearchParams(payload),
+      }
+    );
+
+    const result = await res.json();
+    if (result.success) {
+      message.success("Record updated.");
+      setEditModalOpen(false);
+      loadAllCustomerData();
+    } else {
+      throw new Error(result.message || "Unknown error");
     }
   };
 
@@ -3624,14 +3823,19 @@ generatePDF(pdfPayload, checkboxValues, partsUsed);
                       <Upload
                         accept="image/*"
                         showUploadList={false}
-                        beforeUpload={beforeUpload}
+                        // beforeUpload={beforeUpload}
+                          // beforeUpload={handleCauseImageUpload()}
+                                 beforeUpload={(file) => {
+                                  handleCauseImageUpload({ file }); // ✅ Handle upload manually
+                                  return false; // ✅ Prevent automatic upload
+                                }}
                       >
                         <Button icon={<UploadOutlined />}>Upload Image</Button>
                       </Upload>
 
                       {previewUrl && (
                         <div style={{ marginTop: 10 }}>
-                          <Image src={previewUrl} width={200} alt="Preview"  />
+                          <Image src={previewUrl} width={200} alt="Preview" />
                           <Button
                             icon={<DeleteOutlined />}
                             variant="solid"
@@ -4434,7 +4638,7 @@ generatePDF(pdfPayload, checkboxValues, partsUsed);
                       />
                     </Form.Item>
 
-                    <Form.Item
+                    {/* <Form.Item
                       label="Cause of Failure"
                       name="cause of failure"
                       rules={[
@@ -4452,7 +4656,81 @@ generatePDF(pdfPayload, checkboxValues, partsUsed);
                         maxLength={500}
                         showCount
                       />
+                    </Form.Item> */}
+
+                    <Form.Item label="Cause of Failure">
+                      <Input.TextArea
+                        value={causeOfFailure}
+                        onChange={(e) => setcauseOfFailure(e.target.value)}
+                        placeholder="Describe the failure"
+                        autoSize={{ minRows: 3, maxRows: 3 }}
+                        maxLength={500}
+                        showCount
+                      />
+
+                      {previewUrl && (
+                        <div style={{ marginTop: 10 }}>
+                              <p>Existing Image Preview:</p>
+
+                          <img
+                            src={previewUrl}
+                            alt="Cause of Failure"
+                            style={{
+                              width: "100%",
+                              maxHeight: "200px",
+                              objectFit: "contain",
+                            }}
+                          />
+                          <Button
+                            icon={<DeleteOutlined />}
+                            onClick={() => {
+                              setPreviewUrl(null);
+                              setCauseOfFailureImage(null);
+                            }}
+                            danger
+                            style={{ marginTop: 8 }}
+                          >
+                            Delete Image
+                          </Button>
+                        </div>
+                      )}
+
+                      {!previewUrl && (
+                        <Upload
+                          accept="image/*"
+                          showUploadList={false}
+                          beforeUpload={(file) => {
+                            const isImage = file.type.startsWith("image/");
+                            const isLtMaxSize = file.size / 1024 / 1024 < 5;
+
+                            if (!isImage) {
+                              message.error("Only image files are allowed.");
+                              return Upload.LIST_IGNORE;
+                            }
+                            if (!isLtMaxSize) {
+                              message.error("Image must be smaller than 5MB!");
+                              return Upload.LIST_IGNORE;
+                            }
+
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setPreviewUrl(reader.result); // ✅ show base64 preview
+                              setCauseOfFailureImage(file); // ✅ keep for upload
+                            };
+                            reader.readAsDataURL(file);
+                            return false;
+                          }}
+                        >
+                          <Button
+                            icon={<UploadOutlined />}
+                            style={{ marginTop: 10 }}
+                          >
+                            Upload Image
+                          </Button>
+                        </Upload>
+                      )}
                     </Form.Item>
+
                     <Form.Item
                       label="Notes/Further action required"
                       name="notes/further action required"
