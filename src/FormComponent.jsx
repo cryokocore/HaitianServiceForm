@@ -18,12 +18,14 @@ import {
   Card,
   Modal,
   Descriptions,
+  Popconfirm,
 } from "antd";
 import {
   UploadOutlined,
   DeleteOutlined,
   EyeOutlined,
   EditOutlined,
+  PaperClipOutlined,
 } from "@ant-design/icons";
 import SignatureCanvas from "react-signature-canvas";
 import jsPDF from "jspdf";
@@ -96,7 +98,15 @@ export default function FormComponent() {
   const [editForm] = Form.useForm();
   const [viewTabledata, setViewTableData] = useState([]);
   const [editTabledata, setEditTableData] = useState([]);
+  const [downloadUrl, setDownloadUrl] = useState(null);
 
+const editSigTechnician = useRef();
+const editSigManager = useRef();
+const editSigCustomer = useRef();
+
+const [editSignatureTechnician, setEditSignatureTechnician] = useState("");
+const [editSignatureManager, setEditSignatureManager] = useState(null);
+const [editSignatureCustomer, setEditSignatureCustomer] = useState("");
   const [data, setData] = useState([
     {
       key: Date.now(),
@@ -123,7 +133,7 @@ export default function FormComponent() {
 
     const reader = new FileReader();
     reader.onload = () => {
-        const base64String = reader.result; // This should be full 'data:image/png;base64,...'
+      const base64String = reader.result; // This should be full 'data:image/png;base64,...'
 
       setPreviewUrl(base64String); // base64 preview
       setCauseOfFailureImage(file); // store actual file
@@ -132,11 +142,90 @@ export default function FormComponent() {
 
     return false; // prevent automatic upload
   };
+  const toBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  const uploadImageBase64 = async (file) => {
+    try {
+      const base64String = await toBase64(file);
 
+      const payload = new URLSearchParams();
+      payload.append("action", "uploadImage");
+      payload.append("causeImageBase64", base64String);
+      payload.append("originalFilename", file.name);
+
+      const res = await fetch(
+        "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: payload.toString(),
+        }
+      );
+
+      const result = await res.json();
+      return result;
+    } catch (error) {
+      return { success: false, message: error.message || "Upload failed" };
+    }
+  };
   const handleRemoveImage = () => {
     setCauseOfFailureImage(null);
     setPreviewUrl(null);
   };
+
+const saveEditTechnicianSignature = () => {
+  if (editSigTechnician.current && !editSigTechnician.current.isEmpty()) {
+    setEditSignatureTechnician(
+      editSigTechnician.current.getCanvas().toDataURL("image/png")
+    );
+    message.success("Technician signature saved (edit)");
+  } else {
+    message.warning("Please draw technician signature before saving.");
+  }
+};
+
+const clearEditTechnicianSignature = () => {
+  editSigTechnician.current?.clear();
+  setEditSignatureTechnician("");
+};
+
+
+const saveEditCustomerSignature = () => {
+  if (editSigCustomer.current && !editSigCustomer.current.isEmpty()) {
+    setEditSignatureCustomer(
+      editSigCustomer.current.getCanvas().toDataURL("image/png")
+    );
+    message.success("Customer signature saved (edit)");
+  } else {
+    message.warning("Please draw customer signature before saving.");
+  }
+};
+
+const clearEditCustomerSignature = () => {
+  editSigCustomer.current?.clear();
+  setEditSignatureCustomer("");
+};
+
+const handleEditManagerUpload = ({ file }) => {
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setEditSignatureManager(reader.result);
+    message.success("Manager signature uploaded (edit)");
+  };
+  if (file) reader.readAsDataURL(file);
+};
+
+const clearEditManagerSignature = () => {
+  setEditSignatureManager(null);
+  message.success("Manager signature cleared (edit)");
+};
+
+
 
   // const handleCauseImageUpload = (event) => {
   //   const file = event.target.files[0];
@@ -156,24 +245,67 @@ export default function FormComponent() {
   //   }
   // };
 
+  // const handleCauseImageUpload = ({file}) => {
+  //   const reader = new FileReader();
+  //   reader.onloadend = () => {
+  //     setCauseOfFailureImage(file);
+  //     setPreviewUrl(reader.result);
+  //       const base64 = reader.result;
+  //   console.log("Sending base64:", base64);
+  //     setCauseImageBase64(reader.result); // ✅ Needed for backend
+  //         console.log("Base64 Image URL:", reader.result); // ✅ Console it here
+  //         console.log("Base64 length:", reader.result.length)
 
+  //   };
+  //   reader.readAsDataURL(file);
+  //   return false; // Prevent Upload component from auto-uploading
+  // };
+  //   const handleCauseImageUpload = ({ file }) => {
+  //   setCauseOfFailureImage(file); // Store actual file object
+  //   const reader = new FileReader();
+  //   reader.onload = () => setPreviewUrl(reader.result); // For preview
+  //   reader.readAsDataURL(file);
+  //   return false; // Prevent AntD Upload from auto-uploading
+  // };
 
-const handleCauseImageUpload = ({file}) => {
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    setCauseOfFailureImage(file);
-    setPreviewUrl(reader.result);
-      const base64 = reader.result;
-  console.log("Sending base64:", base64);
-    setCauseImageBase64(reader.result); // ✅ Needed for backend
-        console.log("Base64 Image URL:", reader.result); // ✅ Console it here
+  const handleCauseImageUpload = ({ file }) => {
+    // ✅ Reject files over 3MB
+    if (file.size > 3 * 1024 * 1024) {
+      message.error("File too large. Please upload images smaller than 3MB.");
+      return false;
+    }
 
+    // ✅ Store the file and preview it
+    setCauseOfFailureImage(file); // Save for upload later
+    const reader = new FileReader();
+    reader.onload = () => setPreviewUrl(reader.result); // For preview
+    reader.readAsDataURL(file);
+
+    return false;
   };
-  reader.readAsDataURL(file);
-  return false; // Prevent Upload component from auto-uploading
-};
 
+  const uploadCauseImageToDrive = async () => {
+    if (!causeOfFailureImage) return "";
 
+    const formData = new FormData();
+    formData.append("causeImage", causeOfFailureImage);
+
+    const res = await fetch(
+      "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const result = await res.json();
+    if (result.success && result.imageUrl) {
+      return result.imageUrl;
+    } else {
+      message.error("Image upload failed");
+      return "";
+    }
+  };
 
   useEffect(() => {
     if (selectedRecord && viewModalOpen) {
@@ -274,6 +406,58 @@ const handleCauseImageUpload = ({file}) => {
     }
     console.log("Selected Record:", selectedRecord);
   }, [selectedRecord, viewModalOpen]);
+  const extractDriveImagePreviewUrl = (text) => {
+    const match = text.match(
+      /https:\/\/drive\.google\.com\/file\/d\/([^/]+)\//
+    );
+    if (match && match[1]) {
+      return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    }
+    return null;
+  };
+
+  // const extractFileInfoFromCauseText = (text) => {
+  //   const urlMatch = text.match(
+  //     /https:\/\/drive\.google\.com\/file\/d\/([^/]+)\//
+  //   );
+  //   const nameMatch = text.match(/Name:\s*(.+)$/m); // Extracts filename if saved as 'Name: ...'
+  //   return {
+  //     url: urlMatch
+  //       ? `https://drive.google.com/file/d/${urlMatch[1]}/view`
+  //       : null,
+  //     fileId: urlMatch ? urlMatch[1] : null,
+  //     filename: nameMatch ? nameMatch[1].trim() : "Cause_Failure_Image",
+  //   };
+  // };
+
+  // const extractFileInfoFromCauseText = (text) => {
+  //   const match = text.match(/\/d\/([a-zA-Z0-9_-]+)\//);
+  //   if (!match) return {};
+
+  //   const fileId = match[1];
+  //   return {
+  //     viewUrl: `https://drive.google.com/file/d/${fileId}/view`,
+  //     downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
+  //     fileId,
+  //     filename: "Uploaded Image",
+  //   };
+  // };
+
+  const extractFileInfoFromCauseText = (text) => {
+  const match = text.match(/\/d\/([a-zA-Z0-9_-]+)\//);
+  const nameMatch = text.match(/Filename:\s*(.+)/);
+
+  if (!match) return {};
+
+  const fileId = match[1];
+  return {
+    viewUrl: `https://drive.google.com/file/d/${fileId}/view`,
+    downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
+    fileId,
+    filename: nameMatch ? nameMatch[1].trim() : "Uploaded_Image",
+  };
+};
+
 
   useEffect(() => {
     if (selectedRecord && editModalOpen) {
@@ -345,24 +529,48 @@ const handleCauseImageUpload = ({file}) => {
       });
 
       const fullCause = selectedRecord["Cause of Failure"] || "";
+      // const { url, fileId, filename } = extractFileInfoFromCauseText(fullCause);
+      const { viewUrl, downloadUrl, fileId, filename } = extractFileInfoFromCauseText(fullCause);
+
 
       // Extract image link
-      const match = fullCause.match(
-        /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/
-      );
-      const fileId = match ? match[1] : null;
-      const previewImage = fileId
-        ? `https://drive.google.com/uc?export=view&id=${fileId}` // direct viewable image
-        : null;
+      // const match = fullCause.match(
+      //   /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/
+      // );
+      // const fileId = match ? match[1] : null;
+      // const previewImage = fileId
+      //   ? `https://drive.google.com/uc?export=view&id=${fileId}` // direct viewable image
+      //   : null;
 
-      // Remove image link line from cause text
+      const previewImage = extractDriveImagePreviewUrl(fullCause);
+
+      // Extract only the text (excluding image line)
+      // const causeTextOnly = fullCause
+      //   .split("\n")
+      //   .filter((line) => !line.trim().startsWith("Image:"))
+      //   .join("\n")
+      //   .trim();
       const causeTextOnly = fullCause
-        .replace(/Image:\s*https:\/\/drive\.google\.com\/file\/d\/[^\s]+/i, "")
-        .trim();
+  .split("\n")
+  .filter(
+    (line) =>
+      !line.trim().startsWith("Image:") &&
+      !line.trim().startsWith("Filename:")
+  )
+  .join("\n")
+  .trim();
 
       setcauseOfFailure(causeTextOnly);
       setPreviewUrl(previewImage);
-      setCauseOfFailureImage(null);
+
+      setcauseOfFailure(causeTextOnly);
+      // setPreviewUrl(previewImage);
+      // setCauseOfFailureImage(null);
+      // setPreviewUrl(url);
+      setPreviewUrl(viewUrl);
+
+      setDownloadUrl(downloadUrl);
+      setCauseOfFailureImage({ fileId, name: filename }); // Simulate file object
 
       // ✅ Set "Parts Used" table data
       const partRows = (selectedRecord.partsUsed || []).map((part, index) => ({
@@ -433,9 +641,10 @@ const handleCauseImageUpload = ({file}) => {
     form.setFieldsValue({ customerName: "" });
     setInputCustomer("");
   }, []);
+
   const loadAllCustomerData = async () => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec?action=getAllCustomerData"
+      "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec?action=getAllCustomerData"
     );
     const result = await res.json();
 
@@ -463,7 +672,7 @@ const handleCauseImageUpload = ({file}) => {
   const fetchCustomerNames = async () => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec?action=getAllCustomerData`
+        `https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec?action=getAllCustomerData`
       );
       const result = await res.json();
 
@@ -493,7 +702,7 @@ const handleCauseImageUpload = ({file}) => {
   const handleCustomerSelect = async (selectedName) => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec?action=getCustomerData&name=${encodeURIComponent(
+        `https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec?action=getCustomerData&name=${encodeURIComponent(
           selectedName
         )}`
       );
@@ -522,7 +731,7 @@ const handleCauseImageUpload = ({file}) => {
   const fetchSRN = async () => {
     try {
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec"
+        "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec"
       );
       const data = await response.json(); // ✅ Parse JSON directly
 
@@ -2746,7 +2955,7 @@ const handleCauseImageUpload = ({file}) => {
 
     // Sending the file to the Google Apps Script for uploading to Drive
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec",
+      "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
       {
         method: "POST",
         headers: {
@@ -2914,6 +3123,201 @@ const handleCauseImageUpload = ({file}) => {
   //     }
   //   };
 
+  // const handleSubmit = async (values) => {
+  //   if (isSubmittingRef.current) return;
+  //   isSubmittingRef.current = true;
+  //   setIsSubmitting(true);
+
+  //   try {
+  //     if (!srn) return message.error("SRN missing.");
+  //     if (!signatureTechnician || !signatureManager || !signatureCustomer)
+  //       return message.error("All signatures required.");
+
+  //     // ✅ 1. Prepare image as Base64
+  //     let causeImageBase64 = "";
+  //     if (causeOfFailureImage) {
+  //       const reader = new FileReader();
+  //       causeImageBase64 = await new Promise((resolve, reject) => {
+  //         reader.onloadend = () => resolve(reader.result);
+  //         reader.onerror = reject;
+  //         reader.readAsDataURL(causeOfFailureImage);
+  //       });
+  //     }
+
+  //     // ✅ 2. Build full causeOfFailure string
+  //     const causeOfFailurePayload = JSON.stringify({
+  //       text: causeOfFailureText,
+  //     });
+
+  //     // ✅ 3. Build partsUsed
+  //     // const partsUsed = data.filter(
+  //     //   (row) =>
+  //     //     row.partNumber?.trim() || row.description?.trim() || row.quantity
+  //     // );
+
+  //     const cleanedPartsUsed = data.map((row) => ({
+  //       partNumber:
+  //         typeof row.partNumber === "string" ? row.partNumber.trim() : "",
+  //       description:
+  //         typeof row.description === "string" ? row.description.trim() : "",
+  //       quantity: row.quantity ? parseFloat(row.quantity) : "",
+  //       note: typeof row.note === "string" ? row.note.trim() : "",
+  //     }));
+
+  //     const convertToDubaiTime = (date) =>
+  //       date ? dayjs(date).tz("Asia/Dubai").format("DD-MM-YYYY") : "N/A";
+
+  //     // ✅ 4. Use FormData for large payloads
+  //     const formData = new FormData();
+  //     formData.append("action", "new");
+  //     formData.append("srn", srn);
+  //     formData.append("customerName", values.customerName);
+  //     formData.append("machineType", values.machineType);
+  //     formData.append("address", address);
+  //     formData.append("serialNumber", values.serialNumber);
+  //     formData.append("contact", values.contact);
+  //     formData.append(
+  //       "installationDate",
+  //       convertToDubaiTime(values.installationDate)
+  //     );
+  //     formData.append("telephone", values.telephone);
+  //     formData.append("workTime", values.workTime);
+  //     formData.append("serviceTechnician", values.serviceTechnician);
+  //     formData.append(
+  //       "departureDate",
+  //       convertToDubaiTime(values.departureDate)
+  //     );
+  //     formData.append("returnDate", convertToDubaiTime(values.returnDate));
+  //     formData.append("description", descriptionText);
+  //     formData.append("notes", notes);
+  //     formData.append("causeOfFailure", causeOfFailurePayload);
+  //     if (causeOfFailureImage) {
+  //       formData.append("causeImage", causeOfFailureImage); // raw binary
+  //     }
+  //     // formData.append("causeImageBase64", causeImageBase64);
+  //     // formData.append("partsUsed", JSON.stringify(partsUsed));
+  //     formData.append("partsUsed", JSON.stringify(cleanedPartsUsed));
+
+  //     // Checkboxes
+  //     [...reportOptions, ...serviceOptions].forEach((option) => {
+  //       formData.append(
+  //         option,
+  //         values.report?.includes(option) ||
+  //           values.serviceType?.includes(option)
+  //           ? "true"
+  //           : "false"
+  //       );
+  //     });
+
+  //     setLoading(true);
+  //     console.log("Submitting base64:", causeImageBase64);
+
+  //     const res = await fetch(
+  //       "https://script.google.com/macros/s/AKfycbyRWEov3azkB7oWPSmFsgGQpUQ5wWcfAFKGzzxJ6729Rq7--hSMYdrEbI7PRJy8koo1/exec",
+  //       {
+  //         method: "POST",
+  //         body: formData,
+  //       }
+  //     );
+
+  //     const result = await res.json();
+
+  //     if (!result.success) {
+  //       message.error(result.message || "Submission failed.");
+  //       alert("Error: " + result.message);
+
+  //       return;
+  //     }
+
+  //     message.success("Form submitted successfully!");
+  //     alert("Upload successful!\nImage URL:\n" + result.imageUrl);
+
+  //     const signatures = {
+  //       technician: signatureTechnician,
+  //       manager: signatureManager,
+  //       customer: signatureCustomer,
+  //     };
+  //     const checkboxValues = {};
+
+  //     // Initialize all checkboxes with false
+  //     [...reportOptions, ...serviceOptions].forEach((option) => {
+  //       checkboxValues[option] = false;
+  //     });
+
+  //     // Set the checkboxes that are checked to true
+  //     values.report?.forEach((option) => {
+  //       if (checkboxValues.hasOwnProperty(option))
+  //         checkboxValues[option] = true;
+  //     });
+  //     values.serviceType?.forEach((option) => {
+  //       if (checkboxValues.hasOwnProperty(option))
+  //         checkboxValues[option] = true;
+  //     });
+
+  //     // generatePDF({ ...formData, signatures }, checkboxValues, partsUsed);
+  //     const pdfPayload = {
+  //       srn,
+  //       customerName: values.customerName,
+  //       machineType: values.machineType,
+  //       address,
+  //       serialNumber: values.serialNumber,
+  //       contact: values.contact,
+  //       installationDate: convertToDubaiTime(values.installationDate),
+  //       telephone: values.telephone,
+  //       workTime: values.workTime,
+  //       serviceTechnician: values.serviceTechnician,
+  //       departureDate: convertToDubaiTime(values.departureDate),
+  //       returnDate: convertToDubaiTime(values.returnDate),
+  //       description: descriptionText,
+  //       notes,
+  //       causeOfFailure: causeOfFailureText,
+  //       causeImageBase64,
+  //       partsUsed: cleanedPartsUsed,
+  //       signatures,
+  //     };
+
+  //     // generatePDF(pdfPayload, checkboxValues, partsUsed);
+  //     generatePDF(pdfPayload, checkboxValues, cleanedPartsUsed);
+
+  //     // ✅ Reset form only on success
+  //     form.resetFields();
+  //     setAddress("");
+  //     setSerialNumber("");
+  //     setDescriptionText("");
+  //     // setcauseOfFailure("");
+  //     setCauseOfFailureText("");
+  //     setCauseOfFailureImage(null);
+  //     setPreviewUrl(null);
+
+  //     setNotes("");
+
+  //     setData([
+  //       {
+  //         key: Date.now(),
+  //         partNumber: "",
+  //         description: "",
+  //         quantity: "",
+  //         note: "",
+  //       },
+  //     ]);
+
+  //     sigTechnician.current?.clear();
+  //     sigManager.current?.clear();
+  //     sigCustomer.current?.clear();
+  //     setSignatureManager(null);
+
+  //     await fetchSRN();
+  //     loadAllCustomerData();
+  //   } catch (err) {
+  //     console.error("Submission error:", err);
+  //     message.error("Something went wrong.");
+  //   } finally {
+  //     setLoading(false);
+  //     setIsSubmitting(false);
+  //     isSubmittingRef.current = false;
+  //   }
+  // };
+
   const handleSubmit = async (values) => {
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
@@ -2924,40 +3328,32 @@ const handleCauseImageUpload = ({file}) => {
       if (!signatureTechnician || !signatureManager || !signatureCustomer)
         return message.error("All signatures required.");
 
-      // ✅ 1. Prepare image as Base64
-      let causeImageBase64 = "";
-      if (causeOfFailureImage) {
-        const reader = new FileReader();
-        causeImageBase64 = await new Promise((resolve, reject) => {
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(causeOfFailureImage);
-        });
-      }
-
-      // ✅ 2. Build full causeOfFailure string
-      const causeOfFailurePayload = JSON.stringify({
-        text: causeOfFailureText,
-      });
-
-      // ✅ 3. Build partsUsed
-      // const partsUsed = data.filter(
-      //   (row) =>
-      //     row.partNumber?.trim() || row.description?.trim() || row.quantity
-      // );
-
-      const cleanedPartsUsed = data.map(row => ({
-  partNumber: typeof row.partNumber === "string" ? row.partNumber.trim() : "",
-  description: typeof row.description === "string" ? row.description.trim() : "",
-  quantity: row.quantity ? parseFloat(row.quantity) : "",
-  note: typeof row.note === "string" ? row.note.trim() : "",
-}));
-
+      const cleanedPartsUsed = data.map((row) => ({
+        partNumber:
+          typeof row.partNumber === "string" ? row.partNumber.trim() : "",
+        description:
+          typeof row.description === "string" ? row.description.trim() : "",
+        quantity: row.quantity ? parseFloat(row.quantity) : "",
+        note: typeof row.note === "string" ? row.note.trim() : "",
+      }));
 
       const convertToDubaiTime = (date) =>
         date ? dayjs(date).tz("Asia/Dubai").format("DD-MM-YYYY") : "N/A";
 
-      // ✅ 4. Use FormData for large payloads
+      // ✅ 1. Upload image separately to Drive
+      let causeImageUrl = "";
+      if (causeOfFailureImage) {
+        const uploadResult = await uploadImageBase64(causeOfFailureImage);
+
+        if (!uploadResult.success) {
+          message.error("Image upload failed: " + uploadResult.message);
+          setIsSubmitting(false);
+          return;
+        }
+        causeImageUrl = uploadResult.imageUrl;
+      }
+
+      // ✅ 2. Build form payload
       const formData = new FormData();
       formData.append("action", "new");
       formData.append("srn", srn);
@@ -2980,14 +3376,13 @@ const handleCauseImageUpload = ({file}) => {
       formData.append("returnDate", convertToDubaiTime(values.returnDate));
       formData.append("description", descriptionText);
       formData.append("notes", notes);
-      formData.append("causeOfFailure", causeOfFailurePayload);
-      console.log("Base64 image preview:", causeImageBase64?.slice(0, 100));
-      formData.append("causeImageBase64", causeImageBase64);
-      // formData.append("partsUsed", JSON.stringify(partsUsed));
+      formData.append(
+        "causeOfFailure",
+        JSON.stringify({ text: causeOfFailureText })
+      );
+      formData.append("causeImageUrl", causeImageUrl); // ✅ link to uploaded image
       formData.append("partsUsed", JSON.stringify(cleanedPartsUsed));
 
-
-      // Checkboxes
       [...reportOptions, ...serviceOptions].forEach((option) => {
         formData.append(
           option,
@@ -2999,11 +3394,9 @@ const handleCauseImageUpload = ({file}) => {
       });
 
       setLoading(true);
-      console.log("Submitting base64:", causeImageBase64);
-
 
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec",
+        "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
         {
           method: "POST",
           body: formData,
@@ -3014,33 +3407,29 @@ const handleCauseImageUpload = ({file}) => {
 
       if (!result.success) {
         message.error(result.message || "Submission failed.");
+        alert("Error: " + result.message);
         return;
       }
 
       message.success("Form submitted successfully!");
+      if (causeImageUrl) {
+        message.success("Upload successful!\nImage URL:\n" + causeImageUrl);
+      }
+
+      // ✅ 3. Generate PDF
       const signatures = {
         technician: signatureTechnician,
         manager: signatureManager,
         customer: signatureCustomer,
       };
-      const checkboxValues = {};
 
-      // Initialize all checkboxes with false
+      const checkboxValues = {};
       [...reportOptions, ...serviceOptions].forEach((option) => {
         checkboxValues[option] = false;
       });
+      values.report?.forEach((option) => (checkboxValues[option] = true));
+      values.serviceType?.forEach((option) => (checkboxValues[option] = true));
 
-      // Set the checkboxes that are checked to true
-      values.report?.forEach((option) => {
-        if (checkboxValues.hasOwnProperty(option))
-          checkboxValues[option] = true;
-      });
-      values.serviceType?.forEach((option) => {
-        if (checkboxValues.hasOwnProperty(option))
-          checkboxValues[option] = true;
-      });
-
-      // generatePDF({ ...formData, signatures }, checkboxValues, partsUsed);
       const pdfPayload = {
         srn,
         customerName: values.customerName,
@@ -3057,25 +3446,20 @@ const handleCauseImageUpload = ({file}) => {
         description: descriptionText,
         notes,
         causeOfFailure: causeOfFailureText,
-        causeImageBase64,
-partsUsed: cleanedPartsUsed,
+        partsUsed: cleanedPartsUsed,
         signatures,
       };
 
-      // generatePDF(pdfPayload, checkboxValues, partsUsed);
       generatePDF(pdfPayload, checkboxValues, cleanedPartsUsed);
 
-
-      // ✅ Reset form only on success
+      // ✅ 4. Reset form
       form.resetFields();
       setAddress("");
       setSerialNumber("");
       setDescriptionText("");
-      // setcauseOfFailure("");
       setCauseOfFailureText("");
       setCauseOfFailureImage(null);
       setPreviewUrl(null);
-
       setNotes("");
 
       setData([
@@ -3249,6 +3633,117 @@ partsUsed: cleanedPartsUsed,
   //   }
   // };
 
+  //   const handleEditSubmit = async () => {
+  //     try {
+  //       setIsEditSubmitting(true);
+  //       const values = await editForm.validateFields();
+
+  //       // Convert dates to proper string format
+  //       const convertToDubaiTime = (date) =>
+  //         date ? dayjs(date).tz("Asia/Dubai").format("DD-MM-YYYY") : "N/A";
+
+  //       const installationDate = convertToDubaiTime(values.installationDate);
+  //       const departureDate = convertToDubaiTime(values.departureDate);
+  //       const returnDate = convertToDubaiTime(values.returnDate);
+
+  //       // Prepare partsUsed
+  //       const partsUsed = editTabledata.filter(
+  //         (row) =>
+  //           row.partNumber?.trim() || row.description?.trim() || row.quantity
+  //       );
+
+  //       // Prepare causeOfFailure text
+  //       const causeOfFailureTextOnly = causeOfFailure?.trim() || "";
+
+  //       // Create FormData
+  //       const formData = new FormData();
+  //       formData.append("action", "updateData");
+  //       formData.append("srn", selectedRecord?.["Service Request Number"]);
+  //       formData.append("customerName", values.customerName);
+  //       formData.append("machineType", values.machineType);
+  //       formData.append("address", values.address);
+  //       formData.append("serialNumber", values.serialNumber);
+  //       formData.append("contact", values.contact);
+  //       formData.append("installationDate", installationDate);
+  //       formData.append("telephone", values.telephone);
+  //       formData.append("workTime", values.workTime);
+  //       formData.append("serviceTechnician", values.serviceTechnician);
+  //       formData.append("departureDate", departureDate);
+  //       formData.append("returnDate", returnDate);
+  //       formData.append(
+  //         "description",
+  //         values["description of work/of defect/failure mode"]
+  //       );
+  //       formData.append("notes", values["notes/further action required"]);
+  //       // formData.append("causeOfFailure", causeOfFailureTextOnly);
+  //       formData.append("causeOfFailure", updatedCauseText);
+
+  //       formData.append("partsUsed", JSON.stringify(partsUsed));
+
+  //       // ✅ Append checkbox values individually
+  //       [...reportOptions, ...serviceOptions].forEach((option) => {
+  //         formData.append(
+  //           option,
+  //           values.report?.includes(option) ||
+  //             values.serviceType?.includes(option)
+  //             ? "true"
+  //             : "false"
+  //         );
+  //       });
+
+  //       // ✅ If there's an image, add base64
+  //       // if (causeOfFailureImage) {
+  //       //   const reader = new FileReader();
+  //       //   reader.onloadend = async () => {
+  //       //     formData.append("causeImageBase64", reader.result);
+  //       //     await postUpdate(formData);
+  //       //   };
+  //       //   reader.readAsDataURL(causeOfFailureImage);
+  //       // } else {
+  //       //   await postUpdate(formData);
+  //       // }
+  //       // Check if a new image was selected
+  //       if (causeOfFailureImage && causeOfFailureImage.originFileObj) {
+  //         const result = await uploadImageBase64(
+  //           causeOfFailureImage.originFileObj
+  //         );
+  //         if (result.success) {
+  //           const newImageUrl = result.imageUrl;
+  //           const originalFilename = causeOfFailureImage.originFileObj.name;
+
+  //           // Append image info to cause of failure text
+  //           // const updatedCauseText = `${causeOfFailureTextOnly}\nImage: ${newImageUrl}\nName: ${originalFilename}`;
+  //           // formData.set("causeOfFailure", updatedCauseText); // update field
+
+  //           let updatedCauseText = causeOfFailure?.trim() || "";
+
+  // if (causeOfFailureImage && (causeOfFailureImage.originFileObj || causeOfFailureImage instanceof File)) {
+  //   const fileToUpload = causeOfFailureImage.originFileObj || causeOfFailureImage;
+  //   const result = await uploadImageBase64(fileToUpload);
+
+  //   if (result.success) {
+  //     updatedCauseText += `\nImage: ${result.imageUrl}\nName: ${fileToUpload.name}`;
+  //   } else {
+  //     message.error("Image upload failed, submission aborted.");
+  //     setIsEditSubmitting(false);
+  //     return;
+  //   }
+  // }
+  //         } else {
+  //           message.error("Image upload failed, submission aborted.");
+  //           setIsEditSubmitting(false);
+  //           return;
+  //         }
+  //       }
+
+  //       await postUpdate(formData);
+  //     } catch (err) {
+  //       message.error("Failed to submit update: " + err.message);
+  //     } finally {
+  //       setIsEditSubmitting(false);
+  //     }
+  //   };
+
   const handleEditSubmit = async () => {
     try {
       setIsEditSubmitting(true);
@@ -3268,10 +3763,33 @@ partsUsed: cleanedPartsUsed,
           row.partNumber?.trim() || row.description?.trim() || row.quantity
       );
 
-      // Prepare causeOfFailure text
-      const causeOfFailureTextOnly = causeOfFailure?.trim() || "";
+      // Prepare causeOfFailure text (initial)
+      let updatedCauseText = causeOfFailure?.trim() || "";
 
-      // Create FormData
+      // Handle image re-upload properly
+      if (
+        causeOfFailureImage &&
+        (causeOfFailureImage.originFileObj ||
+          causeOfFailureImage instanceof File)
+      ) {
+        const fileToUpload =
+          causeOfFailureImage.originFileObj || causeOfFailureImage;
+        const result = await uploadImageBase64(fileToUpload);
+
+        if (result.success) {
+          const newImageUrl = result.imageUrl;
+          // updatedCauseText += `\nImage: ${newImageUrl}\nName: ${fileToUpload.name}`;
+          // updatedCauseText += `\nImage: ${newImageUrl}`;
+          updatedCauseText += `\nImage: ${newImageUrl}\nFilename: ${fileToUpload.name}`;
+
+        } else {
+          message.error("Image upload failed, submission aborted.");
+          setIsEditSubmitting(false);
+          return;
+        }
+      }
+
+      // Build form data
       const formData = new FormData();
       formData.append("action", "updateData");
       formData.append("srn", selectedRecord?.["Service Request Number"]);
@@ -3291,7 +3809,7 @@ partsUsed: cleanedPartsUsed,
         values["description of work/of defect/failure mode"]
       );
       formData.append("notes", values["notes/further action required"]);
-      formData.append("causeOfFailure", causeOfFailureTextOnly);
+      formData.append("causeOfFailure", updatedCauseText);
       formData.append("partsUsed", JSON.stringify(partsUsed));
 
       // ✅ Append checkbox values individually
@@ -3305,17 +3823,8 @@ partsUsed: cleanedPartsUsed,
         );
       });
 
-      // ✅ If there's an image, add base64
-      if (causeOfFailureImage) {
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-          formData.append("causeImageBase64", reader.result);
-          await postUpdate(formData);
-        };
-        reader.readAsDataURL(causeOfFailureImage);
-      } else {
-        await postUpdate(formData);
-      }
+      // ✅ Submit
+      await postUpdate(formData);
     } catch (err) {
       message.error("Failed to submit update: " + err.message);
     } finally {
@@ -3325,7 +3834,7 @@ partsUsed: cleanedPartsUsed,
 
   const postUpdate = async (formData) => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec",
+      "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
       {
         method: "POST",
         body: formData,
@@ -3343,7 +3852,7 @@ partsUsed: cleanedPartsUsed,
 
   const submitUpdate = async (payload) => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbyDxe99W52mP3QazrEDpngcqzoJd0mCW-gNJbVBxviQwtyoUm1jNsMKbjyWRvnvFFr2_g/exec",
+      "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
       {
         method: "POST",
         body: new URLSearchParams(payload),
@@ -3360,10 +3869,42 @@ partsUsed: cleanedPartsUsed,
     }
   };
 
+  const deleteCauseImageFromDrive = async (url) => {
+    const payload = new URLSearchParams();
+    payload.append("action", "deleteCauseImage");
+    payload.append("imageUrl", url);
+
+    const res = await fetch(
+      "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: payload.toString(),
+      }
+    );
+
+    const result = await res.json();
+    return result.success;
+  };
+
+  const handleRemoveEditImage = async () => {
+    if (previewUrl) {
+      const deleted = await deleteCauseImageFromDrive(previewUrl);
+      if (deleted) {
+        setPreviewUrl(null);
+        setCauseOfFailureImage(null);
+        message.success("Image deleted from Drive.");
+      } else {
+        message.error("Failed to delete image.");
+      }
+    }
+  };
+
   const styl = `.ant-modal-root .ant-modal {
     width: var(--ant-modal-xs-width);
     width: 100% !important;
-}`;
+}
+    `;
 
   return (
     <>
@@ -3821,16 +4362,12 @@ partsUsed: cleanedPartsUsed,
                         </div>
                       )} */}
                       <Upload
-                        accept="image/*"
+                        beforeUpload={() => false}
+                        onChange={handleCauseImageUpload}
                         showUploadList={false}
-                        // beforeUpload={beforeUpload}
-                          // beforeUpload={handleCauseImageUpload()}
-                                 beforeUpload={(file) => {
-                                  handleCauseImageUpload({ file }); // ✅ Handle upload manually
-                                  return false; // ✅ Prevent automatic upload
-                                }}
+                        accept="image/*"
                       >
-                        <Button icon={<UploadOutlined />}>Upload Image</Button>
+                        <Button icon={<UploadOutlined />}>Select Image</Button>
                       </Upload>
 
                       {previewUrl && (
@@ -4668,9 +5205,9 @@ partsUsed: cleanedPartsUsed,
                         showCount
                       />
 
-                      {previewUrl && (
+                      {/* {previewUrl && (
                         <div style={{ marginTop: 10 }}>
-                              <p>Existing Image Preview:</p>
+                          <p>Existing Image Preview:</p>
 
                           <img
                             src={previewUrl}
@@ -4692,6 +5229,148 @@ partsUsed: cleanedPartsUsed,
                           >
                             Delete Image
                           </Button>
+                        </div>
+                      )} */}
+                      {previewUrl && causeOfFailureImage && (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <PaperClipOutlined />
+                          {/* <a
+                            href={previewUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download
+                          >
+                            {causeOfFailureImage.name}
+                          </a> */}
+                          <a
+                            href={downloadUrl} // from `extractFileInfoFromCauseText`
+                            // target="_blank"
+                            // rel="noopener noreferrer"
+                            download
+                          >
+                            {/* {causeOfFailureImage?.name || "Uploaded Image"} */}
+                                  {causeOfFailureImage.name}
+
+
+                          </a>
+                          {/* <Button
+                            size="small"
+                            icon={<DeleteOutlined />}
+                            danger
+                            onClick={async () => {
+                              // Confirm and delete
+                              const confirmed = window.confirm(
+                                "Are you sure you want to delete this image?"
+                              );
+                              if (!confirmed) return;
+
+                              const res = await fetch(
+                                "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
+                                {
+                                  method: "POST",
+                                  headers: {
+                                    "Content-Type":
+                                      "application/x-www-form-urlencoded",
+                                  },
+                                  body: new URLSearchParams({
+                                    action: "deleteCauseImage",
+                                    imageUrl: previewUrl,
+                                  }),
+                                }
+                              );
+
+                              const result = await res.json();
+                              if (result.success) {
+                                message.success("Image deleted successfully");
+                                setCauseOfFailureImage(null);
+                                setPreviewUrl(null);
+                              } else {
+                                message.error("Image deletion failed");
+                              }
+                            }}
+                          /> */}
+                          {/* <Button
+                            size="small"
+                            icon={<DeleteOutlined />}
+                            danger
+                            onClick={() => {
+                              Modal.confirm({
+                                title: "Are you sure?",
+                                content: "Do you want to delete this image?",
+                                okText: "Yes",
+                                cancelText: "No",
+                                onOk: async () => {
+                                  const res = await fetch(
+                                    "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
+                                    {
+                                      method: "POST",
+                                      headers: {
+                                        "Content-Type":
+                                          "application/x-www-form-urlencoded",
+                                      },
+                                      body: new URLSearchParams({
+                                        action: "deleteCauseImage",
+                                        imageUrl: previewUrl,
+                                      }),
+                                    }
+                                  );
+
+                                  const result = await res.json();
+                                  if (result.success) {
+                                    message.success(
+                                      "Image deleted successfully"
+                                    );
+                                    setCauseOfFailureImage(null);
+                                    setPreviewUrl(null);
+                                  } else {
+                                    message.error("Image deletion failed");
+                                  }
+                                },
+                              });
+                            }}
+                          /> */}
+                          <Popconfirm
+                            title="Are you sure you want to delete this image?"
+                            okText="Yes"
+                            cancelText="No"
+                            onConfirm={async () => {
+                              const res = await fetch(
+                                "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
+                                {
+                                  method: "POST",
+                                  headers: {
+                                    "Content-Type":
+                                      "application/x-www-form-urlencoded",
+                                  },
+                                  body: new URLSearchParams({
+                                    action: "deleteCauseImage",
+                                    imageUrl: previewUrl,
+                                  }),
+                                }
+                              );
+
+                              const result = await res.json();
+                              if (result.success) {
+                                message.success("Image deleted successfully");
+                                setCauseOfFailureImage(null);
+                                setPreviewUrl(null);
+                              } else {
+                                message.error("Image deletion failed");
+                              }
+                            }}
+                          >
+                            <Button
+                              size="small"
+                              icon={<DeleteOutlined />}
+                              danger
+                            />
+                          </Popconfirm>
                         </div>
                       )}
 
@@ -4716,6 +5395,10 @@ partsUsed: cleanedPartsUsed,
                             reader.onloadend = () => {
                               setPreviewUrl(reader.result); // ✅ show base64 preview
                               setCauseOfFailureImage(file); // ✅ keep for upload
+                              console.log(
+                                "Base64 length:",
+                                reader.result.length
+                              );
                             };
                             reader.readAsDataURL(file);
                             return false;
@@ -4782,7 +5465,7 @@ partsUsed: cleanedPartsUsed,
                         required
                       >
                         <SignatureCanvas
-                          ref={sigTechnician}
+                          ref={editSigTechnician}
                           penColor="black"
                           canvasProps={{
                             width: canvasSize.width,
@@ -4790,19 +5473,26 @@ partsUsed: cleanedPartsUsed,
                             className: "border rounded border-3",
                           }}
                         />
+                        {/* <SignatureCanvas
+  ref={editSigTechnician}
+  penColor="black"
+  canvasProps={{ width: 300, height: 100, className: "sigCanvas" }}
+/> */}
                         <div className="d-flex justify-content-start justify-content-md-start justify-content-lg-start  gap-2 mt-1">
                           <Button
                             type="primary"
-                            onClick={saveTechnicianSignature}
-                            disabled={isSubmitting}
+                            // onClick={saveTechnicianSignature}
+                            onClick={saveEditTechnicianSignature}
+                            disabled={isEditSubmitting}
                           >
                             Save Signature
                           </Button>
                           <Button
                             type="primary"
                             danger
-                            onClick={clearTechnicianSignature}
-                            disabled={isSubmitting}
+                            // onClick={clearTechnicianSignature}
+                            onClick={clearEditTechnicianSignature}
+                            disabled={isEditSubmitting}
                           >
                             Clear
                           </Button>
@@ -4829,10 +5519,10 @@ partsUsed: cleanedPartsUsed,
                               overflow: "hidden", // ✅ Ensures image fits nicely
                             }}
                           >
-                            {signatureManager ? (
+                            {editSignatureManager  ? (
                               // ✅ Show uploaded image inside border
                               <Image
-                                src={signatureManager}
+                                src={editSignatureManager}
                                 alt="Manager Signature"
                                 width="100%"
                                 height="100%"
@@ -4844,7 +5534,7 @@ partsUsed: cleanedPartsUsed,
                                 showUploadList={false} // ✅ Hide default file name list
                                 accept="image/png, image/jpeg"
                                 beforeUpload={(file) => {
-                                  handleUpload({ file }); // ✅ Handle upload manually
+                                  handleEditManagerUpload({ file }); // ✅ Handle upload manually
                                   return false; // ✅ Prevent automatic upload
                                 }}
                                 className="d-flex"
@@ -4856,13 +5546,12 @@ partsUsed: cleanedPartsUsed,
                             )}
                           </div>
 
-                          {/* Clear Button (Only visible when image is uploaded) */}
-                          {signatureManager && (
+                          {editSignatureManager  && (
                             <Button
                               type="primary"
                               danger
                               icon={<DeleteOutlined />}
-                              onClick={clearManagerSignature}
+                              onClick={clearEditManagerSignature}
                               className="mt-2"
                             >
                               Clear Signature
@@ -4876,7 +5565,7 @@ partsUsed: cleanedPartsUsed,
                     <div className="col-12 col-lg-6 col-xl-4  mt-2 d-flex justify-content-center">
                       <Form.Item label="Customer signature" required>
                         <SignatureCanvas
-                          ref={sigCustomer}
+                          ref={editSigCustomer}
                           penColor="black"
                           canvasProps={{
                             width: canvasSize.width,
@@ -4887,22 +5576,24 @@ partsUsed: cleanedPartsUsed,
                         <div className="d-flex justify-content-start  justify-content-md-start justify-content-lg-start gap-2 mt-1">
                           <Button
                             type="primary"
-                            onClick={saveCustomerSignature}
-                            disabled={isSubmitting}
+                            onClick={saveEditCustomerSignature}
+                            disabled={isEditSubmitting}
                           >
                             Save Signature
                           </Button>
                           <Button
                             type="primary"
                             danger
-                            onClick={clearCustomerSignature}
-                            disabled={isSubmitting}
+                            onClick={clearEditCustomerSignature}
+                            disabled={isEditSubmitting}
                           >
                             Clear
                           </Button>
                         </div>
                       </Form.Item>
                     </div>
+
+                    
                   </div>
                   <div className="text-center mt-4 ">
                     <Button
