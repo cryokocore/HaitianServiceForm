@@ -42,6 +42,10 @@
 width:70% !important;
 }
 
+.haitianTableLogo{
+width:30% !important;
+}
+
 .header_Service_Text{
 font-size: 22px;
 font-weight: bolder;
@@ -83,24 +87,36 @@ font-weight: bolder;
   .haitianLogo{
     width:30% !important;
     }
+     .haitianTableLogo{
+width:30% !important;
+}
 }
 
 @media only screen and (max-width: 1444px) {
   .haitianLogo{
     width:30% !important;
     }
+     .haitianTableLogo{
+width:30% !important;
+}
 }
 
 @media only screen and (max-width: 1026px) {
   .haitianLogo{
     width:50% !important;
     }
+       .haitianTableLogo{
+width:30% !important;
+}
 }
 
 @media only screen and (max-width: 768px) {
   .haitianLogo{
     width:50% !important;
     }
+    .haitianTableLogo{
+width:30% !important;
+}
     .submitbutton {
       width: 50%;
     }

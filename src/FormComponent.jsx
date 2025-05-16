@@ -19,6 +19,7 @@ import {
   Modal,
   Descriptions,
   Popconfirm,
+  Searc,
 } from "antd";
 import {
   UploadOutlined,
@@ -26,6 +27,10 @@ import {
   EyeOutlined,
   EditOutlined,
   PaperClipOutlined,
+  OrderedListOutlined,
+  DatabaseFilled,
+  SearchOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import SignatureCanvas from "react-signature-canvas";
 import jsPDF from "jspdf";
@@ -38,14 +43,17 @@ import moment from "moment-timezone";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import isBetween from "dayjs/plugin/isBetween";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(isBetween);
 
 message.config({
   duration: 3,
   maxCount: 3,
 });
+const { Search } = Input;
 
 const reportOptions = [
   "Installation/Commission",
@@ -99,14 +107,18 @@ export default function FormComponent() {
   const [viewTabledata, setViewTableData] = useState([]);
   const [editTabledata, setEditTableData] = useState([]);
   const [downloadUrl, setDownloadUrl] = useState(null);
-
-const editSigTechnician = useRef();
-const editSigManager = useRef();
-const editSigCustomer = useRef();
-
-const [editSignatureTechnician, setEditSignatureTechnician] = useState("");
-const [editSignatureManager, setEditSignatureManager] = useState(null);
-const [editSignatureCustomer, setEditSignatureCustomer] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const editSigTechnician = useRef();
+  const editSigManager = useRef();
+  const editSigCustomer = useRef();
+  const [editSignatureTechnician, setEditSignatureTechnician] = useState("");
+  const [editSignatureManager, setEditSignatureManager] = useState(null);
+  const [editSignatureCustomer, setEditSignatureCustomer] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+ const [searchInstallationDate, setSearchInstallationDate] = useState(null);
+const [searchSRN, setSearchSRN] = useState("");
+  const [rawCustomerData, setRawCustomerData] = useState([]);
   const [data, setData] = useState([
     {
       key: Date.now(),
@@ -159,7 +171,7 @@ const [editSignatureCustomer, setEditSignatureCustomer] = useState("");
       payload.append("originalFilename", file.name);
 
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
+        "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -178,54 +190,53 @@ const [editSignatureCustomer, setEditSignatureCustomer] = useState("");
     setPreviewUrl(null);
   };
 
-const saveEditTechnicianSignature = () => {
-  if (editSigTechnician.current && !editSigTechnician.current.isEmpty()) {
-    setEditSignatureTechnician(
-      editSigTechnician.current.getCanvas().toDataURL("image/png")
-    );
-    message.success("Technician signature saved (edit)");
-  } else {
-    message.warning("Please draw technician signature before saving.");
-  }
-};
-
-const clearEditTechnicianSignature = () => {
-  editSigTechnician.current?.clear();
-  setEditSignatureTechnician("");
-};
-
-
-const saveEditCustomerSignature = () => {
-  if (editSigCustomer.current && !editSigCustomer.current.isEmpty()) {
-    setEditSignatureCustomer(
-      editSigCustomer.current.getCanvas().toDataURL("image/png")
-    );
-    message.success("Customer signature saved (edit)");
-  } else {
-    message.warning("Please draw customer signature before saving.");
-  }
-};
-
-const clearEditCustomerSignature = () => {
-  editSigCustomer.current?.clear();
-  setEditSignatureCustomer("");
-};
-
-const handleEditManagerUpload = ({ file }) => {
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    setEditSignatureManager(reader.result);
-    message.success("Manager signature uploaded (edit)");
+  const saveEditTechnicianSignature = () => {
+    if (editSigTechnician.current && !editSigTechnician.current.isEmpty()) {
+      setEditSignatureTechnician(
+        editSigTechnician.current.getCanvas().toDataURL("image/png")
+      );
+      message.success("Technician signature saved successfully (edit)");
+    } else {
+      message.warning("Please draw technician signature before saving.");
+    }
   };
-  if (file) reader.readAsDataURL(file);
-};
 
-const clearEditManagerSignature = () => {
-  setEditSignatureManager(null);
-  message.success("Manager signature cleared (edit)");
-};
+  const clearEditTechnicianSignature = () => {
+    editSigTechnician.current?.clear();
+    setEditSignatureTechnician("");
+  };
 
+  const saveEditCustomerSignature = () => {
+    if (editSigCustomer.current && !editSigCustomer.current.isEmpty()) {
+      setEditSignatureCustomer(
+        editSigCustomer.current.getCanvas().toDataURL("image/png")
+      );
+      message.success("Customer signature saved successfully (edit)");
+    } else {
+      message.warning("Please draw customer signature before saving.");
+    }
+  };
 
+  const clearEditCustomerSignature = () => {
+    editSigCustomer.current?.clear();
+    setEditSignatureCustomer("");
+  };
+
+  const handleEditManagerUpload = ({ file }) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      console.log("Uploaded Image (Base64):", reader.result); // Debugging
+
+      setEditSignatureManager(reader.result);
+      message.success("Manager signature uploaded successfully (edit)");
+    };
+    if (file) reader.readAsDataURL(file);
+  };
+
+  const clearEditManagerSignature = () => {
+    setEditSignatureManager(null);
+    message.success("Manager signature cleared (edit)");
+  };
 
   // const handleCauseImageUpload = (event) => {
   //   const file = event.target.files[0];
@@ -291,7 +302,7 @@ const clearEditManagerSignature = () => {
     formData.append("causeImage", causeOfFailureImage);
 
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
+      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
       {
         method: "POST",
         body: formData,
@@ -444,19 +455,23 @@ const clearEditManagerSignature = () => {
   // };
 
   const extractFileInfoFromCauseText = (text) => {
-  const match = text.match(/\/d\/([a-zA-Z0-9_-]+)\//);
-  const nameMatch = text.match(/Filename:\s*(.+)/);
+    const match = text.match(/\/d\/([a-zA-Z0-9_-]+)\//);
+    const nameMatch = text.match(/Filename:\s*(.+)/);
 
-  if (!match) return {};
+    if (!match) return {};
 
-  const fileId = match[1];
-  return {
-    viewUrl: `https://drive.google.com/file/d/${fileId}/view`,
-    downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
-    fileId,
-    filename: nameMatch ? nameMatch[1].trim() : "Uploaded_Image",
+    const fileId = match[1];
+    return {
+      viewUrl: `https://drive.google.com/file/d/${fileId}/view`,
+      downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
+      fileId,
+      filename: nameMatch ? nameMatch[1].trim() : "Uploaded_Image",
+    };
   };
-};
+
+  useEffect(() => {
+  handleSearchAndFilter();
+}, [searchText, searchInstallationDate, searchSRN, rawCustomerData]);
 
 
   useEffect(() => {
@@ -530,8 +545,8 @@ const clearEditManagerSignature = () => {
 
       const fullCause = selectedRecord["Cause of Failure"] || "";
       // const { url, fileId, filename } = extractFileInfoFromCauseText(fullCause);
-      const { viewUrl, downloadUrl, fileId, filename } = extractFileInfoFromCauseText(fullCause);
-
+      const { viewUrl, downloadUrl, fileId, filename } =
+        extractFileInfoFromCauseText(fullCause);
 
       // Extract image link
       // const match = fullCause.match(
@@ -551,14 +566,14 @@ const clearEditManagerSignature = () => {
       //   .join("\n")
       //   .trim();
       const causeTextOnly = fullCause
-  .split("\n")
-  .filter(
-    (line) =>
-      !line.trim().startsWith("Image:") &&
-      !line.trim().startsWith("Filename:")
-  )
-  .join("\n")
-  .trim();
+        .split("\n")
+        .filter(
+          (line) =>
+            !line.trim().startsWith("Image:") &&
+            !line.trim().startsWith("Filename:")
+        )
+        .join("\n")
+        .trim();
 
       setcauseOfFailure(causeTextOnly);
       setPreviewUrl(previewImage);
@@ -642,9 +657,36 @@ const clearEditManagerSignature = () => {
     setInputCustomer("");
   }, []);
 
+  // const loadAllCustomerData = async () => {
+  //   const res = await fetch(
+  //     "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec?action=getAllCustomerData"
+  //   );
+  //   const result = await res.json();
+
+  //   if (result.success && Array.isArray(result.customers)) {
+  //     const grouped = {};
+
+  //     result.customers.forEach((row) => {
+  //       const srn = row["Service Request Number"];
+  //       if (!grouped[srn]) {
+  //         grouped[srn] = { ...row, partsUsed: [] };
+  //       }
+
+  //       grouped[srn].partsUsed.push({
+  //         partNumber: row["Part Number"],
+  //         description: row["Description"],
+  //         quantity: row["Quantity"],
+  //         note: row["Note"] || row["Note "] || row["Note\t"],
+  //       });
+  //     });
+
+  //     setCustomerDataList(Object.values(grouped));
+  //   }
+  // };
+
   const loadAllCustomerData = async () => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec?action=getAllCustomerData"
+      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec?action=getAllCustomerData"
     );
     const result = await res.json();
 
@@ -665,14 +707,127 @@ const clearEditManagerSignature = () => {
         });
       });
 
-      setCustomerDataList(Object.values(grouped));
+      const finalData = Object.values(grouped);
+      setRawCustomerData(finalData);
+      setCustomerDataList(finalData); // show all initially
+      setFilteredData(finalData); // also show all initially
     }
   };
+
+  // const handleSearchAndFilter = () => {
+  //   let filtered = [...rawCustomerData];
+
+  //   // Filter by search text (customer name, machine type, etc.)
+  //   if (searchText) {
+  //     const lower = searchText.toLowerCase();
+  //     filtered = filtered.filter((item) => {
+  //       const customerName =
+  //         item["Customer Name"]?.toString().toLowerCase() || "";
+  //       const machineType =
+  //         item["Machine Type"]?.toString().toLowerCase() || "";
+  //       const technician =
+  //         item["Service Technician"]?.toString().toLowerCase() || "";
+
+  //       return (
+  //         customerName.includes(lower) ||
+  //         machineType.includes(lower) ||
+  //         technician.includes(lower)
+  //       );
+  //     });
+  //   }
+
+  //   // Filter by date range
+  //   if (fromDate && toDate) {
+  //     const from = dayjs(fromDate).startOf("day");
+  //     const to = dayjs(toDate).endOf("day");
+
+  //     filtered = filtered.filter((item) => {
+  //       const rawDate = item["Installation Date"];
+  //       const parsed = dayjs(rawDate, [
+  //         "DD-MM-YYYY",
+  //         "YYYY-MM-DD",
+  //         "DD MMM YYYY",
+  //       ]);
+  //       return parsed.isValid() && parsed.isBetween(from, to, null, "[]");
+  //     });
+  //   }
+
+  //   setCustomerDataList(filtered);
+  // };
+
+const handleSearchAndFilter = () => {
+  let filtered = [...rawCustomerData];
+
+  // General text filter
+  // if (searchText) {
+  //   const lower = searchText.toLowerCase();
+  //   filtered = filtered.filter((item) => {
+  //     const customerName = item["Customer Name"]?.toString().toLowerCase() || "";
+  //     const machineType = item["Machine Type"]?.toString().toLowerCase() || "";
+  //     const technician = item["Service Technician"]?.toString().toLowerCase() || "";
+  //     return (
+  //       customerName.includes(lower) ||
+  //       machineType.includes(lower) ||
+  //       technician.includes(lower)
+  //     );
+  //   });
+  // }
+
+//   if (searchText) {
+//   const lower = searchText.toLowerCase();
+
+//   filtered = filtered.filter((item) => {
+//     return Object.values(item).some((value) =>
+//       value?.toString().toLowerCase().includes(lower)
+//     );
+//   });
+// }
+
+if (searchText.trim()) {
+  const lower = searchText.toLowerCase().trim();
+
+  filtered = filtered.filter((item) => {
+    return Object.entries(item).some(([key, value]) => {
+      // ✅ Skip non-display fields
+      if (Array.isArray(value) || typeof value === "object") return false;
+
+      // ✅ Convert everything to string and search lowercase
+      const text = (value ?? "").toString().toLowerCase();
+
+      return text.includes(lower);
+    });
+  });
+}
+
+
+
+  // Filter by Installation Date
+if (searchInstallationDate) {
+  filtered = filtered.filter((item) => {
+    const rawDate = item["Installation Date"];
+    const parsed = dayjs(rawDate); // ISO string support built-in
+    return parsed.isValid() && parsed.isSame(searchInstallationDate, 'day');
+  });
+}
+
+  // Filter by SRN
+  if (searchSRN.trim()) {
+    filtered = filtered.filter(
+      (item) =>
+        item["Service Request Number"]?.toString().trim() === searchSRN.trim()
+    );
+  }
+
+  setCustomerDataList(filtered);
+};
+
+
+
 
   const fetchCustomerNames = async () => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec?action=getAllCustomerData`
+        `https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec?action=getAllCustomerData`
       );
       const result = await res.json();
 
@@ -702,7 +857,7 @@ const clearEditManagerSignature = () => {
   const handleCustomerSelect = async (selectedName) => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec?action=getCustomerData&name=${encodeURIComponent(
+        `https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec?action=getCustomerData&name=${encodeURIComponent(
           selectedName
         )}`
       );
@@ -731,7 +886,7 @@ const clearEditManagerSignature = () => {
   const fetchSRN = async () => {
     try {
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec"
+        "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec"
       );
       const data = await response.json(); // ✅ Parse JSON directly
 
@@ -2650,13 +2805,13 @@ const clearEditManagerSignature = () => {
       //   );
       // }
 
-      if (signatureManager) {
+      if (signatures.manager) {
         doc.setTextColor("#0C3C74");
         doc.text("Signature of service manager:", col2X, nextY);
         doc.setTextColor(0, 0, 0);
 
         doc.addImage(
-          signatureManager, // ✅ Use uploaded image (Base64)
+          signatures.manager, // ✅ Use uploaded image (Base64)
           "PNG",
           col2X,
           baseY + 2,
@@ -2955,7 +3110,7 @@ const clearEditManagerSignature = () => {
 
     // Sending the file to the Google Apps Script for uploading to Drive
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
+      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
       {
         method: "POST",
         headers: {
@@ -3322,6 +3477,7 @@ const clearEditManagerSignature = () => {
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
     setIsSubmitting(true);
+    setLoading(true);
 
     try {
       if (!srn) return message.error("SRN missing.");
@@ -3381,6 +3537,10 @@ const clearEditManagerSignature = () => {
         JSON.stringify({ text: causeOfFailureText })
       );
       formData.append("causeImageUrl", causeImageUrl); // ✅ link to uploaded image
+      formData.append(
+        "filename",
+        causeOfFailureImage?.name || "uploaded_image.png"
+      ); // ✅ NEW
       formData.append("partsUsed", JSON.stringify(cleanedPartsUsed));
 
       [...reportOptions, ...serviceOptions].forEach((option) => {
@@ -3393,10 +3553,10 @@ const clearEditManagerSignature = () => {
         );
       });
 
-      setLoading(true);
+      // setLoading(true);
 
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
+        "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
         {
           method: "POST",
           body: formData,
@@ -3407,7 +3567,7 @@ const clearEditManagerSignature = () => {
 
       if (!result.success) {
         message.error(result.message || "Submission failed.");
-        alert("Error: " + result.message);
+        // alert("Error: " + result.message);
         return;
       }
 
@@ -3491,10 +3651,10 @@ const clearEditManagerSignature = () => {
 
   const handleEditModalclose = () => {
     setEditModalOpen(false);
-    sigTechnician.current?.clear();
-    sigManager.current?.clear();
-    sigCustomer.current?.clear();
-    setSignatureManager(null);
+    editSigTechnician.current?.clear();
+    editSigManager.current?.clear();
+    editSigCustomer.current?.clear();
+    setEditSignatureManager(null);
     loadAllCustomerData();
   };
 
@@ -3747,6 +3907,7 @@ const clearEditManagerSignature = () => {
   const handleEditSubmit = async () => {
     try {
       setIsEditSubmitting(true);
+      setEditLoading(true);
       const values = await editForm.validateFields();
 
       // Convert dates to proper string format
@@ -3757,10 +3918,17 @@ const clearEditManagerSignature = () => {
       const departureDate = convertToDubaiTime(values.departureDate);
       const returnDate = convertToDubaiTime(values.returnDate);
 
+      const cleanedPartsUsed = editTabledata.map((row) => ({
+        partNumber:
+          typeof row.partNumber === "string" ? row.partNumber.trim() : "",
+        description:
+          typeof row.description === "string" ? row.description.trim() : "",
+        quantity: row.quantity ? parseFloat(row.quantity) : "",
+        note: typeof row.note === "string" ? row.note.trim() : "",
+      }));
       // Prepare partsUsed
-      const partsUsed = editTabledata.filter(
-        (row) =>
-          row.partNumber?.trim() || row.description?.trim() || row.quantity
+      const partsUsed = cleanedPartsUsed.filter(
+        (row) => row.partNumber || row.description || row.quantity
       );
 
       // Prepare causeOfFailure text (initial)
@@ -3781,7 +3949,6 @@ const clearEditManagerSignature = () => {
           // updatedCauseText += `\nImage: ${newImageUrl}\nName: ${fileToUpload.name}`;
           // updatedCauseText += `\nImage: ${newImageUrl}`;
           updatedCauseText += `\nImage: ${newImageUrl}\nFilename: ${fileToUpload.name}`;
-
         } else {
           message.error("Image upload failed, submission aborted.");
           setIsEditSubmitting(false);
@@ -3810,7 +3977,7 @@ const clearEditManagerSignature = () => {
       );
       formData.append("notes", values["notes/further action required"]);
       formData.append("causeOfFailure", updatedCauseText);
-      formData.append("partsUsed", JSON.stringify(partsUsed));
+      formData.append("partsUsed", JSON.stringify(cleanedPartsUsed));
 
       // ✅ Append checkbox values individually
       [...reportOptions, ...serviceOptions].forEach((option) => {
@@ -3825,16 +3992,61 @@ const clearEditManagerSignature = () => {
 
       // ✅ Submit
       await postUpdate(formData);
+      // const signatures = {
+      //   technician: editSignatureTechnician,
+      //   manager: editSignatureManager,
+      //   customer: editSignatureCustomer,
+      // };
+
+      const checkboxValues = {};
+      [...reportOptions, ...serviceOptions].forEach((option) => {
+        checkboxValues[option] = false;
+      });
+      values.report?.forEach((option) => (checkboxValues[option] = true));
+      values.serviceType?.forEach((option) => (checkboxValues[option] = true));
+
+      const pdfPayload = {
+        srn: selectedRecord?.["Service Request Number"] || "N/A",
+        customerName: values.customerName,
+        machineType: values.machineType,
+        address: values.address,
+        serialNumber: values.serialNumber,
+        contact: values.contact,
+        installationDate,
+        telephone: values.telephone,
+        workTime: values.workTime,
+        serviceTechnician: values.serviceTechnician,
+        departureDate,
+        returnDate,
+        description: values["description of work/of defect/failure mode"],
+        causeOfFailure: updatedCauseText,
+        notes: values["notes/further action required"],
+        partsUsed: cleanedPartsUsed,
+        signatures: {
+          technician: editSignatureTechnician,
+          manager: editSignatureManager,
+          customer: editSignatureCustomer,
+        },
+      };
+
+      generateEditPDF(pdfPayload, checkboxValues, cleanedPartsUsed);
+      setEditModalOpen(false);
+      editSigTechnician.current?.clear();
+      editSigManager.current?.clear();
+      editSigCustomer.current?.clear();
+      setEditSignatureManager(null);
+      loadAllCustomerData();
     } catch (err) {
       message.error("Failed to submit update: " + err.message);
     } finally {
       setIsEditSubmitting(false);
+      setEditLoading(false);
     }
   };
 
   const postUpdate = async (formData) => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
+      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
       {
         method: "POST",
         body: formData,
@@ -3852,7 +4064,7 @@ const clearEditManagerSignature = () => {
 
   const submitUpdate = async (payload) => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
+      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
       {
         method: "POST",
         body: new URLSearchParams(payload),
@@ -3875,7 +4087,7 @@ const clearEditManagerSignature = () => {
     payload.append("imageUrl", url);
 
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
+      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
       {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -4361,13 +4573,24 @@ const clearEditManagerSignature = () => {
                           />
                         </div>
                       )} */}
+                      <div
+                        style={{
+                          marginTop: 8,
+                          marginBottom: 4,
+                          color: "#888",
+                          fontSize: "0.85rem",
+                        }}
+                      >
+                        Upload only image files (PNG, JPG, JPEG) for cause of
+                        failure. Max size: <strong>3MB</strong>.
+                      </div>
                       <Upload
                         beforeUpload={() => false}
                         onChange={handleCauseImageUpload}
                         showUploadList={false}
                         accept="image/*"
                       >
-                        <Button icon={<UploadOutlined />}>Select Image</Button>
+                        <Button icon={<UploadOutlined />}>Upload Image</Button>
                       </Upload>
 
                       {previewUrl && (
@@ -4698,484 +4921,582 @@ const clearEditManagerSignature = () => {
               </div>
             </div>
           </div>
-          <div className="container-fluid  mt-3">
-            <div className="row">
-              <div className="col-12">
-                <Card>
-                  <Table
-                    dataSource={customerDataList}
-                    columns={Tablecolumns}
-                    rowKey={(record) => record["Service Request Number"]}
-                    scroll={{ x: "max-content" }}
-                  />
-                </Card>
+        </div>
+      </div>
+      <div className="container-fluid pb-1">
+        <div className="container-fluid  border shadow rounded-5  mt-5  mb-3 pb-3">
+          <div className="row d-flex align-items-center justify-content-center bg-light rounded-top-5 rounded-right-5">
+            {/* <div className="col-12 col-lg-3"></div> */}
+            <div className="col-12 col-md-12 col-lg-12 col-xl-12  d-flex flex-column align-items-center justify-content-center ">
+              <div className=" fw-bold text-center">
+                <img
+                  src={HaitianLogo}
+                  alt="HaitianLogo"
+                  className="img-fluid haitianTableLogo"
+                />
               </div>
-              <Modal
-                width={1200}
-                style={{ top: "1px" }}
-                open={viewModalOpen}
-                onCancel={() => setViewModalOpen(false)}
-                footer={null}
+            </div>
+          </div>
+          <div className="row mt-3 ">
+            <div className="col-12 col-md-6 col-lg-6">
+              <h3 className="fw-bold">
+                <DatabaseFilled className="mt-1" /> Service Report Form Data
+              </h3>
+            </div>
+            <div className="col-12 col-md-6 col-lg-6 d-flex justify-content-md-end">
+              <Button
+                type="primary"
+                size="large"
+                loading={refreshing}
+                icon={<ReloadOutlined />}
               >
-                <h3>View Service Form Record</h3>
-                <Form form={viewForm} layout="vertical">
-                  <div className="col-12">
-                    <Form.Item label="Service Request Number" name="srn">
+                {refreshing ? "Refreshing..." : "Refresh"}
+              </Button>
+              <div>
+
+          <Button
+            color="danger"
+              variant="solid"
+            size="large"
+            onClick={() => {
+             
+              setSearchText("");
+              setSearchInstallationDate(null);
+              setSearchSRN("");
+            }}
+            className="ms-2 "
+          >
+            Clear Filters
+          </Button>
+                    </div>
+            </div>
+            <div className="col-12 col-md-6 col-lg-6">
+              <Input
+                placeholder="Search form data"
+                prefix={<SearchOutlined />}
+                allowClear
+                // value={searchText}
+                // onChange={handleSearch}
+                value={searchText}
+              onChange={(e) => {
+  setSearchText(e.target.value);
+  handleSearchAndFilter();
+}}
+                // onPressEnter={handleSearchAndFilter}
+                // onBlur={handleSearchAndFilter}
+                style={{ width: "100%" }}
+                className="mt-md-3 mt-lg-0 ms-0 ms-md-2"
+                size="large"
+              />
+            </div>
+          <div className="col-12 col-md-3 col-lg-3 mt-3 mt-lg-0">
+  <DatePicker
+    placeholder="Search by Installation Date"
+    format="DD-MM-YYYY"
+    value={searchInstallationDate}
+ onChange={(date) => {
+  setSearchInstallationDate(date);
+  handleSearchAndFilter();
+}}
+    size="large"
+    style={{ width: "100%" }}
+  />
+</div>
+
+<div className="col-12 col-md-3 col-lg-3 mt-3 mt-lg-0">
+  <Input
+  type="number"
+    placeholder="Search by SRN"
+    prefix={<SearchOutlined />}
+    allowClear
+    value={searchSRN}
+onChange={(e) => {
+  setSearchSRN(e.target.value);
+  handleSearchAndFilter();
+}}
+    size="large"
+    style={{ width: "100%" }}
+  />
+</div>
+
+              
+          </div>
+                    
+
+          <div className="row">
+            <div className="col-12">
+              <div className="mt-3">
+                <Table
+                  dataSource={customerDataList}
+                  loading={refreshing}
+                  columns={Tablecolumns}
+                  rowKey={(record) => record["Service Request Number"]}
+                  scroll={{ x: "max-content" }}
+                />
+              </div>
+            </div>
+            <Modal
+              width={1200}
+              style={{ top: "1px" }}
+              open={viewModalOpen}
+              onCancel={() => setViewModalOpen(false)}
+              footer={null}
+            >
+              <h3>View Service Form Record</h3>
+              <Form form={viewForm} layout="vertical">
+                <div className="col-12">
+                  <Form.Item label="Service Request Number" name="srn">
+                    <Input readOnly />
+                  </Form.Item>
+                </div>
+                <div className="row">
+                  <div className="col-12 col-md-6">
+                    <Form.Item label="Customer Name" name="customerName">
+                      <Input readOnly />
+                    </Form.Item>
+
+                    <Form.Item label="Address" name="address">
+                      <TextArea
+                        readOnly
+                        autoSize={{ minRows: 3, maxRows: 3 }}
+                      />
+                    </Form.Item>
+
+                    <Form.Item label="Contact" name="contact">
+                      <Input readOnly />
+                    </Form.Item>
+
+                    <Form.Item label="Telephone" name="telephone">
                       <Input readOnly />
                     </Form.Item>
                   </div>
-                  <div className="row">
-                    <div className="col-12 col-md-6">
-                      <Form.Item label="Customer Name" name="customerName">
-                        <Input readOnly />
-                      </Form.Item>
 
-                      <Form.Item label="Address" name="address">
-                        <TextArea
-                          readOnly
-                          autoSize={{ minRows: 3, maxRows: 3 }}
-                        />
-                      </Form.Item>
+                  <div className="col-12 col-md-6">
+                    <Form.Item label="Machine Type" name="machineType">
+                      <Input readOnly />
+                    </Form.Item>
 
-                      <Form.Item label="Contact" name="contact">
-                        <Input readOnly />
-                      </Form.Item>
-
-                      <Form.Item label="Telephone" name="telephone">
-                        <Input readOnly />
-                      </Form.Item>
-                    </div>
-
-                    <div className="col-12 col-md-6">
-                      <Form.Item label="Machine Type" name="machineType">
-                        <Input readOnly />
-                      </Form.Item>
-
-                      <Form.Item label="Serial Number" name="serialNumber">
-                        <TextArea
-                          readOnly
-                          autoSize={{ minRows: 3, maxRows: 3 }}
-                        />
-                      </Form.Item>
-
-                      <Form.Item
-                        label="Installation Date"
-                        name="installationDate"
-                      >
-                        <DatePicker
-                          className="w-100"
-                          format="DD-MM-YYYY"
-                          disabled
-                        />
-                      </Form.Item>
-
-                      <Form.Item label="Work Time" name="workTime">
-                        <Input readOnly />
-                      </Form.Item>
-                    </div>
-
-                    <div className="col-12 col-lg-4">
-                      <Form.Item
-                        label="Service Technician"
-                        name="serviceTechnician"
+                    <Form.Item label="Serial Number" name="serialNumber">
+                      <TextArea
                         readOnly
-                      >
-                        <Input readOnly />
-                      </Form.Item>
-                    </div>
-
-                    <div className="col-12 col-lg-4">
-                      <Form.Item label="Departure Date" name="departureDate">
-                        <DatePicker
-                          className="w-100"
-                          format="DD-MM-YYYY"
-                          disabled
-                        />
-                      </Form.Item>
-                    </div>
-
-                    <div className="col-12 col-lg-4">
-                      <Form.Item label="Return Date" name="returnDate">
-                        <DatePicker
-                          className="w-100"
-                          format="DD-MM-YYYY"
-                          disabled
-                        />
-                      </Form.Item>
-                    </div>
-
-                    <div className="col-12">
-                      <Form.Item label="Report" name="report">
-                        <Checkbox.Group options={reportOptions} readOnly />
-                      </Form.Item>
-
-                      <Form.Item
-                        label="Description of work/of defect/failure mode"
-                        name="description of work/of defect/failure mode"
-                      >
-                        <TextArea
-                          readOnly
-                          autoSize={{ minRows: 5, maxRows: 5 }}
-                        />
-                      </Form.Item>
-
-                      <Form.Item
-                        label="Cause of Failure"
-                        name="cause of failure"
-                      >
-                        <TextArea
-                          readOnly
-                          autoSize={{ minRows: 3, maxRows: 3 }}
-                        />
-                      </Form.Item>
-
-                      <Form.Item
-                        label="Notes/Further action required"
-                        name="notes/further action required"
-                      >
-                        <TextArea
-                          readOnly
-                          autoSize={{ minRows: 3, maxRows: 3 }}
-                        />
-                      </Form.Item>
-
-                      <h6>Parts Used</h6>
-                      <Table
-                        columns={viewModalcolumns}
-                        dataSource={viewTabledata}
-                        pagination={false}
+                        autoSize={{ minRows: 3, maxRows: 3 }}
                       />
-                    </div>
+                    </Form.Item>
 
-                    <div className="col-12 mt-4">
-                      <Form.Item label="Service Type" name="serviceType">
-                        <Checkbox.Group options={serviceOptions} readOnly />
-                      </Form.Item>
-                    </div>
-                    <div>
-                      <Button
-                        color="danger"
-                        variant="solid"
-                        size="large"
-                        onClick={() => setViewModalOpen(false)}
-                      >
-                        Close From
-                      </Button>
-                    </div>
+                    <Form.Item
+                      label="Installation Date"
+                      name="installationDate"
+                    >
+                      <DatePicker
+                        className="w-100"
+                        format="DD-MM-YYYY"
+                        disabled
+                      />
+                    </Form.Item>
+
+                    <Form.Item label="Work Time" name="workTime">
+                      <Input readOnly />
+                    </Form.Item>
                   </div>
-                </Form>
-              </Modal>
-              <Modal
-                style={{ top: "1px", width: "100%" }}
-                open={editModalOpen}
-                onCancel={handleEditModalclose}
-                footer={null}
-              >
-                <h3>Edit Service Form Record</h3>
-                <Form
-                  form={editForm}
-                  layout="vertical"
-                  onFinish={handleEditSubmit}
-                >
-                  <div className="row">
-                    <div className="col-12">
-                      <Form.Item label="Service Request Number" name="editsrn">
-                        <Input readOnly />
-                      </Form.Item>
-                    </div>
-                    <div className="col-12 col-md-6">
-                      <Form.Item
-                        label="Customer Name"
-                        name="customerName"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please enter customer name",
-                          },
-                        ]}
-                      >
-                        <Input />
-                      </Form.Item>
 
-                      <Form.Item
-                        label="Address"
-                        name="address"
-                        rules={[
-                          { required: true, message: "Please enter address" },
-                        ]}
-                      >
-                        {/* <TextArea placeholder="Enter address" 
-                       /> */}
-                        <TextArea
-                          placeholder="Enter address"
-                          value={address}
-                          onChange={handleAddressChange}
-                          autoSize={{ minRows: 3, maxRows: 3 }}
-                          maxLength={100}
-                          showCount
-                        />
-                      </Form.Item>
+                  <div className="col-12 col-lg-4">
+                    <Form.Item
+                      label="Service Technician"
+                      name="serviceTechnician"
+                      readOnly
+                    >
+                      <Input readOnly />
+                    </Form.Item>
+                  </div>
 
-                      <Form.Item
-                        label="Contact"
-                        name="contact"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please enter contact name",
-                          },
-                          {
-                            pattern: /^[A-Za-z. ]+$/,
-                            message:
-                              "Only letters, spaces, and '.' are allowed",
-                          },
-                        ]}
-                      >
-                        <Input placeholder="Enter contact name" />
-                      </Form.Item>
+                  <div className="col-12 col-lg-4">
+                    <Form.Item label="Departure Date" name="departureDate">
+                      <DatePicker
+                        className="w-100"
+                        format="DD-MM-YYYY"
+                        disabled
+                      />
+                    </Form.Item>
+                  </div>
 
-                      <Form.Item
-                        label="Telephone"
-                        name="telephone"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please enter telephone number",
-                          },
-                          {
-                            pattern: /^[0-9+-]+$/,
-                            message: "Only numbers, +, and - are allowed",
-                          },
-                        ]}
-                      >
-                        <Input placeholder="Enter telephone number" />
-                      </Form.Item>
-                    </div>
+                  <div className="col-12 col-lg-4">
+                    <Form.Item label="Return Date" name="returnDate">
+                      <DatePicker
+                        className="w-100"
+                        format="DD-MM-YYYY"
+                        disabled
+                      />
+                    </Form.Item>
+                  </div>
 
-                    <div className="col-12 col-md-6">
-                      <Form.Item
-                        label="Machine Type"
-                        name="machineType"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please enter machine type",
-                          },
-                        ]}
-                      >
-                        <Input placeholder="Enter machine type" />
-                      </Form.Item>
-
-                      <Form.Item
-                        label="Serial Number"
-                        name="serialNumber"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please enter serial number",
-                          },
-                        ]}
-                      >
-                        <TextArea
-                          placeholder="Enter serial number"
-                          value={serialNumber}
-                          onChange={handleSerialNumberChange}
-                          autoSize={{ minRows: 3, maxRows: 3 }}
-                          maxLength={60}
-                          showCount
-                        />
-                      </Form.Item>
-
-                      <Form.Item
-                        label="Installation Date"
-                        name="installationDate"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please select the installation date",
-                          },
-                        ]}
-                      >
-                        <DatePicker
-                          className="w-100"
-                          // showTime
-                          format="DD-MM-YYYY" // Dubai Time Format
-                          value={
-                            form.getFieldValue("installationDate")
-                              ? dayjs(
-                                  form.getFieldValue("installationDate")
-                                ).tz("Asia/Dubai")
-                              : dayjs().tz("Asia/Dubai") // Default to Dubai Time
-                          }
-                          onChange={(date) => {
-                            if (date) {
-                              const dubaiTime = dayjs(date).tz("Asia/Dubai");
-                              // console.log(
-                              //   "Selected Dubai Time:",
-                              //   dubaiTime.format("YYYY-MM-DD hh:mm A")
-                              // );
-                              form.setFieldsValue({
-                                installationDate: dubaiTime,
-                              });
-                            }
-                          }}
-                        />
-                      </Form.Item>
-
-                      <Form.Item
-                        label="Work Time"
-                        name="workTime"
-                        rules={[
-                          { required: true, message: "Please enter work time" },
-                        ]}
-                      >
-                        <Input placeholder="Enter work time" />
-                      </Form.Item>
-                    </div>
-
-                    <div className="col-12 col-lg-4">
-                      <Form.Item
-                        label="Service Technician"
-                        name="serviceTechnician"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please select a service technician",
-                          },
-                          // {
-                          //   pattern: /^[A-Za-z. ]+$/,
-                          //   message:
-                          //     "Only letters, spaces, and '.' are allowed",
-                          // },
-                        ]}
-                      >
-                        {/* <Input placeholder="Enter service technician name" /> */}
-                        <Select placeholder="Select a service technician">
-                          <Select.Option value="Palani">Palani</Select.Option>
-                          <Select.Option value="Sampath">Sampath</Select.Option>
-                          <Select.Option value="Karpagaraj">
-                            Karpagaraj
-                          </Select.Option>
-                          <Select.Option value="Balaji">Balaji</Select.Option>
-                          <Select.Option value="Eshwar">Eshwar</Select.Option>
-                          <Select.Option value="ShivaSundar">
-                            ShivaSundar
-                          </Select.Option>
-                        </Select>
-                      </Form.Item>
-                    </div>
-
-                    <div className="col-12 col-lg-4">
-                      <Form.Item
-                        label="Departure Date"
-                        name="departureDate"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please select the departure date",
-                          },
-                        ]}
-                      >
-                        <DatePicker
-                          className="w-100"
-                          // showTime
-                          // format="YYYY-MM-DD" // Dubai Time Format
-                          format="DD-MM-YYYY" // Dubai Time Format
-                          value={
-                            form.getFieldValue("departureDate")
-                              ? dayjs(form.getFieldValue("departureDate")).tz(
-                                  "Asia/Dubai"
-                                )
-                              : dayjs().tz("Asia/Dubai") // Default to Dubai Time
-                          }
-                          onChange={(date) => {
-                            if (date) {
-                              const dubaiTime = dayjs(date).tz("Asia/Dubai");
-                              // console.log(
-                              //   "Selected Dubai Time:",
-                              //   dubaiTime.format("YYYY-MM-DD hh:mm A")
-                              // );
-                              form.setFieldsValue({ departureDate: dubaiTime });
-                            }
-                          }}
-                        />
-                      </Form.Item>
-                    </div>
-
-                    <div className="col-12 col-lg-4">
-                      <Form.Item
-                        label="Return Date"
-                        name="returnDate"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please select the return date",
-                          },
-                        ]}
-                      >
-                        <DatePicker
-                          className="w-100"
-                          // showTime
-                          // format="YYYY-MM-DD" // Dubai Time Format
-                          format="DD-MM-YYYY"
-                          value={
-                            form.getFieldValue("returnDate")
-                              ? dayjs(form.getFieldValue("returnDate")).tz(
-                                  "Asia/Dubai"
-                                )
-                              : dayjs().tz("Asia/Dubai") // Default to Dubai Time
-                          }
-                          onChange={(date) => {
-                            if (date) {
-                              const dubaiTime = dayjs(date).tz("Asia/Dubai");
-                              // console.log(
-                              //   "Selected Dubai Time:",
-                              //   dubaiTime.format("YYYY-MM-DD hh:mm A")
-                              // );
-                              form.setFieldsValue({ returnDate: dubaiTime });
-                            }
-                          }}
-                        />
-                      </Form.Item>
-                    </div>
-
-                    <div className="col-12">
-                      <Form.Item
-                        label="Report"
-                        name="report"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please select at least one report type",
-                          },
-                        ]}
-                      >
-                        <Checkbox.Group options={reportOptions} />
-                      </Form.Item>
-                    </div>
+                  <div className="col-12">
+                    <Form.Item label="Report" name="report">
+                      <Checkbox.Group options={reportOptions} readOnly />
+                    </Form.Item>
 
                     <Form.Item
                       label="Description of work/of defect/failure mode"
                       name="description of work/of defect/failure mode"
+                    >
+                      <TextArea
+                        readOnly
+                        autoSize={{ minRows: 5, maxRows: 5 }}
+                      />
+                    </Form.Item>
+
+                    <Form.Item label="Cause of Failure" name="cause of failure">
+                      <TextArea
+                        readOnly
+                        autoSize={{ minRows: 3, maxRows: 3 }}
+                      />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Notes/Further action required"
+                      name="notes/further action required"
+                    >
+                      <TextArea
+                        readOnly
+                        autoSize={{ minRows: 3, maxRows: 3 }}
+                      />
+                    </Form.Item>
+
+                    <h6>Parts Used</h6>
+                    <Table
+                      columns={viewModalcolumns}
+                      dataSource={viewTabledata}
+                      pagination={false}
+                    />
+                  </div>
+
+                  <div className="col-12 mt-4">
+                    <Form.Item label="Service Type" name="serviceType">
+                      <Checkbox.Group options={serviceOptions} readOnly />
+                    </Form.Item>
+                  </div>
+                  <div>
+                    <Button
+                      color="danger"
+                      variant="solid"
+                      size="large"
+                      onClick={() => setViewModalOpen(false)}
+                    >
+                      Close From
+                    </Button>
+                  </div>
+                </div>
+              </Form>
+            </Modal>
+            <Modal
+              style={{ top: "1px", width: "100%" }}
+              open={editModalOpen}
+              onCancel={handleEditModalclose}
+              footer={null}
+            >
+              <h3>Edit Service Form Record</h3>
+              <Form
+                form={editForm}
+                layout="vertical"
+                onFinish={handleEditSubmit}
+              >
+                <div className="row">
+                  <div className="col-12">
+                    <Form.Item label="Service Request Number" name="editsrn">
+                      <Input readOnly />
+                    </Form.Item>
+                  </div>
+                  <div className="col-12 col-md-6">
+                    <Form.Item
+                      label="Customer Name"
+                      name="customerName"
                       rules={[
                         {
                           required: true,
-                          message:
-                            "Please enter the description of work/of defect/failure mode",
+                          message: "Please enter customer name",
                         },
                       ]}
                     >
+                      <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Address"
+                      name="address"
+                      rules={[
+                        { required: true, message: "Please enter address" },
+                      ]}
+                    >
+                      {/* <TextArea placeholder="Enter address" 
+                       /> */}
                       <TextArea
-                        placeholder="Enter the description of work/of defect/failure mode"
-                        value={descriptionText}
-                        onChange={handleDescriptionTextChange}
-                        autoSize={{ minRows: 5, maxRows: 5 }}
-                        maxLength={1000}
+                        placeholder="Enter address"
+                        value={address}
+                        onChange={handleAddressChange}
+                        autoSize={{ minRows: 3, maxRows: 3 }}
+                        maxLength={100}
                         showCount
                       />
                     </Form.Item>
 
-                    {/* <Form.Item
+                    <Form.Item
+                      label="Contact"
+                      name="contact"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter contact name",
+                        },
+                        {
+                          pattern: /^[A-Za-z. ]+$/,
+                          message: "Only letters, spaces, and '.' are allowed",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="Enter contact name" />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Telephone"
+                      name="telephone"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter telephone number",
+                        },
+                        {
+                          pattern: /^[0-9+-]+$/,
+                          message: "Only numbers, +, and - are allowed",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="Enter telephone number" />
+                    </Form.Item>
+                  </div>
+
+                  <div className="col-12 col-md-6">
+                    <Form.Item
+                      label="Machine Type"
+                      name="machineType"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter machine type",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="Enter machine type" />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Serial Number"
+                      name="serialNumber"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter serial number",
+                        },
+                      ]}
+                    >
+                      <TextArea
+                        placeholder="Enter serial number"
+                        value={serialNumber}
+                        onChange={handleSerialNumberChange}
+                        autoSize={{ minRows: 3, maxRows: 3 }}
+                        maxLength={60}
+                        showCount
+                      />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Installation Date"
+                      name="installationDate"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select the installation date",
+                        },
+                      ]}
+                    >
+                      <DatePicker
+                        className="w-100"
+                        // showTime
+                        format="DD-MM-YYYY" // Dubai Time Format
+                        value={
+                          form.getFieldValue("installationDate")
+                            ? dayjs(form.getFieldValue("installationDate")).tz(
+                                "Asia/Dubai"
+                              )
+                            : dayjs().tz("Asia/Dubai") // Default to Dubai Time
+                        }
+                        onChange={(date) => {
+                          if (date) {
+                            const dubaiTime = dayjs(date).tz("Asia/Dubai");
+                            // console.log(
+                            //   "Selected Dubai Time:",
+                            //   dubaiTime.format("YYYY-MM-DD hh:mm A")
+                            // );
+                            form.setFieldsValue({
+                              installationDate: dubaiTime,
+                            });
+                          }
+                        }}
+                      />
+                    </Form.Item>
+
+                    <Form.Item
+                      label="Work Time"
+                      name="workTime"
+                      rules={[
+                        { required: true, message: "Please enter work time" },
+                      ]}
+                    >
+                      <Input placeholder="Enter work time" />
+                    </Form.Item>
+                  </div>
+
+                  <div className="col-12 col-lg-4">
+                    <Form.Item
+                      label="Service Technician"
+                      name="serviceTechnician"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select a service technician",
+                        },
+                        // {
+                        //   pattern: /^[A-Za-z. ]+$/,
+                        //   message:
+                        //     "Only letters, spaces, and '.' are allowed",
+                        // },
+                      ]}
+                    >
+                      {/* <Input placeholder="Enter service technician name" /> */}
+                      <Select placeholder="Select a service technician">
+                        <Select.Option value="Palani">Palani</Select.Option>
+                        <Select.Option value="Sampath">Sampath</Select.Option>
+                        <Select.Option value="Karpagaraj">
+                          Karpagaraj
+                        </Select.Option>
+                        <Select.Option value="Balaji">Balaji</Select.Option>
+                        <Select.Option value="Eshwar">Eshwar</Select.Option>
+                        <Select.Option value="ShivaSundar">
+                          ShivaSundar
+                        </Select.Option>
+                      </Select>
+                    </Form.Item>
+                  </div>
+
+                  <div className="col-12 col-lg-4">
+                    <Form.Item
+                      label="Departure Date"
+                      name="departureDate"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select the departure date",
+                        },
+                      ]}
+                    >
+                      <DatePicker
+                        className="w-100"
+                        // showTime
+                        // format="YYYY-MM-DD" // Dubai Time Format
+                        format="DD-MM-YYYY" // Dubai Time Format
+                        value={
+                          form.getFieldValue("departureDate")
+                            ? dayjs(form.getFieldValue("departureDate")).tz(
+                                "Asia/Dubai"
+                              )
+                            : dayjs().tz("Asia/Dubai") // Default to Dubai Time
+                        }
+                        onChange={(date) => {
+                          if (date) {
+                            const dubaiTime = dayjs(date).tz("Asia/Dubai");
+                            // console.log(
+                            //   "Selected Dubai Time:",
+                            //   dubaiTime.format("YYYY-MM-DD hh:mm A")
+                            // );
+                            form.setFieldsValue({ departureDate: dubaiTime });
+                          }
+                        }}
+                      />
+                    </Form.Item>
+                  </div>
+
+                  <div className="col-12 col-lg-4">
+                    <Form.Item
+                      label="Return Date"
+                      name="returnDate"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select the return date",
+                        },
+                      ]}
+                    >
+                      <DatePicker
+                        className="w-100"
+                        // showTime
+                        // format="YYYY-MM-DD" // Dubai Time Format
+                        format="DD-MM-YYYY"
+                        value={
+                          form.getFieldValue("returnDate")
+                            ? dayjs(form.getFieldValue("returnDate")).tz(
+                                "Asia/Dubai"
+                              )
+                            : dayjs().tz("Asia/Dubai") // Default to Dubai Time
+                        }
+                        onChange={(date) => {
+                          if (date) {
+                            const dubaiTime = dayjs(date).tz("Asia/Dubai");
+                            // console.log(
+                            //   "Selected Dubai Time:",
+                            //   dubaiTime.format("YYYY-MM-DD hh:mm A")
+                            // );
+                            form.setFieldsValue({ returnDate: dubaiTime });
+                          }
+                        }}
+                      />
+                    </Form.Item>
+                  </div>
+
+                  <div className="col-12">
+                    <Form.Item
+                      label="Report"
+                      name="report"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select at least one report type",
+                        },
+                      ]}
+                    >
+                      <Checkbox.Group options={reportOptions} />
+                    </Form.Item>
+                  </div>
+
+                  <Form.Item
+                    label="Description of work/of defect/failure mode"
+                    name="description of work/of defect/failure mode"
+                    rules={[
+                      {
+                        required: true,
+                        message:
+                          "Please enter the description of work/of defect/failure mode",
+                      },
+                    ]}
+                  >
+                    <TextArea
+                      placeholder="Enter the description of work/of defect/failure mode"
+                      value={descriptionText}
+                      onChange={handleDescriptionTextChange}
+                      autoSize={{ minRows: 5, maxRows: 5 }}
+                      maxLength={1000}
+                      showCount
+                    />
+                  </Form.Item>
+
+                  {/* <Form.Item
                       label="Cause of Failure"
                       name="cause of failure"
                       rules={[
@@ -5195,17 +5516,17 @@ const clearEditManagerSignature = () => {
                       />
                     </Form.Item> */}
 
-                    <Form.Item label="Cause of Failure">
-                      <Input.TextArea
-                        value={causeOfFailure}
-                        onChange={(e) => setcauseOfFailure(e.target.value)}
-                        placeholder="Describe the failure"
-                        autoSize={{ minRows: 3, maxRows: 3 }}
-                        maxLength={500}
-                        showCount
-                      />
+                  <Form.Item label="Cause of Failure">
+                    <Input.TextArea
+                      value={causeOfFailure}
+                      onChange={(e) => setcauseOfFailure(e.target.value)}
+                      placeholder="Describe the failure"
+                      autoSize={{ minRows: 3, maxRows: 3 }}
+                      maxLength={500}
+                      showCount
+                    />
 
-                      {/* {previewUrl && (
+                    {/* {previewUrl && (
                         <div style={{ marginTop: 10 }}>
                           <p>Existing Image Preview:</p>
 
@@ -5231,16 +5552,16 @@ const clearEditManagerSignature = () => {
                           </Button>
                         </div>
                       )} */}
-                      {previewUrl && causeOfFailureImage && (
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 8,
-                          }}
-                        >
-                          <PaperClipOutlined />
-                          {/* <a
+                    {previewUrl && causeOfFailureImage && (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                        }}
+                      >
+                        <PaperClipOutlined />
+                        {/* <a
                             href={previewUrl}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -5248,18 +5569,16 @@ const clearEditManagerSignature = () => {
                           >
                             {causeOfFailureImage.name}
                           </a> */}
-                          <a
-                            href={downloadUrl} // from `extractFileInfoFromCauseText`
-                            // target="_blank"
-                            // rel="noopener noreferrer"
-                            download
-                          >
-                            {/* {causeOfFailureImage?.name || "Uploaded Image"} */}
-                                  {causeOfFailureImage.name}
-
-
-                          </a>
-                          {/* <Button
+                        <a
+                          href={downloadUrl} // from `extractFileInfoFromCauseText`
+                          // target="_blank"
+                          // rel="noopener noreferrer"
+                          download
+                        >
+                          {/* {causeOfFailureImage?.name || "Uploaded Image"} */}
+                          {causeOfFailureImage.name}
+                        </a>
+                        {/* <Button
                             size="small"
                             icon={<DeleteOutlined />}
                             danger
@@ -5295,7 +5614,7 @@ const clearEditManagerSignature = () => {
                               }
                             }}
                           /> */}
-                          {/* <Button
+                        {/* <Button
                             size="small"
                             icon={<DeleteOutlined />}
                             danger
@@ -5335,291 +5654,288 @@ const clearEditManagerSignature = () => {
                               });
                             }}
                           /> */}
-                          <Popconfirm
-                            title="Are you sure you want to delete this image?"
-                            okText="Yes"
-                            cancelText="No"
-                            onConfirm={async () => {
-                              const res = await fetch(
-                                "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
-                                {
-                                  method: "POST",
-                                  headers: {
-                                    "Content-Type":
-                                      "application/x-www-form-urlencoded",
-                                  },
-                                  body: new URLSearchParams({
-                                    action: "deleteCauseImage",
-                                    imageUrl: previewUrl,
-                                  }),
-                                }
-                              );
-
-                              const result = await res.json();
-                              if (result.success) {
-                                message.success("Image deleted successfully");
-                                setCauseOfFailureImage(null);
-                                setPreviewUrl(null);
-                              } else {
-                                message.error("Image deletion failed");
+                        <Popconfirm
+                          title="Are you sure you want to delete this image?"
+                          okText="Yes"
+                          cancelText="No"
+                          onConfirm={async () => {
+                            const res = await fetch(
+                              "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
+                              {
+                                method: "POST",
+                                headers: {
+                                  "Content-Type":
+                                    "application/x-www-form-urlencoded",
+                                },
+                                body: new URLSearchParams({
+                                  action: "deleteCauseImage",
+                                  imageUrl: previewUrl,
+                                }),
                               }
-                            }}
-                          >
-                            <Button
-                              size="small"
-                              icon={<DeleteOutlined />}
-                              danger
-                            />
-                          </Popconfirm>
-                        </div>
-                      )}
+                            );
 
-                      {!previewUrl && (
-                        <Upload
-                          accept="image/*"
-                          showUploadList={false}
-                          beforeUpload={(file) => {
-                            const isImage = file.type.startsWith("image/");
-                            const isLtMaxSize = file.size / 1024 / 1024 < 5;
-
-                            if (!isImage) {
-                              message.error("Only image files are allowed.");
-                              return Upload.LIST_IGNORE;
+                            const result = await res.json();
+                            if (result.success) {
+                              message.success("Image deleted successfully");
+                              setCauseOfFailureImage(null);
+                              setPreviewUrl(null);
+                            } else {
+                              message.error("Image deletion failed");
                             }
-                            if (!isLtMaxSize) {
-                              message.error("Image must be smaller than 5MB!");
-                              return Upload.LIST_IGNORE;
-                            }
-
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              setPreviewUrl(reader.result); // ✅ show base64 preview
-                              setCauseOfFailureImage(file); // ✅ keep for upload
-                              console.log(
-                                "Base64 length:",
-                                reader.result.length
-                              );
-                            };
-                            reader.readAsDataURL(file);
-                            return false;
                           }}
                         >
                           <Button
-                            icon={<UploadOutlined />}
-                            style={{ marginTop: 10 }}
-                          >
-                            Upload Image
-                          </Button>
-                        </Upload>
-                      )}
-                    </Form.Item>
+                            size="small"
+                            icon={<DeleteOutlined />}
+                            danger
+                          />
+                        </Popconfirm>
+                      </div>
+                    )}
 
+                    {!previewUrl && (
+                      <Upload
+                        accept="image/*"
+                        showUploadList={false}
+                        beforeUpload={(file) => {
+                          const isImage = file.type.startsWith("image/");
+                          const isLtMaxSize = file.size / 1024 / 1024 < 5;
+
+                          if (!isImage) {
+                            message.error("Only image files are allowed.");
+                            return Upload.LIST_IGNORE;
+                          }
+                          if (!isLtMaxSize) {
+                            message.error("Image must be smaller than 5MB!");
+                            return Upload.LIST_IGNORE;
+                          }
+
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setPreviewUrl(reader.result); // ✅ show base64 preview
+                            setCauseOfFailureImage(file); // ✅ keep for upload
+                            console.log("Base64 length:", reader.result.length);
+                          };
+                          reader.readAsDataURL(file);
+                          return false;
+                        }}
+                      >
+                        <div
+                          style={{
+                            marginTop: 8,
+                            marginBottom: 4,
+                            color: "#888",
+                            fontSize: "0.85rem",
+                          }}
+                        >
+                          Upload only image files (PNG, JPG, JPEG) for cause of
+                          failure. Max size: <strong>3MB</strong>.
+                        </div>
+                        <Button icon={<UploadOutlined />}>Upload Image</Button>
+                      </Upload>
+                    )}
+                  </Form.Item>
+
+                  <Form.Item
+                    label="Notes/Further action required"
+                    name="notes/further action required"
+                    rules={[
+                      {
+                        required: true,
+                        message:
+                          "Please enter the notes/further action required",
+                      },
+                    ]}
+                  >
+                    <TextArea
+                      placeholder="Enter the notes/further action required"
+                      value={notes}
+                      onChange={handleNotesChange}
+                      autoSize={{ minRows: 3, maxRows: 3 }}
+                      maxLength={200}
+                      showCount
+                    />
+                  </Form.Item>
+
+                  <div className="col-12">
+                    <h6>Parts Used</h6>
+                    <Table
+                      columns={editModalcolumns}
+                      dataSource={editTabledata}
+                      pagination={false}
+                    />
+                  </div>
+
+                  <div className="col-12 mt-4">
                     <Form.Item
-                      label="Notes/Further action required"
-                      name="notes/further action required"
+                      label="Service Type"
+                      name="serviceType" // This is the field name
                       rules={[
                         {
                           required: true,
-                          message:
-                            "Please enter the notes/further action required",
+                          message: "Please select at least one report type",
                         },
                       ]}
                     >
-                      <TextArea
-                        placeholder="Enter the notes/further action required"
-                        value={notes}
-                        onChange={handleNotesChange}
-                        autoSize={{ minRows: 3, maxRows: 3 }}
-                        maxLength={200}
-                        showCount
-                      />
+                      <Checkbox.Group options={serviceOptions} />
                     </Form.Item>
+                  </div>
 
-                    <div className="col-12">
-                      <h6>Parts Used</h6>
-                      <Table
-                        columns={editModalcolumns}
-                        dataSource={editTabledata}
-                        pagination={false}
+                  <div className="col-12 col-lg-6 col-xl-4 mt-2 d-flex justify-content-center">
+                    <Form.Item label="Signature of service technician" required>
+                      <SignatureCanvas
+                        ref={editSigTechnician}
+                        penColor="black"
+                        canvasProps={{
+                          width: canvasSize.width,
+                          height: canvasSize.height,
+                          className: "border rounded border-3",
+                        }}
                       />
-                    </div>
-
-                    <div className="col-12 mt-4">
-                      <Form.Item
-                        label="Service Type"
-                        name="serviceType" // This is the field name
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please select at least one report type",
-                          },
-                        ]}
-                      >
-                        <Checkbox.Group options={serviceOptions} />
-                      </Form.Item>
-                    </div>
-
-                    <div className="col-12 col-lg-6 col-xl-4 mt-2 d-flex justify-content-center">
-                      <Form.Item
-                        label="Signature of service technician"
-                        required
-                      >
-                        <SignatureCanvas
-                          ref={editSigTechnician}
-                          penColor="black"
-                          canvasProps={{
-                            width: canvasSize.width,
-                            height: canvasSize.height,
-                            className: "border rounded border-3",
-                          }}
-                        />
-                        {/* <SignatureCanvas
+                      {/* <SignatureCanvas
   ref={editSigTechnician}
   penColor="black"
   canvasProps={{ width: 300, height: 100, className: "sigCanvas" }}
 /> */}
-                        <div className="d-flex justify-content-start justify-content-md-start justify-content-lg-start  gap-2 mt-1">
-                          <Button
-                            type="primary"
-                            // onClick={saveTechnicianSignature}
-                            onClick={saveEditTechnicianSignature}
-                            disabled={isEditSubmitting}
-                          >
-                            Save Signature
-                          </Button>
-                          <Button
-                            type="primary"
-                            danger
-                            // onClick={clearTechnicianSignature}
-                            onClick={clearEditTechnicianSignature}
-                            disabled={isEditSubmitting}
-                          >
-                            Clear
-                          </Button>
-                        </div>
-                      </Form.Item>
-                    </div>
-
-                    <div className="col-12 col-lg-6 col-xl-4 mt-2 d-flex justify-content-center">
-                      <div>
-                        <Form.Item
-                          label="Signature of Service Manager"
-                          name="serviceManagerSignature"
-                          required
+                      <div className="d-flex justify-content-start justify-content-md-start justify-content-lg-start  gap-2 mt-1">
+                        <Button
+                          type="primary"
+                          // onClick={saveTechnicianSignature}
+                          onClick={saveEditTechnicianSignature}
+                          disabled={isEditSubmitting}
                         >
-                          <div
-                            className="border rounded border-3 p-2 d-flex flex-column align-items-center"
-                            style={{
-                              width: canvasSize.width, // ✅ Same width as other signatures
-                              height: canvasSize.height, // ✅ Same height as other signatures
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              backgroundColor: "#fff",
-                              overflow: "hidden", // ✅ Ensures image fits nicely
-                            }}
-                          >
-                            {editSignatureManager  ? (
-                              // ✅ Show uploaded image inside border
-                              <Image
-                                src={editSignatureManager}
-                                alt="Manager Signature"
-                                width="100%"
-                                height="100%"
-                                style={{ objectFit: "contain" }}
-                              />
-                            ) : (
-                              // ✅ Show Upload Button when no image
-                              <Upload
-                                showUploadList={false} // ✅ Hide default file name list
-                                accept="image/png, image/jpeg"
-                                beforeUpload={(file) => {
-                                  handleEditManagerUpload({ file }); // ✅ Handle upload manually
-                                  return false; // ✅ Prevent automatic upload
-                                }}
-                                className="d-flex"
-                              >
-                                <Button icon={<UploadOutlined />}>
-                                  Upload Signature
-                                </Button>
-                              </Upload>
-                            )}
-                          </div>
-
-                          {editSignatureManager  && (
-                            <Button
-                              type="primary"
-                              danger
-                              icon={<DeleteOutlined />}
-                              onClick={clearEditManagerSignature}
-                              className="mt-2"
-                            >
-                              Clear Signature
-                            </Button>
-                          )}
-                        </Form.Item>
+                          Save Signature
+                        </Button>
+                        <Button
+                          type="primary"
+                          danger
+                          // onClick={clearTechnicianSignature}
+                          onClick={clearEditTechnicianSignature}
+                          disabled={isEditSubmitting}
+                        >
+                          Clear
+                        </Button>
                       </div>
-                    </div>
+                    </Form.Item>
+                  </div>
 
-                    {/* Customer Signature */}
-                    <div className="col-12 col-lg-6 col-xl-4  mt-2 d-flex justify-content-center">
-                      <Form.Item label="Customer signature" required>
-                        <SignatureCanvas
-                          ref={editSigCustomer}
-                          penColor="black"
-                          canvasProps={{
-                            width: canvasSize.width,
-                            height: canvasSize.height,
-                            className: "border rounded border-3",
+                  <div className="col-12 col-lg-6 col-xl-4 mt-2 d-flex justify-content-center">
+                    <div>
+                      <Form.Item
+                        label="Signature of Service Manager"
+                        name="serviceManagerSignature"
+                        required
+                      >
+                        <div
+                          className="border rounded border-3 p-2 d-flex flex-column align-items-center"
+                          style={{
+                            width: canvasSize.width, // ✅ Same width as other signatures
+                            height: canvasSize.height, // ✅ Same height as other signatures
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: "#fff",
+                            overflow: "hidden", // ✅ Ensures image fits nicely
                           }}
-                        />
-                        <div className="d-flex justify-content-start  justify-content-md-start justify-content-lg-start gap-2 mt-1">
-                          <Button
-                            type="primary"
-                            onClick={saveEditCustomerSignature}
-                            disabled={isEditSubmitting}
-                          >
-                            Save Signature
-                          </Button>
+                        >
+                          {editSignatureManager ? (
+                            // ✅ Show uploaded image inside border
+                            <Image
+                              src={editSignatureManager}
+                              alt="Manager Signature"
+                              width="100%"
+                              height="100%"
+                              style={{ objectFit: "contain" }}
+                            />
+                          ) : (
+                            // ✅ Show Upload Button when no image
+                            <Upload
+                              showUploadList={false} // ✅ Hide default file name list
+                              accept="image/png, image/jpeg"
+                              beforeUpload={(file) => {
+                                handleEditManagerUpload({ file }); // ✅ Handle upload manually
+                                return false; // ✅ Prevent automatic upload
+                              }}
+                              className="d-flex"
+                            >
+                              <Button icon={<UploadOutlined />}>
+                                Upload Signature
+                              </Button>
+                            </Upload>
+                          )}
+                        </div>
+
+                        {editSignatureManager && (
                           <Button
                             type="primary"
                             danger
-                            onClick={clearEditCustomerSignature}
-                            disabled={isEditSubmitting}
+                            icon={<DeleteOutlined />}
+                            onClick={clearEditManagerSignature}
+                            className="mt-2"
                           >
-                            Clear
+                            Clear Signature
                           </Button>
-                        </div>
+                        )}
                       </Form.Item>
                     </div>
-
-                    
                   </div>
-                  <div className="text-center mt-4 ">
-                    <Button
-                      htmlType="submit"
-                      className="editsubmitbutton p-3"
-                      style={{ fontSize: "1.2rem" }}
-                      size="large"
-                      loading={editLoading}
-                      disabled={editLoading || isEditSubmitting}
-                    >
-                      {editLoading ? "Updating..." : "Update record"}
-                    </Button>
 
-                    <Button
-                      color="danger"
-                      variant="solid"
-                      size="large"
-                      onClick={handleEditModalclose}
-                      className="ms-3"
-                    >
-                      Cancel
-                    </Button>
+                  {/* Customer Signature */}
+                  <div className="col-12 col-lg-6 col-xl-4  mt-2 d-flex justify-content-center">
+                    <Form.Item label="Customer signature" required>
+                      <SignatureCanvas
+                        ref={editSigCustomer}
+                        penColor="black"
+                        canvasProps={{
+                          width: canvasSize.width,
+                          height: canvasSize.height,
+                          className: "border rounded border-3",
+                        }}
+                      />
+                      <div className="d-flex justify-content-start  justify-content-md-start justify-content-lg-start gap-2 mt-1">
+                        <Button
+                          type="primary"
+                          onClick={saveEditCustomerSignature}
+                          disabled={isEditSubmitting}
+                        >
+                          Save Signature
+                        </Button>
+                        <Button
+                          type="primary"
+                          danger
+                          onClick={clearEditCustomerSignature}
+                          disabled={isEditSubmitting}
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    </Form.Item>
                   </div>
-                </Form>
-              </Modal>
-            </div>
+                </div>
+                <div className="text-center mt-4 ">
+                  <Button
+                    htmlType="submit"
+                    className="editsubmitbutton p-3"
+                    style={{ fontSize: "1.2rem" }}
+                    size="large"
+                    loading={editLoading}
+                    disabled={editLoading || isEditSubmitting}
+                  >
+                    {editLoading ? "Updating record..." : "Update record"}
+                  </Button>
+
+                  <Button
+                    color="danger"
+                    variant="solid"
+                    size="large"
+                    onClick={handleEditModalclose}
+                    className="ms-3"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </Form>
+            </Modal>
           </div>
         </div>
       </div>
