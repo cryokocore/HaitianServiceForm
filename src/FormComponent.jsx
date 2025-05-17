@@ -116,9 +116,18 @@ export default function FormComponent() {
   const [editSignatureCustomer, setEditSignatureCustomer] = useState("");
   const [searchText, setSearchText] = useState("");
   const [filteredData, setFilteredData] = useState([]);
- const [searchInstallationDate, setSearchInstallationDate] = useState(null);
-const [searchSRN, setSearchSRN] = useState("");
+  const [searchInstallationDate, setSearchInstallationDate] = useState(null);
+  const [searchSRN, setSearchSRN] = useState("");
   const [rawCustomerData, setRawCustomerData] = useState([]);
+  const [viewPreviewUrl, setViewPreviewUrl] = useState(null);
+  const [viewCauseOfFailureFile, setViewCauseOfFailureFile] = useState(null);
+  const [viewCauseOfFailureText, setViewCauseOfFailureText] = useState("");
+  const hasInitializedEditForm = useRef(false);
+  const [editCauseOfFailureImage, setEditCauseOfFailureImage] = useState(null);
+  const [editPreviewUrl, setEditPreviewUrl] = useState(null);
+  const [editCauseText, setEditCauseText] = useState("");
+  const [editViewUrl, setEditViewUrl] = useState(null); // ✅ new state
+
   const [data, setData] = useState([
     {
       key: Date.now(),
@@ -186,8 +195,17 @@ const [searchSRN, setSearchSRN] = useState("");
     }
   };
   const handleRemoveImage = () => {
-    setCauseOfFailureImage(null);
-    setPreviewUrl(null);
+    setEditCauseOfFailureImage(null);
+    setEditPreviewUrl(null);
+    setEditCauseText((prev) =>
+      prev
+        .split("\n")
+        .filter(
+          (line) => !line.startsWith("Image:") && !line.startsWith("Filename:")
+        )
+        .join("\n")
+        .trim()
+    );
   };
 
   const saveEditTechnicianSignature = () => {
@@ -295,6 +313,20 @@ const [searchSRN, setSearchSRN] = useState("");
     return false;
   };
 
+  const handleEditCauseImageUpload = ({ file }) => {
+    if (file.size > 3 * 1024 * 1024) {
+      message.error("File too large.");
+      return false;
+    }
+
+    setEditCauseOfFailureImage(file);
+    const reader = new FileReader();
+    reader.onload = () => setEditPreviewUrl(reader.result);
+    reader.readAsDataURL(file);
+
+    return false;
+  };
+
   const uploadCauseImageToDrive = async () => {
     if (!causeOfFailureImage) return "";
 
@@ -354,6 +386,24 @@ const [searchSRN, setSearchSRN] = useState("");
           true
         );
       };
+      const fullCause = selectedRecord["Cause of Failure"] || "";
+
+      const { downloadUrl, filename } = extractFileInfoFromCauseText(fullCause);
+
+      const causeTextOnly = fullCause
+        .split("\n")
+        .filter(
+          (line) =>
+            !line.trim().startsWith("Image:") &&
+            !line.trim().startsWith("Filename:")
+        )
+        .join("\n");
+
+      // setViewPreviewUrl(url);
+      setViewPreviewUrl(downloadUrl);
+
+      setViewCauseOfFailureFile(filename ? { name: filename } : null);
+      setViewCauseOfFailureText(causeTextOnly);
 
       viewForm.setFieldsValue({
         srn: selectedRecord["Service Request Number"],
@@ -401,19 +451,19 @@ const [searchSRN, setSearchSRN] = useState("");
         note: part.note ?? "",
       }));
 
-      setViewTableData(
-        partRows.length > 0
-          ? partRows
-          : [
-              {
-                key: Date.now(),
-                partNumber: "",
-                description: "",
-                quantity: "",
-                note: "",
-              },
-            ]
-      );
+      // setViewTableData(
+      //   partRows.length > 0
+      //     ? partRows
+      //     : [
+      //         {
+      //           key: Date.now(),
+      //           partNumber: "",
+      //           description: "",
+      //           quantity: "",
+      //           note: "",
+      //         },
+      //       ]
+      // );
     }
     console.log("Selected Record:", selectedRecord);
   }, [selectedRecord, viewModalOpen]);
@@ -454,27 +504,186 @@ const [searchSRN, setSearchSRN] = useState("");
   //   };
   // };
 
+  // const extractFileInfoFromCauseText = (text) => {
+  //   const match = text.match(/\/d\/([a-zA-Z0-9_-]+)\//);
+  //   const nameMatch = text.match(/Filename:\s*(.+)/);
+
+  //   if (!match) return {};
+
+  //   const fileId = match[1];
+  //   return {
+  //     viewUrl: `https://drive.google.com/file/d/${fileId}/view`,
+  //     downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
+  //     fileId,
+  //     filename: nameMatch ? nameMatch[1].trim() : "Uploaded_Image",
+  //   };
+  // };
   const extractFileInfoFromCauseText = (text) => {
-    const match = text.match(/\/d\/([a-zA-Z0-9_-]+)\//);
-    const nameMatch = text.match(/Filename:\s*(.+)/);
+  const match = text.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  const nameMatch = text.match(/Filename:\s*(.+)/);
 
-    if (!match) return {};
+  if (!match) return {};
 
-    const fileId = match[1];
-    return {
-      viewUrl: `https://drive.google.com/file/d/${fileId}/view`,
-      downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
-      fileId,
-      filename: nameMatch ? nameMatch[1].trim() : "Uploaded_Image",
-    };
+  const fileId = match[1];
+  return {
+    viewUrl: `https://drive.google.com/file/d/${fileId}/view`,
+    downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
+    fileId,
+    filename: nameMatch ? nameMatch[1].trim() : "Uploaded_Image",
   };
-
-  useEffect(() => {
-  handleSearchAndFilter();
-}, [searchText, searchInstallationDate, searchSRN, rawCustomerData]);
+};
 
 
   useEffect(() => {
+    handleSearchAndFilter();
+  }, [searchText, searchInstallationDate, searchSRN, rawCustomerData]);
+
+  // useEffect(() => {
+  // if (!selectedRecord || !editModalOpen || hasInitializedEditForm.current) return;
+
+  //   if (selectedRecord && editModalOpen) {
+  //     const reportOptions = [
+  //       "Installation/Commission",
+  //       "Maintenance",
+  //       "Defect",
+  //       "Customer Visit (Report)",
+  //       "Other",
+  //     ];
+
+  //     const serviceOptions = [
+  //       "F.O.C Commissioning",
+  //       "F.O.C Maintenance",
+  //       "Chargeable Maintenance",
+  //       "Goodwill",
+  //       "Guarantee",
+  //       "Service contract",
+  //       "Customer Visit (Service)",
+  //       "Installation/Commission",
+  //     ];
+
+  //     const checkedReports = reportOptions.filter(
+  //       (option) => selectedRecord[option] === "Yes"
+  //     );
+
+  //     const checkedServices = serviceOptions.filter(
+  //       (option) => selectedRecord[option] === "Yes"
+  //     );
+
+  //     const parseDate = (dateStr) => {
+  //       return dayjs(
+  //         dateStr,
+  //         ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
+  //         true
+  //       );
+  //     };
+
+  //     editForm.setFieldsValue({
+  //       editsrn: selectedRecord["Service Request Number"],
+  //       customerName: selectedRecord["Customer Name"],
+  //       address: selectedRecord["Address"],
+  //       contact: selectedRecord["Contact"],
+  //       telephone: selectedRecord["Telephone"],
+  //       machineType: selectedRecord["Machine Type"],
+  //       serialNumber: selectedRecord["Serial Number"],
+  //       installationDate: selectedRecord["Installation Date"]
+  //         ? parseDate(selectedRecord["Installation Date"])
+  //         : null,
+  //       departureDate: selectedRecord["Departure Date"]
+  //         ? parseDate(selectedRecord["Departure Date"])
+  //         : null,
+  //       returnDate: selectedRecord["Return Date"]
+  //         ? parseDate(selectedRecord["Return Date"])
+  //         : null,
+
+  //       workTime: selectedRecord["Work Time"],
+  //       serviceTechnician: selectedRecord["Service Technician"],
+  //       report: checkedReports,
+  //       serviceType: checkedServices,
+  //       ["description of work/of defect/failure mode"]:
+  //         selectedRecord["Description of work/of defect/failure mode"],
+  //       ["cause of failure"]: selectedRecord["Cause of Failure"],
+
+  //       ["notes/further action required"]:
+  //         selectedRecord["Notes/Further action required"] ||
+  //         selectedRecord["Note "] ||
+  //         selectedRecord["Note\t"], // all variants
+  //     });
+
+  //     const fullCause = selectedRecord["Cause of Failure"] || "";
+  //     // const { url, fileId, filename } = extractFileInfoFromCauseText(fullCause);
+  //     const { viewUrl, downloadUrl, fileId, filename } =
+  //       extractFileInfoFromCauseText(fullCause);
+
+  //     // Extract image link
+  //     // const match = fullCause.match(
+  //     //   /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/
+  //     // );
+  //     // const fileId = match ? match[1] : null;
+  //     // const previewImage = fileId
+  //     //   ? `https://drive.google.com/uc?export=view&id=${fileId}` // direct viewable image
+  //     //   : null;
+
+  //     const previewImage = extractDriveImagePreviewUrl(fullCause);
+
+  //     // Extract only the text (excluding image line)
+  //     // const causeTextOnly = fullCause
+  //     //   .split("\n")
+  //     //   .filter((line) => !line.trim().startsWith("Image:"))
+  //     //   .join("\n")
+  //     //   .trim();
+  //     const causeTextOnly = fullCause
+  //       .split("\n")
+  //       .filter(
+  //         (line) =>
+  //           !line.trim().startsWith("Image:") &&
+  //           !line.trim().startsWith("Filename:")
+  //       )
+  //       .join("\n")
+  //       .trim();
+
+  //     setcauseOfFailure(causeTextOnly);
+  //     setPreviewUrl(previewImage);
+
+  //     setcauseOfFailure(causeTextOnly);
+  //     // setPreviewUrl(previewImage);
+  //     // setCauseOfFailureImage(null);
+  //     // setPreviewUrl(url);
+  //     // setPreviewUrl(viewUrl);
+  //     setEditPreviewUrl(viewUrl);
+
+  //     setDownloadUrl(downloadUrl);
+  //     // setCauseOfFailureImage({ fileId, name: filename }); // Simulate file object
+
+  //     // ✅ Set "Parts Used" table data
+  //     const partRows = (selectedRecord.partsUsed || []).map((part, index) => ({
+  //       key: Date.now() + index,
+  //       partNumber: part.partNumber ?? "",
+  //       description: part.description ?? "",
+  //       quantity: part.quantity ?? 1,
+  //       note: part.note ?? "",
+  //     }));
+  //     setEditTableData(
+  //       partRows.length > 0
+  //         ? partRows
+  //         : [
+  //             {
+  //               key: Date.now(),
+  //               partNumber: "",
+  //               description: "",
+  //               quantity: "",
+  //               note: "",
+  //             },
+  //           ]
+  //     );
+  //   }
+  //   console.log("Selected Record:", selectedRecord);
+  //     hasInitializedEditForm.current = true;
+  // }, [selectedRecord, editModalOpen]);
+
+  useEffect(() => {
+    if (!selectedRecord || !editModalOpen || hasInitializedEditForm.current)
+      return;
+
     if (selectedRecord && editModalOpen) {
       const reportOptions = [
         "Installation/Commission",
@@ -547,6 +756,10 @@ const [searchSRN, setSearchSRN] = useState("");
       // const { url, fileId, filename } = extractFileInfoFromCauseText(fullCause);
       const { viewUrl, downloadUrl, fileId, filename } =
         extractFileInfoFromCauseText(fullCause);
+      setEditViewUrl(viewUrl);
+      console.log("Set editViewUrl to:", viewUrl);
+      console.log("Full Cause text:", fullCause);
+
 
       // Extract image link
       // const match = fullCause.match(
@@ -575,17 +788,11 @@ const [searchSRN, setSearchSRN] = useState("");
         .join("\n")
         .trim();
 
-      setcauseOfFailure(causeTextOnly);
-      setPreviewUrl(previewImage);
-
-      setcauseOfFailure(causeTextOnly);
-      // setPreviewUrl(previewImage);
-      // setCauseOfFailureImage(null);
-      // setPreviewUrl(url);
-      setPreviewUrl(viewUrl);
-
+      setEditCauseText(causeTextOnly);
+      setEditPreviewUrl(previewImage);
+      setEditCauseOfFailureImage({ name: filename });
       setDownloadUrl(downloadUrl);
-      setCauseOfFailureImage({ fileId, name: filename }); // Simulate file object
+      // setCauseOfFailureImage({ fileId, name: filename }); // Simulate file object
 
       // ✅ Set "Parts Used" table data
       const partRows = (selectedRecord.partsUsed || []).map((part, index) => ({
@@ -610,6 +817,7 @@ const [searchSRN, setSearchSRN] = useState("");
       );
     }
     console.log("Selected Record:", selectedRecord);
+    hasInitializedEditForm.current = true;
   }, [selectedRecord, editModalOpen]);
 
   useEffect(() => {
@@ -755,74 +963,69 @@ const [searchSRN, setSearchSRN] = useState("");
   //   setCustomerDataList(filtered);
   // };
 
-const handleSearchAndFilter = () => {
-  let filtered = [...rawCustomerData];
+  const handleSearchAndFilter = () => {
+    let filtered = [...rawCustomerData];
 
-  // General text filter
-  // if (searchText) {
-  //   const lower = searchText.toLowerCase();
-  //   filtered = filtered.filter((item) => {
-  //     const customerName = item["Customer Name"]?.toString().toLowerCase() || "";
-  //     const machineType = item["Machine Type"]?.toString().toLowerCase() || "";
-  //     const technician = item["Service Technician"]?.toString().toLowerCase() || "";
-  //     return (
-  //       customerName.includes(lower) ||
-  //       machineType.includes(lower) ||
-  //       technician.includes(lower)
-  //     );
-  //   });
-  // }
+    // General text filter
+    // if (searchText) {
+    //   const lower = searchText.toLowerCase();
+    //   filtered = filtered.filter((item) => {
+    //     const customerName = item["Customer Name"]?.toString().toLowerCase() || "";
+    //     const machineType = item["Machine Type"]?.toString().toLowerCase() || "";
+    //     const technician = item["Service Technician"]?.toString().toLowerCase() || "";
+    //     return (
+    //       customerName.includes(lower) ||
+    //       machineType.includes(lower) ||
+    //       technician.includes(lower)
+    //     );
+    //   });
+    // }
 
-//   if (searchText) {
-//   const lower = searchText.toLowerCase();
+    //   if (searchText) {
+    //   const lower = searchText.toLowerCase();
 
-//   filtered = filtered.filter((item) => {
-//     return Object.values(item).some((value) =>
-//       value?.toString().toLowerCase().includes(lower)
-//     );
-//   });
-// }
+    //   filtered = filtered.filter((item) => {
+    //     return Object.values(item).some((value) =>
+    //       value?.toString().toLowerCase().includes(lower)
+    //     );
+    //   });
+    // }
 
-if (searchText.trim()) {
-  const lower = searchText.toLowerCase().trim();
+    if (searchText.trim()) {
+      const lower = searchText.toLowerCase().trim();
 
-  filtered = filtered.filter((item) => {
-    return Object.entries(item).some(([key, value]) => {
-      // ✅ Skip non-display fields
-      if (Array.isArray(value) || typeof value === "object") return false;
+      filtered = filtered.filter((item) => {
+        return Object.entries(item).some(([key, value]) => {
+          // ✅ Skip non-display fields
+          if (Array.isArray(value) || typeof value === "object") return false;
 
-      // ✅ Convert everything to string and search lowercase
-      const text = (value ?? "").toString().toLowerCase();
+          // ✅ Convert everything to string and search lowercase
+          const text = (value ?? "").toString().toLowerCase();
 
-      return text.includes(lower);
-    });
-  });
-}
+          return text.includes(lower);
+        });
+      });
+    }
 
+    // Filter by Installation Date
+    if (searchInstallationDate) {
+      filtered = filtered.filter((item) => {
+        const rawDate = item["Installation Date"];
+        const parsed = dayjs(rawDate); // ISO string support built-in
+        return parsed.isValid() && parsed.isSame(searchInstallationDate, "day");
+      });
+    }
 
+    // Filter by SRN
+    if (searchSRN.trim()) {
+      filtered = filtered.filter(
+        (item) =>
+          item["Service Request Number"]?.toString().trim() === searchSRN.trim()
+      );
+    }
 
-  // Filter by Installation Date
-if (searchInstallationDate) {
-  filtered = filtered.filter((item) => {
-    const rawDate = item["Installation Date"];
-    const parsed = dayjs(rawDate); // ISO string support built-in
-    return parsed.isValid() && parsed.isSame(searchInstallationDate, 'day');
-  });
-}
-
-  // Filter by SRN
-  if (searchSRN.trim()) {
-    filtered = filtered.filter(
-      (item) =>
-        item["Service Request Number"]?.toString().trim() === searchSRN.trim()
-    );
-  }
-
-  setCustomerDataList(filtered);
-};
-
-
-
+    setCustomerDataList(filtered);
+  };
 
   const fetchCustomerNames = async () => {
     try {
@@ -3651,6 +3854,8 @@ if (searchInstallationDate) {
 
   const handleEditModalclose = () => {
     setEditModalOpen(false);
+    hasInitializedEditForm.current = false;
+
     editSigTechnician.current?.clear();
     editSigManager.current?.clear();
     editSigCustomer.current?.clear();
@@ -3932,22 +4137,19 @@ if (searchInstallationDate) {
       );
 
       // Prepare causeOfFailure text (initial)
-      let updatedCauseText = causeOfFailure?.trim() || "";
+      let updatedCauseText = editCauseText?.trim() || "";
 
-      // Handle image re-upload properly
       if (
-        causeOfFailureImage &&
-        (causeOfFailureImage.originFileObj ||
-          causeOfFailureImage instanceof File)
+        editCauseOfFailureImage &&
+        (editCauseOfFailureImage.originFileObj ||
+          editCauseOfFailureImage instanceof File)
       ) {
         const fileToUpload =
-          causeOfFailureImage.originFileObj || causeOfFailureImage;
+          editCauseOfFailureImage.originFileObj || editCauseOfFailureImage;
         const result = await uploadImageBase64(fileToUpload);
 
         if (result.success) {
           const newImageUrl = result.imageUrl;
-          // updatedCauseText += `\nImage: ${newImageUrl}\nName: ${fileToUpload.name}`;
-          // updatedCauseText += `\nImage: ${newImageUrl}`;
           updatedCauseText += `\nImage: ${newImageUrl}\nFilename: ${fileToUpload.name}`;
         } else {
           message.error("Image upload failed, submission aborted.");
@@ -4031,6 +4233,8 @@ if (searchInstallationDate) {
 
       generateEditPDF(pdfPayload, checkboxValues, cleanedPartsUsed);
       setEditModalOpen(false);
+      hasInitializedEditForm.current = false;
+
       editSigTechnician.current?.clear();
       editSigManager.current?.clear();
       editSigCustomer.current?.clear();
@@ -4056,6 +4260,8 @@ if (searchInstallationDate) {
     if (result.success) {
       message.success("Update successful");
       setEditModalOpen(false);
+      hasInitializedEditForm.current = false;
+
       loadAllCustomerData();
     } else {
       message.error("Update failed: " + result.message);
@@ -4075,6 +4281,8 @@ if (searchInstallationDate) {
     if (result.success) {
       message.success("Record updated.");
       setEditModalOpen(false);
+      hasInitializedEditForm.current = false;
+
       loadAllCustomerData();
     } else {
       throw new Error(result.message || "Unknown error");
@@ -4099,18 +4307,23 @@ if (searchInstallationDate) {
     return result.success;
   };
 
-  const handleRemoveEditImage = async () => {
-    if (previewUrl) {
-      const deleted = await deleteCauseImageFromDrive(previewUrl);
-      if (deleted) {
-        setPreviewUrl(null);
-        setCauseOfFailureImage(null);
-        message.success("Image deleted from Drive.");
-      } else {
-        message.error("Failed to delete image.");
-      }
-    }
+  const handleEditRemoveImage = () => {
+    setEditCauseOfFailureImage(null);
+    setEditPreviewUrl(null);
   };
+
+  // const handleRemoveEditImage = async () => {
+  //   if (previewUrl) {
+  //     const deleted = await deleteCauseImageFromDrive(previewUrl);
+  //     if (deleted) {
+  //       setPreviewUrl(null);
+  //       setCauseOfFailureImage(null);
+  //       message.success("Image deleted from Drive.");
+  //     } else {
+  //       message.error("Failed to delete image.");
+  //     }
+  //   }
+  // };
 
   const styl = `.ant-modal-root .ant-modal {
     width: var(--ant-modal-xs-width);
@@ -4953,22 +5166,20 @@ if (searchInstallationDate) {
                 {refreshing ? "Refreshing..." : "Refresh"}
               </Button>
               <div>
-
-          <Button
-            color="danger"
-              variant="solid"
-            size="large"
-            onClick={() => {
-             
-              setSearchText("");
-              setSearchInstallationDate(null);
-              setSearchSRN("");
-            }}
-            className="ms-2 "
-          >
-            Clear Filters
-          </Button>
-                    </div>
+                <Button
+                  color="danger"
+                  variant="solid"
+                  size="large"
+                  onClick={() => {
+                    setSearchText("");
+                    setSearchInstallationDate(null);
+                    setSearchSRN("");
+                  }}
+                  className="ms-2 "
+                >
+                  Clear Filters
+                </Button>
+              </div>
             </div>
             <div className="col-12 col-md-6 col-lg-6">
               <Input
@@ -4978,10 +5189,10 @@ if (searchInstallationDate) {
                 // value={searchText}
                 // onChange={handleSearch}
                 value={searchText}
-              onChange={(e) => {
-  setSearchText(e.target.value);
-  handleSearchAndFilter();
-}}
+                onChange={(e) => {
+                  setSearchText(e.target.value);
+                  handleSearchAndFilter();
+                }}
                 // onPressEnter={handleSearchAndFilter}
                 // onBlur={handleSearchAndFilter}
                 style={{ width: "100%" }}
@@ -4989,39 +5200,36 @@ if (searchInstallationDate) {
                 size="large"
               />
             </div>
-          <div className="col-12 col-md-3 col-lg-3 mt-3 mt-lg-0">
-  <DatePicker
-    placeholder="Search by Installation Date"
-    format="DD-MM-YYYY"
-    value={searchInstallationDate}
- onChange={(date) => {
-  setSearchInstallationDate(date);
-  handleSearchAndFilter();
-}}
-    size="large"
-    style={{ width: "100%" }}
-  />
-</div>
+            <div className="col-12 col-md-3 col-lg-3 mt-3 mt-lg-0">
+              <DatePicker
+                placeholder="Search by Installation Date"
+                format="DD-MM-YYYY"
+                value={searchInstallationDate}
+                onChange={(date) => {
+                  setSearchInstallationDate(date);
+                  handleSearchAndFilter();
+                }}
+                size="large"
+                style={{ width: "100%" }}
+              />
+            </div>
 
-<div className="col-12 col-md-3 col-lg-3 mt-3 mt-lg-0">
-  <Input
-  type="number"
-    placeholder="Search by SRN"
-    prefix={<SearchOutlined />}
-    allowClear
-    value={searchSRN}
-onChange={(e) => {
-  setSearchSRN(e.target.value);
-  handleSearchAndFilter();
-}}
-    size="large"
-    style={{ width: "100%" }}
-  />
-</div>
-
-              
+            <div className="col-12 col-md-3 col-lg-3 mt-3 mt-lg-0">
+              <Input
+                type="number"
+                placeholder="Search by SRN"
+                prefix={<SearchOutlined />}
+                allowClear
+                value={searchSRN}
+                onChange={(e) => {
+                  setSearchSRN(e.target.value);
+                  handleSearchAndFilter();
+                }}
+                size="large"
+                style={{ width: "100%" }}
+              />
+            </div>
           </div>
-                    
 
           <div className="row">
             <div className="col-12">
@@ -5144,11 +5352,37 @@ onChange={(e) => {
                       />
                     </Form.Item>
 
-                    <Form.Item label="Cause of Failure" name="cause of failure">
+                    {/* <Form.Item label="Cause of Failure" name="cause of failure">
                       <TextArea
                         readOnly
                         autoSize={{ minRows: 3, maxRows: 3 }}
                       />
+                    </Form.Item> */}
+
+                    <Form.Item label="Cause of Failure">
+                      {/* <div style={{ whiteSpace: "pre-wrap", marginBottom: 8 }}>
+                        {viewCauseOfFailureText}
+                      </div> */}
+                      <TextArea
+                        readOnly
+                        autoSize={{ minRows: 3, maxRows: 3 }}
+                        value={viewCauseOfFailureText}
+                      />
+
+                      {viewPreviewUrl && viewCauseOfFailureFile && (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          <PaperClipOutlined />
+                          <a href={viewPreviewUrl} download>
+                            {viewCauseOfFailureFile.name}
+                          </a>
+                        </div>
+                      )}
                     </Form.Item>
 
                     <Form.Item
@@ -5518,182 +5752,78 @@ onChange={(e) => {
 
                   <Form.Item label="Cause of Failure">
                     <Input.TextArea
-                      value={causeOfFailure}
-                      onChange={(e) => setcauseOfFailure(e.target.value)}
+                      value={editCauseText}
+                      onChange={(e) => setEditCauseText(e.target.value)}
                       placeholder="Describe the failure"
                       autoSize={{ minRows: 3, maxRows: 3 }}
                       maxLength={500}
                       showCount
                     />
 
-                    {/* {previewUrl && (
-                        <div style={{ marginTop: 10 }}>
-                          <p>Existing Image Preview:</p>
-
-                          <img
-                            src={previewUrl}
-                            alt="Cause of Failure"
-                            style={{
-                              width: "100%",
-                              maxHeight: "200px",
-                              objectFit: "contain",
-                            }}
-                          />
-                          <Button
-                            icon={<DeleteOutlined />}
-                            onClick={() => {
-                              setPreviewUrl(null);
-                              setCauseOfFailureImage(null);
-                            }}
-                            danger
-                            style={{ marginTop: 8 }}
-                          >
-                            Delete Image
-                          </Button>
-                        </div>
-                      )} */}
-                    {previewUrl && causeOfFailureImage && (
+                    {/* Show preview and delete if image exists */}
+                    {editPreviewUrl && (
                       <div
                         style={{
                           display: "flex",
                           alignItems: "center",
                           gap: 8,
+                          marginTop: 10,
                         }}
                       >
                         <PaperClipOutlined />
-                        {/* <a
-                            href={previewUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            download
-                          >
-                            {causeOfFailureImage.name}
-                          </a> */}
-                        <a
-                          href={downloadUrl} // from `extractFileInfoFromCauseText`
-                          // target="_blank"
-                          // rel="noopener noreferrer"
-                          download
-                        >
-                          {/* {causeOfFailureImage?.name || "Uploaded Image"} */}
-                          {causeOfFailureImage.name}
+                        <a href={downloadUrl} download>
+                          {editCauseOfFailureImage?.name || "Uploaded Image"}
                         </a>
-                        {/* <Button
-                            size="small"
-                            icon={<DeleteOutlined />}
-                            danger
-                            onClick={async () => {
-                              // Confirm and delete
-                              const confirmed = window.confirm(
-                                "Are you sure you want to delete this image?"
-                              );
-                              if (!confirmed) return;
-
-                              const res = await fetch(
-                                "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
-                                {
-                                  method: "POST",
-                                  headers: {
-                                    "Content-Type":
-                                      "application/x-www-form-urlencoded",
-                                  },
-                                  body: new URLSearchParams({
-                                    action: "deleteCauseImage",
-                                    imageUrl: previewUrl,
-                                  }),
-                                }
-                              );
-
-                              const result = await res.json();
-                              if (result.success) {
-                                message.success("Image deleted successfully");
-                                setCauseOfFailureImage(null);
-                                setPreviewUrl(null);
-                              } else {
-                                message.error("Image deletion failed");
-                              }
-                            }}
-                          /> */}
-                        {/* <Button
-                            size="small"
-                            icon={<DeleteOutlined />}
-                            danger
-                            onClick={() => {
-                              Modal.confirm({
-                                title: "Are you sure?",
-                                content: "Do you want to delete this image?",
-                                okText: "Yes",
-                                cancelText: "No",
-                                onOk: async () => {
-                                  const res = await fetch(
-                                    "https://script.google.com/macros/s/AKfycbzlenYvJDHQ4t9uESo03IfuKHeYFPFHd5xTbU6F1w1oM2iLnZwtmJ391hrK06wuJNqq1w/exec",
-                                    {
-                                      method: "POST",
-                                      headers: {
-                                        "Content-Type":
-                                          "application/x-www-form-urlencoded",
-                                      },
-                                      body: new URLSearchParams({
-                                        action: "deleteCauseImage",
-                                        imageUrl: previewUrl,
-                                      }),
-                                    }
-                                  );
-
-                                  const result = await res.json();
-                                  if (result.success) {
-                                    message.success(
-                                      "Image deleted successfully"
-                                    );
-                                    setCauseOfFailureImage(null);
-                                    setPreviewUrl(null);
-                                  } else {
-                                    message.error("Image deletion failed");
-                                  }
-                                },
-                              });
-                            }}
-                          /> */}
                         <Popconfirm
-                          title="Are you sure you want to delete this image?"
-                          okText="Yes"
-                          cancelText="No"
-                          onConfirm={async () => {
-                            const res = await fetch(
-                              "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
-                              {
-                                method: "POST",
-                                headers: {
-                                  "Content-Type":
-                                    "application/x-www-form-urlencoded",
-                                },
-                                body: new URLSearchParams({
-                                  action: "deleteCauseImage",
-                                  imageUrl: previewUrl,
-                                }),
-                              }
-                            );
+  title="Are you sure you want to delete this image?"
+  okText="Yes"
+  cancelText="No"
+  onConfirm={async () => {
+    console.log("Deleting image at:", editViewUrl);
 
-                            const result = await res.json();
-                            if (result.success) {
-                              message.success("Image deleted successfully");
-                              setCauseOfFailureImage(null);
-                              setPreviewUrl(null);
-                            } else {
-                              message.error("Image deletion failed");
-                            }
-                          }}
-                        >
-                          <Button
-                            size="small"
-                            icon={<DeleteOutlined />}
-                            danger
-                          />
-                        </Popconfirm>
+    const res = await fetch(
+      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          action: "deleteCauseImage",
+          imageUrl: editViewUrl,
+ // ✅ Use viewUrl here, not downloadUrl
+        }),
+      }
+    );
+
+    const result = await res.json();
+    if (result.success) {
+      message.success("Image deleted successfully");
+      setEditCauseOfFailureImage(null);
+      setEditPreviewUrl(null);
+      setEditCauseText((prev) =>
+        prev
+          .split("\n")
+          .filter(
+            (line) =>
+              !line.startsWith("Image:") && !line.startsWith("Filename:")
+          )
+          .join("\n")
+          .trim()
+      );
+    } else {
+      message.error("Image deletion failed");
+    }
+  }}
+>
+  <Button size="small" icon={<DeleteOutlined />} danger />
+</Popconfirm>
+
                       </div>
                     )}
 
-                    {!previewUrl && (
+                    {/* Show uploader if no image yet */}
+                    {!editPreviewUrl && (
                       <Upload
                         accept="image/*"
                         showUploadList={false}
@@ -5712,9 +5842,8 @@ onChange={(e) => {
 
                           const reader = new FileReader();
                           reader.onloadend = () => {
-                            setPreviewUrl(reader.result); // ✅ show base64 preview
-                            setCauseOfFailureImage(file); // ✅ keep for upload
-                            console.log("Base64 length:", reader.result.length);
+                            setEditPreviewUrl(reader.result); // show base64
+                            setEditCauseOfFailureImage(file); // hold image
                           };
                           reader.readAsDataURL(file);
                           return false;
