@@ -127,6 +127,9 @@ export default function FormComponent() {
   const [editPreviewUrl, setEditPreviewUrl] = useState(null);
   const [editCauseText, setEditCauseText] = useState("");
   const [editViewUrl, setEditViewUrl] = useState(null); // ✅ new state
+  const [isEditTechnicianSignSaved, setIsEditTechnicianSignSaved] = useState(false);
+const [isEditCustomerSignSaved, setIsEditCustomerSignSaved] = useState(false);
+const [isEditManagerSignSaved, setIsEditManagerSignSaved] = useState(false);
 
   const [data, setData] = useState([
     {
@@ -180,7 +183,7 @@ export default function FormComponent() {
       payload.append("originalFilename", file.name);
 
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
+        "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -194,9 +197,25 @@ export default function FormComponent() {
       return { success: false, message: error.message || "Upload failed" };
     }
   };
+  // const handleRemoveImage = () => {
+  //   setEditCauseOfFailureImage(null);
+  //   setEditPreviewUrl(null);
+  //   setEditCauseText((prev) =>
+  //     prev
+  //       .split("\n")
+  //       .filter(
+  //         (line) => !line.startsWith("Image:") && !line.startsWith("Filename:")
+  //       )
+  //       .join("\n")
+  //       .trim()
+  //   );
+  // };
+
   const handleRemoveImage = () => {
     setEditCauseOfFailureImage(null);
     setEditPreviewUrl(null);
+
+    // Only modify image lines from editCauseText
     setEditCauseText((prev) =>
       prev
         .split("\n")
@@ -206,55 +225,98 @@ export default function FormComponent() {
         .join("\n")
         .trim()
     );
+
+    // ✅ Do NOT touch editTableData here
   };
 
-  const saveEditTechnicianSignature = () => {
-    if (editSigTechnician.current && !editSigTechnician.current.isEmpty()) {
-      setEditSignatureTechnician(
-        editSigTechnician.current.getCanvas().toDataURL("image/png")
+  const handleEditImageDelete = async () => {
+    console.log("Deleting image at:", editViewUrl);
+
+    const res = await fetch(
+      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          action: "deleteCauseImage",
+          imageUrl: editViewUrl,
+        }),
+      }
+    );
+
+    const result = await res.json();
+    if (result.success) {
+      message.success("Image deleted successfully");
+
+      setEditCauseOfFailureImage(null);
+      setEditPreviewUrl(null);
+      setEditViewUrl(null);
+      setDownloadUrl(null);
+
+      setEditCauseText((prev) =>
+        prev
+          .split("\n")
+          .filter(
+            (line) =>
+              !line.startsWith("Image:") && !line.startsWith("Filename:")
+          )
+          .join("\n")
+          .trim()
       );
-      message.success("Technician signature saved successfully (edit)");
     } else {
-      message.warning("Please draw technician signature before saving.");
+      message.error("Image deletion failed");
     }
   };
 
-  const clearEditTechnicianSignature = () => {
-    editSigTechnician.current?.clear();
-    setEditSignatureTechnician("");
-  };
+  // const saveEditTechnicianSignature = () => {
+  //   if (editSigTechnician.current && !editSigTechnician.current.isEmpty()) {
+  //     setEditSignatureTechnician(
+  //       editSigTechnician.current.getCanvas().toDataURL("image/png")
+  //     );
+  //     message.success("Technician signature saved successfully (edit)");
+  //   } else {
+  //     message.warning("Please draw technician signature before saving.");
+  //   }
+  // };
 
-  const saveEditCustomerSignature = () => {
-    if (editSigCustomer.current && !editSigCustomer.current.isEmpty()) {
-      setEditSignatureCustomer(
-        editSigCustomer.current.getCanvas().toDataURL("image/png")
-      );
-      message.success("Customer signature saved successfully (edit)");
-    } else {
-      message.warning("Please draw customer signature before saving.");
-    }
-  };
+  // const clearEditTechnicianSignature = () => {
+  //   editSigTechnician.current?.clear();
+  //   setEditSignatureTechnician("");
+  // };
 
-  const clearEditCustomerSignature = () => {
-    editSigCustomer.current?.clear();
-    setEditSignatureCustomer("");
-  };
+  // const saveEditCustomerSignature = () => {
+  //   if (editSigCustomer.current && !editSigCustomer.current.isEmpty()) {
+  //     setEditSignatureCustomer(
+  //       editSigCustomer.current.getCanvas().toDataURL("image/png")
+  //     );
+  //     message.success("Customer signature saved successfully (edit)");
+  //   } else {
+  //     message.warning("Please draw customer signature before saving.");
+  //   }
+  // };
 
-  const handleEditManagerUpload = ({ file }) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      console.log("Uploaded Image (Base64):", reader.result); // Debugging
+  // const clearEditCustomerSignature = () => {
+  //   editSigCustomer.current?.clear();
+  //   setEditSignatureCustomer("");
+  // };
 
-      setEditSignatureManager(reader.result);
-      message.success("Manager signature uploaded successfully (edit)");
-    };
-    if (file) reader.readAsDataURL(file);
-  };
+  // const handleEditManagerUpload = ({ file }) => {
+  //   const reader = new FileReader();
+  //   reader.onloadend = () => {
+  //     console.log("Uploaded Image (Base64):", reader.result); // Debugging
 
-  const clearEditManagerSignature = () => {
-    setEditSignatureManager(null);
-    message.success("Manager signature cleared (edit)");
-  };
+  //     setEditSignatureManager(reader.result);
+  //     message.success("Manager signature uploaded successfully (edit)");
+  //   };
+  //   if (file) reader.readAsDataURL(file);
+  // };
+
+  // const clearEditManagerSignature = () => {
+  //   setEditSignatureManager(null);
+  //   message.success("Manager signature cleared (edit)");
+  // };
 
   // const handleCauseImageUpload = (event) => {
   //   const file = event.target.files[0];
@@ -297,6 +359,54 @@ export default function FormComponent() {
   //   return false; // Prevent AntD Upload from auto-uploading
   // };
 
+const saveEditTechnicianSignature = () => {
+  if (editSigTechnician.current && !editSigTechnician.current.isEmpty()) {
+    setEditSignatureTechnician(editSigTechnician.current.getCanvas().toDataURL("image/png"));
+    setIsEditTechnicianSignSaved(true);
+    message.success("Technician signature saved successfully (edit)");
+  } else {
+    message.warning("Please draw technician signature before saving.");
+  }
+};
+
+const clearEditTechnicianSignature = () => {
+  editSigTechnician.current?.clear();
+  setEditSignatureTechnician("");
+  setIsEditTechnicianSignSaved(false);
+};
+
+  const saveEditCustomerSignature = () => {
+  if (editSigCustomer.current && !editSigCustomer.current.isEmpty()) {
+    setEditSignatureCustomer(editSigCustomer.current.getCanvas().toDataURL("image/png"));
+    setIsEditCustomerSignSaved(true);
+    message.success("Customer signature saved successfully (edit)");
+  } else {
+    message.warning("Please draw customer signature before saving.");
+  }
+};
+
+const clearEditCustomerSignature = () => {
+  editSigCustomer.current?.clear();
+  setEditSignatureCustomer("");
+  setIsEditCustomerSignSaved(false);
+};
+
+const handleEditManagerUpload = ({ file }) => {
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setEditSignatureManager(reader.result);
+    setIsEditManagerSignSaved(true);
+    message.success("Manager signature uploaded successfully (edit)");
+  };
+  if (file) reader.readAsDataURL(file);
+};
+
+const clearEditManagerSignature = () => {
+  setEditSignatureManager(null);
+  setIsEditManagerSignSaved(false);
+};
+
+
   const handleCauseImageUpload = ({ file }) => {
     // ✅ Reject files over 3MB
     if (file.size > 3 * 1024 * 1024) {
@@ -334,7 +444,7 @@ export default function FormComponent() {
     formData.append("causeImage", causeOfFailureImage);
 
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
+      "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
       {
         method: "POST",
         body: formData,
@@ -451,19 +561,19 @@ export default function FormComponent() {
         note: part.note ?? "",
       }));
 
-      // setViewTableData(
-      //   partRows.length > 0
-      //     ? partRows
-      //     : [
-      //         {
-      //           key: Date.now(),
-      //           partNumber: "",
-      //           description: "",
-      //           quantity: "",
-      //           note: "",
-      //         },
-      //       ]
-      // );
+      setViewTableData(
+        partRows.length > 0
+          ? partRows
+          : [
+              {
+                key: Date.now(),
+                partNumber: "",
+                description: "",
+                quantity: "",
+                note: "",
+              },
+            ]
+      );
     }
     console.log("Selected Record:", selectedRecord);
   }, [selectedRecord, viewModalOpen]);
@@ -519,20 +629,19 @@ export default function FormComponent() {
   //   };
   // };
   const extractFileInfoFromCauseText = (text) => {
-  const match = text.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  const nameMatch = text.match(/Filename:\s*(.+)/);
+    const match = text.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    const nameMatch = text.match(/Filename:\s*(.+)/);
 
-  if (!match) return {};
+    if (!match) return {};
 
-  const fileId = match[1];
-  return {
-    viewUrl: `https://drive.google.com/file/d/${fileId}/view`,
-    downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
-    fileId,
-    filename: nameMatch ? nameMatch[1].trim() : "Uploaded_Image",
+    const fileId = match[1];
+    return {
+      viewUrl: `https://drive.google.com/file/d/${fileId}/view`,
+      downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
+      fileId,
+      filename: nameMatch ? nameMatch[1].trim() : "Uploaded_Image",
+    };
   };
-};
-
 
   useEffect(() => {
     handleSearchAndFilter();
@@ -680,143 +789,259 @@ export default function FormComponent() {
   //     hasInitializedEditForm.current = true;
   // }, [selectedRecord, editModalOpen]);
 
+  // useEffect(() => {
+  //     if (!selectedRecord || !editModalOpen) return;
+
+  // if (editTabledata.length > 0) return;
+
+  //   if (selectedRecord && editModalOpen) {
+  //     const reportOptions = [
+  //       "Installation/Commission",
+  //       "Maintenance",
+  //       "Defect",
+  //       "Customer Visit (Report)",
+  //       "Other",
+  //     ];
+
+  //     const serviceOptions = [
+  //       "F.O.C Commissioning",
+  //       "F.O.C Maintenance",
+  //       "Chargeable Maintenance",
+  //       "Goodwill",
+  //       "Guarantee",
+  //       "Service contract",
+  //       "Customer Visit (Service)",
+  //       "Installation/Commission",
+  //     ];
+
+  //     const checkedReports = reportOptions.filter(
+  //       (option) => selectedRecord[option] === "Yes"
+  //     );
+
+  //     const checkedServices = serviceOptions.filter(
+  //       (option) => selectedRecord[option] === "Yes"
+  //     );
+
+  //     const parseDate = (dateStr) => {
+  //       return dayjs(
+  //         dateStr,
+  //         ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
+  //         true
+  //       );
+  //     };
+
+  //     editForm.setFieldsValue({
+  //       editsrn: selectedRecord["Service Request Number"],
+  //       customerName: selectedRecord["Customer Name"],
+  //       address: selectedRecord["Address"],
+  //       contact: selectedRecord["Contact"],
+  //       telephone: selectedRecord["Telephone"],
+  //       machineType: selectedRecord["Machine Type"],
+  //       serialNumber: selectedRecord["Serial Number"],
+  //       installationDate: selectedRecord["Installation Date"]
+  //         ? parseDate(selectedRecord["Installation Date"])
+  //         : null,
+  //       departureDate: selectedRecord["Departure Date"]
+  //         ? parseDate(selectedRecord["Departure Date"])
+  //         : null,
+  //       returnDate: selectedRecord["Return Date"]
+  //         ? parseDate(selectedRecord["Return Date"])
+  //         : null,
+
+  //       workTime: selectedRecord["Work Time"],
+  //       serviceTechnician: selectedRecord["Service Technician"],
+  //       report: checkedReports,
+  //       serviceType: checkedServices,
+  //       ["description of work/of defect/failure mode"]:
+  //         selectedRecord["Description of work/of defect/failure mode"],
+  //       ["cause of failure"]: selectedRecord["Cause of Failure"],
+
+  //       ["notes/further action required"]:
+  //         selectedRecord["Notes/Further action required"] ||
+  //         selectedRecord["Note "] ||
+  //         selectedRecord["Note\t"], // all variants
+  //     });
+
+  //     const fullCause = selectedRecord["Cause of Failure"] || "";
+  //     // const { url, fileId, filename } = extractFileInfoFromCauseText(fullCause);
+  //     const { viewUrl, downloadUrl, fileId, filename } =
+  //       extractFileInfoFromCauseText(fullCause);
+  //     setEditViewUrl(viewUrl);
+  //     console.log("Set editViewUrl to:", viewUrl);
+  //     console.log("Full Cause text:", fullCause);
+
+  //     // Extract image link
+  //     // const match = fullCause.match(
+  //     //   /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/
+  //     // );
+  //     // const fileId = match ? match[1] : null;
+  //     // const previewImage = fileId
+  //     //   ? `https://drive.google.com/uc?export=view&id=${fileId}` // direct viewable image
+  //     //   : null;
+
+  //     const previewImage = extractDriveImagePreviewUrl(fullCause);
+
+  //     // Extract only the text (excluding image line)
+  //     // const causeTextOnly = fullCause
+  //     //   .split("\n")
+  //     //   .filter((line) => !line.trim().startsWith("Image:"))
+  //     //   .join("\n")
+  //     //   .trim();
+  //     const causeTextOnly = fullCause
+  //       .split("\n")
+  //       .filter(
+  //         (line) =>
+  //           !line.trim().startsWith("Image:") &&
+  //           !line.trim().startsWith("Filename:")
+  //       )
+  //       .join("\n")
+  //       .trim();
+
+  //     setEditCauseText(causeTextOnly);
+  //     setEditPreviewUrl(previewImage);
+  //     setEditCauseOfFailureImage({ name: filename });
+  //     setDownloadUrl(downloadUrl);
+  //     // setCauseOfFailureImage({ fileId, name: filename }); // Simulate file object
+
+  //     // ✅ Set "Parts Used" table data
+  //     // const partRows = (selectedRecord.partsUsed || []).map((part, index) => ({
+  //     //   key: Date.now() + index,
+  //     //   partNumber: part.partNumber ?? "",
+  //     //   description: part.description ?? "",
+  //     //   quantity: part.quantity ?? 1,
+  //     //   note: part.note ?? "",
+  //     // }));
+  //     // setEditTableData(
+  //     //   partRows.length > 0
+  //     //     ? partRows
+  //     //     : [
+  //     //         {
+  //     //           key: Date.now(),
+  //     //           partNumber: "",
+  //     //           description: "",
+  //     //           quantity: "",
+  //     //           note: "",
+  //     //         },
+  //     //       ]
+  //     // );
+
+  //       if (selectedRecord.partsUsed && selectedRecord.partsUsed.length > 0) {
+  //   const partRows = selectedRecord.partsUsed.map((part, index) => ({
+  //     key: Date.now() + index,
+  //     partNumber: part.partNumber ?? "",
+  //     description: part.description ?? "",
+  //     quantity: part.quantity ?? 1,
+  //     note: part.note ?? "",
+  //   }));
+  //   setEditTableData(partRows);
+  // }
+  //   }
+  //   console.log("Selected Record:", selectedRecord);
+  //   hasInitializedEditForm.current = true;
+  // }, [selectedRecord, editModalOpen]);
+
   useEffect(() => {
     if (!selectedRecord || !editModalOpen || hasInitializedEditForm.current)
       return;
 
-    if (selectedRecord && editModalOpen) {
-      const reportOptions = [
-        "Installation/Commission",
-        "Maintenance",
-        "Defect",
-        "Customer Visit (Report)",
-        "Other",
-      ];
+    const reportOptions = [
+      "Installation/Commission",
+      "Maintenance",
+      "Defect",
+      "Customer Visit (Report)",
+      "Other",
+    ];
 
-      const serviceOptions = [
-        "F.O.C Commissioning",
-        "F.O.C Maintenance",
-        "Chargeable Maintenance",
-        "Goodwill",
-        "Guarantee",
-        "Service contract",
-        "Customer Visit (Service)",
-        "Installation/Commission",
-      ];
+    const serviceOptions = [
+      "F.O.C Commissioning",
+      "F.O.C Maintenance",
+      "Chargeable Maintenance",
+      "Goodwill",
+      "Guarantee",
+      "Service contract",
+      "Customer Visit (Service)",
+      "Installation/Commission",
+    ];
 
-      const checkedReports = reportOptions.filter(
-        (option) => selectedRecord[option] === "Yes"
-      );
+    const checkedReports = reportOptions.filter(
+      (option) => selectedRecord[option] === "Yes"
+    );
 
-      const checkedServices = serviceOptions.filter(
-        (option) => selectedRecord[option] === "Yes"
-      );
+    const checkedServices = serviceOptions.filter(
+      (option) => selectedRecord[option] === "Yes"
+    );
 
-      const parseDate = (dateStr) => {
-        return dayjs(
-          dateStr,
-          ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
-          true
-        );
-      };
+    const parseDate = (dateStr) =>
+      dateStr
+        ? dayjs(
+            dateStr,
+            ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
+            true
+          )
+        : null;
 
-      editForm.setFieldsValue({
-        editsrn: selectedRecord["Service Request Number"],
-        customerName: selectedRecord["Customer Name"],
-        address: selectedRecord["Address"],
-        contact: selectedRecord["Contact"],
-        telephone: selectedRecord["Telephone"],
-        machineType: selectedRecord["Machine Type"],
-        serialNumber: selectedRecord["Serial Number"],
-        installationDate: selectedRecord["Installation Date"]
-          ? parseDate(selectedRecord["Installation Date"])
-          : null,
-        departureDate: selectedRecord["Departure Date"]
-          ? parseDate(selectedRecord["Departure Date"])
-          : null,
-        returnDate: selectedRecord["Return Date"]
-          ? parseDate(selectedRecord["Return Date"])
-          : null,
+    editForm.setFieldsValue({
+      editsrn: selectedRecord["Service Request Number"],
+      customerName: selectedRecord["Customer Name"],
+      address: selectedRecord["Address"],
+      contact: selectedRecord["Contact"],
+      telephone: selectedRecord["Telephone"],
+      machineType: selectedRecord["Machine Type"],
+      serialNumber: selectedRecord["Serial Number"],
+      installationDate: parseDate(selectedRecord["Installation Date"]),
+      departureDate: parseDate(selectedRecord["Departure Date"]),
+      returnDate: parseDate(selectedRecord["Return Date"]),
+      workTime: selectedRecord["Work Time"],
+      serviceTechnician: selectedRecord["Service Technician"],
+      report: checkedReports,
+      serviceType: checkedServices,
+      ["description of work/of defect/failure mode"]:
+        selectedRecord["Description of work/of defect/failure mode"],
+      ["cause of failure"]: selectedRecord["Cause of Failure"],
+      ["notes/further action required"]:
+        selectedRecord["Notes/Further action required"] ||
+        selectedRecord["Note "] ||
+        selectedRecord["Note\t"],
+    });
 
-        workTime: selectedRecord["Work Time"],
-        serviceTechnician: selectedRecord["Service Technician"],
-        report: checkedReports,
-        serviceType: checkedServices,
-        ["description of work/of defect/failure mode"]:
-          selectedRecord["Description of work/of defect/failure mode"],
-        ["cause of failure"]: selectedRecord["Cause of Failure"],
+    // Handle cause of failure image
+    const fullCause = selectedRecord["Cause of Failure"] || "";
+    const { viewUrl, downloadUrl, fileId, filename } =
+      extractFileInfoFromCauseText(fullCause);
+    setEditViewUrl(viewUrl);
+    // const causeTextOnly = fullCause
+    //   .split("\n")
+    //   .filter(
+    //     (line) => !line.startsWith("Image:") && !line.startsWith("Filename:")
+    //   )
+    //   .join("\n")
+    //   .trim();
+    const causeTextOnly = fullCause
+  .split("\n")
+  .filter(
+    (line) =>
+      !line.trim().startsWith("Image:") &&
+      !line.trim().startsWith("Filename:")
+  )
+  .join("\n")
+  .trim();
 
-        ["notes/further action required"]:
-          selectedRecord["Notes/Further action required"] ||
-          selectedRecord["Note "] ||
-          selectedRecord["Note\t"], // all variants
-      });
 
-      const fullCause = selectedRecord["Cause of Failure"] || "";
-      // const { url, fileId, filename } = extractFileInfoFromCauseText(fullCause);
-      const { viewUrl, downloadUrl, fileId, filename } =
-        extractFileInfoFromCauseText(fullCause);
-      setEditViewUrl(viewUrl);
-      console.log("Set editViewUrl to:", viewUrl);
-      console.log("Full Cause text:", fullCause);
+    setEditCauseText(causeTextOnly);
+    setEditPreviewUrl(extractDriveImagePreviewUrl(fullCause));
+    setEditCauseOfFailureImage(filename ? { name: filename } : null);
+    setDownloadUrl(downloadUrl);
 
+    // ✅ Only initialize editTableData ONCE
+    const partRows = (selectedRecord.partsUsed || []).map((part, index) => ({
+      key: Date.now() + index,
+      partNumber: part.partNumber ?? "",
+      description: part.description ?? "",
+      quantity: part.quantity ?? 1,
+      note: part.note ?? "",
+    }));
+    setEditTableData(partRows);
 
-      // Extract image link
-      // const match = fullCause.match(
-      //   /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/
-      // );
-      // const fileId = match ? match[1] : null;
-      // const previewImage = fileId
-      //   ? `https://drive.google.com/uc?export=view&id=${fileId}` // direct viewable image
-      //   : null;
-
-      const previewImage = extractDriveImagePreviewUrl(fullCause);
-
-      // Extract only the text (excluding image line)
-      // const causeTextOnly = fullCause
-      //   .split("\n")
-      //   .filter((line) => !line.trim().startsWith("Image:"))
-      //   .join("\n")
-      //   .trim();
-      const causeTextOnly = fullCause
-        .split("\n")
-        .filter(
-          (line) =>
-            !line.trim().startsWith("Image:") &&
-            !line.trim().startsWith("Filename:")
-        )
-        .join("\n")
-        .trim();
-
-      setEditCauseText(causeTextOnly);
-      setEditPreviewUrl(previewImage);
-      setEditCauseOfFailureImage({ name: filename });
-      setDownloadUrl(downloadUrl);
-      // setCauseOfFailureImage({ fileId, name: filename }); // Simulate file object
-
-      // ✅ Set "Parts Used" table data
-      const partRows = (selectedRecord.partsUsed || []).map((part, index) => ({
-        key: Date.now() + index,
-        partNumber: part.partNumber ?? "",
-        description: part.description ?? "",
-        quantity: part.quantity ?? 1,
-        note: part.note ?? "",
-      }));
-      setEditTableData(
-        partRows.length > 0
-          ? partRows
-          : [
-              {
-                key: Date.now(),
-                partNumber: "",
-                description: "",
-                quantity: "",
-                note: "",
-              },
-            ]
-      );
-    }
-    console.log("Selected Record:", selectedRecord);
     hasInitializedEditForm.current = true;
   }, [selectedRecord, editModalOpen]);
 
@@ -892,9 +1117,49 @@ export default function FormComponent() {
   //   }
   // };
 
+  //   const loadAllCustomerData = async () => {
+  //     const res = await fetch(
+  //       "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec?action=getAllCustomerData"
+  //     );
+  //     const result = await res.json();
+
+  //     if (result.success && Array.isArray(result.customers)) {
+  //       const grouped = {};
+
+  //       result.customers.forEach((row) => {
+  //         const srn = row["Service Request Number"];
+  //         if (!grouped[srn]) {
+  //           grouped[srn] = { ...row, partsUsed: [] };
+  //         }
+
+  //         grouped[srn].partsUsed.push({
+  //           partNumber: row["Part Number"],
+  //           description: row["Description"],
+  //           quantity: row["Quantity"],
+  //           note: row["Note"] || row["Note "] || row["Note\t"],
+  //         });
+  //       });
+
+  //       const finalData = Object.values(grouped);
+  //       setRawCustomerData(finalData);
+  //       setCustomerDataList(finalData); // show all initially
+  //   if (editModalOpen && selectedRecord && !hasInitializedEditForm.current) {
+  //   const updatedRecord = finalData.find(
+  //     (rec) =>
+  //       rec["Service Request Number"] === selectedRecord["Service Request Number"]
+  //   );
+  //   if (updatedRecord) {
+  //     setSelectedRecord(updatedRecord);
+  //   }
+  // }
+
+  //       setFilteredData(finalData); // also show all initially
+  //     }
+  //   };
+
   const loadAllCustomerData = async () => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec?action=getAllCustomerData"
+      "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec?action=getAllCustomerData"
     );
     const result = await res.json();
 
@@ -917,8 +1182,20 @@ export default function FormComponent() {
 
       const finalData = Object.values(grouped);
       setRawCustomerData(finalData);
-      setCustomerDataList(finalData); // show all initially
-      setFilteredData(finalData); // also show all initially
+      setCustomerDataList(finalData);
+      setFilteredData(finalData);
+
+      // ✅ Prevent overwriting selectedRecord while modal is open
+      if (!editModalOpen && selectedRecord) {
+        const updatedRecord = finalData.find(
+          (rec) =>
+            rec["Service Request Number"] ===
+            selectedRecord["Service Request Number"]
+        );
+        if (updatedRecord) {
+          setSelectedRecord(updatedRecord);
+        }
+      }
     }
   };
 
@@ -1030,7 +1307,7 @@ export default function FormComponent() {
   const fetchCustomerNames = async () => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec?action=getAllCustomerData`
+        `https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec?action=getAllCustomerData`
       );
       const result = await res.json();
 
@@ -1060,7 +1337,7 @@ export default function FormComponent() {
   const handleCustomerSelect = async (selectedName) => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec?action=getCustomerData&name=${encodeURIComponent(
+        `https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec?action=getCustomerData&name=${encodeURIComponent(
           selectedName
         )}`
       );
@@ -1089,7 +1366,7 @@ export default function FormComponent() {
   const fetchSRN = async () => {
     try {
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec"
+        "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec"
       );
       const data = await response.json(); // ✅ Parse JSON directly
 
@@ -1430,14 +1707,14 @@ export default function FormComponent() {
     { title: "Cause of Failure", dataIndex: "Cause of Failure" },
     { title: "Part Number", dataIndex: "Part Number" },
     { title: "Description", dataIndex: "Description" },
-    { title: "Quantity", dataIndex: "Quantity\t" },
-    { title: "Note", dataIndex: "Note\t" },
+    { title: "Quantity", dataIndex: "Quantity" },
+    { title: "Note", dataIndex: "Note" },
     { title: "F.O.C Commissioning", dataIndex: "F.O.C Commissioning" },
     { title: "F.O.C Maintenance", dataIndex: "F.O.C Maintenance" },
     { title: "Guarantee", dataIndex: "Guarantee" },
-    {
+    { 
       title: "Chargeable Maintenance",
-      dataIndex: "Chargeable Maintenance\r",
+      dataIndex: "Chargeable Maintenance",
     },
     {
       title: "Customer Visit (Service)",
@@ -3313,7 +3590,7 @@ export default function FormComponent() {
 
     // Sending the file to the Google Apps Script for uploading to Drive
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
+      "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
       {
         method: "POST",
         headers: {
@@ -3759,7 +4036,7 @@ export default function FormComponent() {
       // setLoading(true);
 
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
+        "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
         {
           method: "POST",
           body: formData,
@@ -3855,6 +4132,9 @@ export default function FormComponent() {
   const handleEditModalclose = () => {
     setEditModalOpen(false);
     hasInitializedEditForm.current = false;
+setIsEditTechnicianSignSaved(false);
+setIsEditCustomerSignSaved(false);
+setIsEditManagerSignSaved(false);
 
     editSigTechnician.current?.clear();
     editSigManager.current?.clear();
@@ -4114,7 +4394,19 @@ export default function FormComponent() {
       setIsEditSubmitting(true);
       setEditLoading(true);
       const values = await editForm.validateFields();
-
+const technicianCanvasEmpty = editSigTechnician.current?.isEmpty?.();
+const customerCanvasEmpty = editSigCustomer.current?.isEmpty?.();
+const managerEmpty = !editSignatureManager;
+if (
+  !isEditTechnicianSignSaved || technicianCanvasEmpty ||
+  !isEditCustomerSignSaved || customerCanvasEmpty ||
+  !isEditManagerSignSaved || managerEmpty
+) {
+  message.error("All signatures (technician, manager, customer) must be saved before submitting.");
+  setIsEditSubmitting(false);
+  setEditLoading(false);
+  return;
+}
       // Convert dates to proper string format
       const convertToDubaiTime = (date) =>
         date ? dayjs(date).tz("Asia/Dubai").format("DD-MM-YYYY") : "N/A";
@@ -4123,27 +4415,57 @@ export default function FormComponent() {
       const departureDate = convertToDubaiTime(values.departureDate);
       const returnDate = convertToDubaiTime(values.returnDate);
 
-      const cleanedPartsUsed = editTabledata.map((row) => ({
-        partNumber:
-          typeof row.partNumber === "string" ? row.partNumber.trim() : "",
-        description:
-          typeof row.description === "string" ? row.description.trim() : "",
-        quantity: row.quantity ? parseFloat(row.quantity) : "",
-        note: typeof row.note === "string" ? row.note.trim() : "",
-      }));
+      // const cleanedPartsUsed = editTabledata.map((row) => ({
+      //   partNumber:
+      //     typeof row.partNumber === "string" ? row.partNumber.trim() : "",
+      //   description:
+      //     typeof row.description === "string" ? row.description.trim() : "",
+      //   quantity: row.quantity ? parseFloat(row.quantity) : "",
+      //   note: typeof row.note === "string" ? row.note.trim() : "",
+      // }));
       // Prepare partsUsed
-      const partsUsed = cleanedPartsUsed.filter(
-        (row) => row.partNumber || row.description || row.quantity
-      );
+      // const partsUsed = cleanedPartsUsed.filter(
+      //   (row) => row.partNumber || row.description || row.quantity
+      // );
+
+      const cleanedPartsUsed = (editTabledata || []).map((row) => ({
+        partNumber: row?.partNumber?.toString().trim() || "",
+        description: row?.description?.toString().trim() || "",
+        quantity: row?.quantity ? Number(row.quantity) : "",
+        note: row?.note?.toString().trim() || "",
+      }));
+
+      // Don’t over-filter — let empty rows go if necessary
+      const partsUsed = cleanedPartsUsed.length > 0 ? cleanedPartsUsed : [{}];
 
       // Prepare causeOfFailure text (initial)
       let updatedCauseText = editCauseText?.trim() || "";
+
+      // if (
+      //   editCauseOfFailureImage &&
+      //   (editCauseOfFailureImage.originFileObj ||
+      //     editCauseOfFailureImage instanceof File)
+      // ) {
+      //   const fileToUpload =
+      //     editCauseOfFailureImage.originFileObj || editCauseOfFailureImage;
+      //   const result = await uploadImageBase64(fileToUpload);
+
+      //   if (result.success) {
+      //     const newImageUrl = result.imageUrl;
+      //     updatedCauseText += `\nImage: ${newImageUrl}\nFilename: ${fileToUpload.name}`;
+      //   } else {
+      //     message.error("Image upload failed, submission aborted.");
+      //     setIsEditSubmitting(false);
+      //     return;
+      //   }
+      // }
 
       if (
         editCauseOfFailureImage &&
         (editCauseOfFailureImage.originFileObj ||
           editCauseOfFailureImage instanceof File)
       ) {
+        // A new image is being uploaded
         const fileToUpload =
           editCauseOfFailureImage.originFileObj || editCauseOfFailureImage;
         const result = await uploadImageBase64(fileToUpload);
@@ -4156,6 +4478,9 @@ export default function FormComponent() {
           setIsEditSubmitting(false);
           return;
         }
+      } else if (editPreviewUrl && editCauseOfFailureImage?.name) {
+        // No new upload, but existing image still in preview — re-attach it
+        updatedCauseText += `\nImage: ${editViewUrl}\nFilename: ${editCauseOfFailureImage.name}`;
       }
 
       // Build form data
@@ -4179,7 +4504,13 @@ export default function FormComponent() {
       );
       formData.append("notes", values["notes/further action required"]);
       formData.append("causeOfFailure", updatedCauseText);
-      formData.append("partsUsed", JSON.stringify(cleanedPartsUsed));
+      // formData.append("partsUsed", JSON.stringify(cleanedPartsUsed));
+      partsUsed.forEach((part, index) => {
+        formData.append(`Part Number[${index}]`, part.partNumber);
+        formData.append(`Description[${index}]`, part.description);
+        formData.append(`Quantity[${index}]`, part.quantity);
+        formData.append(`Note[${index}]`, part.note);
+      });
 
       // ✅ Append checkbox values individually
       [...reportOptions, ...serviceOptions].forEach((option) => {
@@ -4193,6 +4524,11 @@ export default function FormComponent() {
       });
 
       // ✅ Submit
+      console.log("🧪 Submitting partsUsed", cleanedPartsUsed);
+      formData.forEach((value, key) => console.log(`${key}: ${value}`));
+
+      console.log("Parts used about to be submitted:", cleanedPartsUsed);
+
       await postUpdate(formData);
       // const signatures = {
       //   technician: editSignatureTechnician,
@@ -4221,7 +4557,8 @@ export default function FormComponent() {
         departureDate,
         returnDate,
         description: values["description of work/of defect/failure mode"],
-        causeOfFailure: updatedCauseText,
+        // causeOfFailure: updatedCauseText,
+        causeOfFailure: editCauseText?.trim() || "",
         notes: values["notes/further action required"],
         partsUsed: cleanedPartsUsed,
         signatures: {
@@ -4233,6 +4570,9 @@ export default function FormComponent() {
 
       generateEditPDF(pdfPayload, checkboxValues, cleanedPartsUsed);
       setEditModalOpen(false);
+      setIsEditTechnicianSignSaved(false);
+setIsEditCustomerSignSaved(false);
+setIsEditManagerSignSaved(false);
       hasInitializedEditForm.current = false;
 
       editSigTechnician.current?.clear();
@@ -4250,7 +4590,7 @@ export default function FormComponent() {
 
   const postUpdate = async (formData) => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
+      "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
       {
         method: "POST",
         body: formData,
@@ -4270,7 +4610,7 @@ export default function FormComponent() {
 
   const submitUpdate = async (payload) => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
+      "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
       {
         method: "POST",
         body: new URLSearchParams(payload),
@@ -4295,7 +4635,7 @@ export default function FormComponent() {
     payload.append("imageUrl", url);
 
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
+      "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
       {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -5394,7 +5734,8 @@ export default function FormComponent() {
                         autoSize={{ minRows: 3, maxRows: 3 }}
                       />
                     </Form.Item>
-
+                  </div>
+                  <div>
                     <h6>Parts Used</h6>
                     <Table
                       columns={viewModalcolumns}
@@ -5761,7 +6102,7 @@ export default function FormComponent() {
                     />
 
                     {/* Show preview and delete if image exists */}
-                    {editPreviewUrl && (
+                    {/* {editPreviewUrl && (
                       <div
                         style={{
                           display: "flex",
@@ -5782,7 +6123,7 @@ export default function FormComponent() {
     console.log("Deleting image at:", editViewUrl);
 
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
+      "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
       {
         method: "POST",
         headers: {
@@ -5819,6 +6160,34 @@ export default function FormComponent() {
   <Button size="small" icon={<DeleteOutlined />} danger />
 </Popconfirm>
 
+                      </div>
+                    )} */}
+
+                    {editPreviewUrl && (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          marginTop: 10,
+                        }}
+                      >
+                        <PaperClipOutlined />
+                        <a href={downloadUrl} download>
+                          {editCauseOfFailureImage?.name || "Uploaded Image"}
+                        </a>
+                        <Popconfirm
+                          title="Are you sure you want to delete this image?"
+                          okText="Yes"
+                          cancelText="No"
+                          onConfirm={handleEditImageDelete} // ✅ Use the new function
+                        >
+                          <Button
+                            size="small"
+                            icon={<DeleteOutlined />}
+                            danger
+                          />
+                        </Popconfirm>
                       </div>
                     )}
 
