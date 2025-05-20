@@ -229,46 +229,139 @@ const [isEditManagerSignSaved, setIsEditManagerSignSaved] = useState(false);
     // ✅ Do NOT touch editTableData here
   };
 
+  const parseDate = (dateStr) => {
+  if (!dateStr || dateStr === "N/A") return null;
+
+  const parsed = dayjs(
+    dateStr,
+    ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
+    true
+  );
+
+  return parsed.isValid() ? parsed : null;
+};
+
+
+  const handleRemoveCauseImage = () => {
+  setCauseOfFailureImage(null);
+  setPreviewUrl(null);
+  setcauseOfFailure((prev) =>
+    prev
+      .split("\n")
+      .filter(
+        (line) => !line.startsWith("Image:") && !line.startsWith("Filename:")
+      )
+      .join("\n")
+      .trim()
+  );
+};
+
+
+  // const handleEditImageDelete = async () => {
+  //   console.log("Deleting image at:", editViewUrl);
+
+  //   const res = await fetch(
+  //     "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
+  //     {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/x-www-form-urlencoded",
+  //       },
+  //       body: new URLSearchParams({
+  //         action: "deleteCauseImage",
+  //         imageUrl: editViewUrl,
+  //       }),
+  //     }
+  //   );
+
+  //   const result = await res.json();
+  //   if (result.success) {
+  //     message.success("Image deleted successfully");
+
+  //     setEditCauseOfFailureImage(null);
+  //     setEditPreviewUrl(null);
+  //     setEditViewUrl(null);
+  //     setDownloadUrl(null);
+
+  //     setEditCauseText((prev) =>
+  //       prev
+  //         .split("\n")
+  //         .filter(
+  //           (line) =>
+  //             !line.startsWith("Image:") && !line.startsWith("Filename:")
+  //         )
+  //         .join("\n")
+  //         .trim()
+  //     );
+  //   } else {
+  //     message.error("Image deletion failed");
+  //   }
+  // };
+
+
+
   const handleEditImageDelete = async () => {
-    console.log("Deleting image at:", editViewUrl);
+  const isDriveLink = editViewUrl?.includes("drive.google.com/file/d/");
 
-    const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          action: "deleteCauseImage",
-          imageUrl: editViewUrl,
-        }),
-      }
+  if (!isDriveLink) {
+    // ✅ If not from Drive, just clear locally
+    message.success("Image removed from form");
+    setEditCauseOfFailureImage(null);
+    setEditPreviewUrl(null);
+    setEditViewUrl(null);
+    setDownloadUrl(null);
+    setEditCauseText((prev) =>
+      prev
+        .split("\n")
+        .filter(
+          (line) => !line.startsWith("Image:") && !line.startsWith("Filename:")
+        )
+        .join("\n")
+        .trim()
     );
+    return;
+  }
 
-    const result = await res.json();
-    if (result.success) {
-      message.success("Image deleted successfully");
-
-      setEditCauseOfFailureImage(null);
-      setEditPreviewUrl(null);
-      setEditViewUrl(null);
-      setDownloadUrl(null);
-
-      setEditCauseText((prev) =>
-        prev
-          .split("\n")
-          .filter(
-            (line) =>
-              !line.startsWith("Image:") && !line.startsWith("Filename:")
-          )
-          .join("\n")
-          .trim()
-      );
-    } else {
-      message.error("Image deletion failed");
+  // Otherwise, call backend
+  const res = await fetch(
+    "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        action: "deleteCauseImage",
+        imageUrl: editViewUrl,
+      }),
     }
-  };
+  );
+
+  const result = await res.json();
+  if (result.success) {
+    message.success("Image deleted successfully");
+  } else {
+    message.warning("Image not found in Drive, removed from form");
+  }
+
+  // In both cases, clear local state
+  setEditCauseOfFailureImage(null);
+  setEditPreviewUrl(null);
+  setEditViewUrl(null);
+  setDownloadUrl(null);
+  setEditCauseText((prev) =>
+    prev
+      .split("\n")
+      .filter(
+        (line) => !line.startsWith("Image:") && !line.startsWith("Filename:")
+      )
+      .join("\n")
+      .trim()
+  );
+};
+
+
+  
 
   // const saveEditTechnicianSignature = () => {
   //   if (editSigTechnician.current && !editSigTechnician.current.isEmpty()) {
@@ -489,13 +582,25 @@ const clearEditManagerSignature = () => {
         (option) => selectedRecord[option] === "Yes"
       );
 
+      // const parseDate = (dateStr) => {
+      //   return dayjs(
+      //     dateStr,
+      //     ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
+      //     true
+      //   );
+      // };
       const parseDate = (dateStr) => {
-        return dayjs(
-          dateStr,
-          ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
-          true
-        );
-      };
+  if (!dateStr || dateStr === "N/A") return null;
+
+  const parsed = dayjs(
+    dateStr,
+    ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
+    true
+  );
+
+  return parsed.isValid() ? parsed : null;
+};
+
       const fullCause = selectedRecord["Cause of Failure"] || "";
 
       const { downloadUrl, filename } = extractFileInfoFromCauseText(fullCause);
@@ -1288,7 +1393,9 @@ const clearEditManagerSignature = () => {
     if (searchInstallationDate) {
       filtered = filtered.filter((item) => {
         const rawDate = item["Installation Date"];
-        const parsed = dayjs(rawDate); // ISO string support built-in
+        // const parsed = dayjs(rawDate); // ISO string support built-in
+        const parsed = parseDate(rawDate);
+
         return parsed.isValid() && parsed.isSame(searchInstallationDate, "day");
       });
     }
@@ -1704,7 +1811,48 @@ const clearEditManagerSignature = () => {
       title: "Notes/Further action required",
       dataIndex: "Notes/Further action required",
     },
-    { title: "Cause of Failure", dataIndex: "Cause of Failure" },
+    // { title: "Cause of Failure", dataIndex: "Cause of Failure" },
+//     {
+//   title: "Cause of Failure",
+//   dataIndex: "Cause of Failure",
+//   render: (text) => {
+//     if (!text) return "";
+
+//     // Remove lines starting with "Image:" or "Filename:"
+//     const cleaned = text
+//       .split("\n")
+//       .filter(
+//         (line) =>
+//           !line.trim().startsWith("Image:") &&
+//           !line.trim().startsWith("Filename:")
+//       )
+//       .join("\n")
+//       .trim();
+
+//     return cleaned;
+//   },
+// },
+{
+  title: "Cause of Failure",
+  dataIndex: "Cause of Failure",
+  render: (text) => {
+    const str = (text ?? "").toString(); // ✅ ensures it's a string
+
+    const cleaned = str
+      .split("\n")
+      .filter(
+        (line) =>
+          !line.trim().startsWith("Image:") &&
+          !line.trim().startsWith("Filename:")
+      )
+      .join("\n")
+      .trim();
+
+    return cleaned;
+  },
+},
+
+
     { title: "Part Number", dataIndex: "Part Number" },
     { title: "Description", dataIndex: "Description" },
     { title: "Quantity", dataIndex: "Quantity" },
@@ -3604,6 +3752,20 @@ const clearEditManagerSignature = () => {
     return result.fileUrl; // Assuming Apps Script returns the file URL after successful upload
   };
 
+  const handleRefresh = async () => {
+  setRefreshing(true);
+  try {
+    await loadAllCustomerData(); // refetches and updates state
+    message.success("Table data refreshed. Showing updated data");
+  } catch (err) {
+    message.error("Failed to refresh data");
+    console.error("Refresh error:", err);
+  } finally {
+    setRefreshing(false);
+  }
+};
+
+
   //   const handleSubmit = async (values) => {
   //     if (isSubmittingRef.current) return;
   //     isSubmittingRef.current = true;
@@ -4402,7 +4564,8 @@ if (
   !isEditCustomerSignSaved || customerCanvasEmpty ||
   !isEditManagerSignSaved || managerEmpty
 ) {
-  message.error("All signatures (technician, manager, customer) must be saved before submitting.");
+message.error("The manager's signature must be uploaded. The technician's and customer's signatures must be saved before submitting.");
+
   setIsEditSubmitting(false);
   setEditLoading(false);
   return;
@@ -4513,15 +4676,24 @@ if (
       });
 
       // ✅ Append checkbox values individually
-      [...reportOptions, ...serviceOptions].forEach((option) => {
-        formData.append(
-          option,
-          values.report?.includes(option) ||
-            values.serviceType?.includes(option)
-            ? "true"
-            : "false"
-        );
-      });
+      // [...reportOptions, ...serviceOptions].forEach((option) => {
+      //   formData.append(
+      //     option,
+      //     values.report?.includes(option) ||
+      //       values.serviceType?.includes(option)
+      //       ? "true"
+      //       : "false"
+      //   );
+      // });
+
+      reportOptions.forEach((option) => {
+  formData.append(option, values.report?.includes(option) ? "true" : "false");
+});
+
+serviceOptions.forEach((option) => {
+  formData.append(option, values.serviceType?.includes(option) ? "true" : "false");
+});
+
 
       // ✅ Submit
       console.log("🧪 Submitting partsUsed", cleanedPartsUsed);
@@ -4598,11 +4770,11 @@ setIsEditManagerSignSaved(false);
     );
     const result = await res.json();
     if (result.success) {
-      message.success("Update successful");
+      await loadAllCustomerData();
+      message.success("Form updated successfully!");
       setEditModalOpen(false);
       hasInitializedEditForm.current = false;
 
-      loadAllCustomerData();
     } else {
       message.error("Update failed: " + result.message);
     }
@@ -4699,7 +4871,8 @@ setIsEditManagerSignSaved(false);
           <div className="container-fluid  mt-3">
             <div className="row">
               <div className="col-12">
-                <Form form={form} layout="vertical" onFinish={handleSubmit}>
+                <Form form={form} layout="vertical" onFinish={handleSubmit}                       disabled={loading || isSubmittingRef.current}
+>
                   <div className="row ">
                     <div className="col-12 col-md-6">
                       <Form.Item
@@ -4773,9 +4946,11 @@ setIsEditManagerSignSaved(false);
                                 telephone: matched["Telephone"] || "",
                                 machineType: matched["Machine Type"] || "",
                                 serialNumber: matched["Serial Number"] || "",
-                                installationDate: matched["Installation Date"]
-                                  ? dayjs(matched["Installation Date"])
-                                  : null,
+                                // installationDate: matched["Installation Date"]
+                                //   ? dayjs(matched["Installation Date"])
+                                //   : null,
+                                      installationDate: parseDate(matched["Installation Date"]),
+
                               });
                               setAddress(matched["Address"] || "");
                               setSerialNumber(matched["Serial Number"] || "");
@@ -4786,6 +4961,8 @@ setIsEditManagerSignSaved(false);
                                 telephone: "",
                                 machineType: "",
                                 serialNumber: "",
+                                installationDate: null,
+
                               });
                               setAddress("");
                               setSerialNumber("");
@@ -5153,7 +5330,8 @@ setIsEditManagerSignSaved(false);
                             icon={<DeleteOutlined />}
                             variant="solid"
                             color="danger"
-                            onClick={handleRemoveImage}
+                            // onClick={handleRemoveImage}
+                            onClick={handleRemoveCauseImage}
                             style={{ marginTop: 5 }}
                           ></Button>
                         </div>
@@ -5501,6 +5679,8 @@ setIsEditManagerSignSaved(false);
                 type="primary"
                 size="large"
                 loading={refreshing}
+                  onClick={handleRefresh}
+
                 icon={<ReloadOutlined />}
               >
                 {refreshing ? "Refreshing..." : "Refresh"}
@@ -5514,6 +5694,7 @@ setIsEditManagerSignSaved(false);
                     setSearchText("");
                     setSearchInstallationDate(null);
                     setSearchSRN("");
+                    message.success("All the filters cleared")
                   }}
                   className="ms-2 "
                 >
@@ -5749,11 +5930,13 @@ setIsEditManagerSignSaved(false);
                       <Checkbox.Group options={serviceOptions} readOnly />
                     </Form.Item>
                   </div>
-                  <div>
+                  <div className="text-center">
                     <Button
                       color="danger"
                       variant="solid"
                       size="large"
+                      className="text-center"
+                      style={{width:"35%"}}
                       onClick={() => setViewModalOpen(false)}
                     >
                       Close From
@@ -5773,6 +5956,8 @@ setIsEditManagerSignSaved(false);
                 form={editForm}
                 layout="vertical"
                 onFinish={handleEditSubmit}
+                disabled={isEditSubmitting}
+
               >
                 <div className="row">
                   <div className="col-12">
@@ -5897,8 +6082,8 @@ setIsEditManagerSignSaved(false);
                         // showTime
                         format="DD-MM-YYYY" // Dubai Time Format
                         value={
-                          form.getFieldValue("installationDate")
-                            ? dayjs(form.getFieldValue("installationDate")).tz(
+                          editForm.getFieldValue("installationDate")
+                            ? dayjs(editForm.getFieldValue("installationDate")).tz(
                                 "Asia/Dubai"
                               )
                             : dayjs().tz("Asia/Dubai") // Default to Dubai Time
@@ -5910,7 +6095,7 @@ setIsEditManagerSignSaved(false);
                             //   "Selected Dubai Time:",
                             //   dubaiTime.format("YYYY-MM-DD hh:mm A")
                             // );
-                            form.setFieldsValue({
+                            editForm.setFieldsValue({
                               installationDate: dubaiTime,
                             });
                           }
@@ -5978,8 +6163,8 @@ setIsEditManagerSignSaved(false);
                         // format="YYYY-MM-DD" // Dubai Time Format
                         format="DD-MM-YYYY" // Dubai Time Format
                         value={
-                          form.getFieldValue("departureDate")
-                            ? dayjs(form.getFieldValue("departureDate")).tz(
+                          editForm.getFieldValue("departureDate")
+                            ? dayjs(editForm.getFieldValue("departureDate")).tz(
                                 "Asia/Dubai"
                               )
                             : dayjs().tz("Asia/Dubai") // Default to Dubai Time
@@ -5991,7 +6176,7 @@ setIsEditManagerSignSaved(false);
                             //   "Selected Dubai Time:",
                             //   dubaiTime.format("YYYY-MM-DD hh:mm A")
                             // );
-                            form.setFieldsValue({ departureDate: dubaiTime });
+                            editForm.setFieldsValue({ departureDate: dubaiTime });
                           }
                         }}
                       />
@@ -6015,8 +6200,8 @@ setIsEditManagerSignSaved(false);
                         // format="YYYY-MM-DD" // Dubai Time Format
                         format="DD-MM-YYYY"
                         value={
-                          form.getFieldValue("returnDate")
-                            ? dayjs(form.getFieldValue("returnDate")).tz(
+                          editForm.getFieldValue("returnDate")
+                            ? dayjs(editForm.getFieldValue("returnDate")).tz(
                                 "Asia/Dubai"
                               )
                             : dayjs().tz("Asia/Dubai") // Default to Dubai Time
@@ -6028,7 +6213,7 @@ setIsEditManagerSignSaved(false);
                             //   "Selected Dubai Time:",
                             //   dubaiTime.format("YYYY-MM-DD hh:mm A")
                             // );
-                            form.setFieldsValue({ returnDate: dubaiTime });
+                            editForm.setFieldsValue({ returnDate: dubaiTime });
                           }
                         }}
                       />
@@ -6436,6 +6621,10 @@ setIsEditManagerSignSaved(false);
             </Modal>
           </div>
         </div>
+        <div className="text-center mt-2">
+          <p className="text-center " style={{fontSize:"14px"}}>
+          Crafted and Maintained by <a href="https://www.stratifytechno.com/" target="_blank" className="text-primary" style={{textDecoration:"none"}}>Stratify Techologies</a></p>
+          </div>
       </div>
     </>
   );
