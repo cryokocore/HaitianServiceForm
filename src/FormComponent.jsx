@@ -127,9 +127,10 @@ export default function FormComponent() {
   const [editPreviewUrl, setEditPreviewUrl] = useState(null);
   const [editCauseText, setEditCauseText] = useState("");
   const [editViewUrl, setEditViewUrl] = useState(null); // ✅ new state
-  const [isEditTechnicianSignSaved, setIsEditTechnicianSignSaved] = useState(false);
-const [isEditCustomerSignSaved, setIsEditCustomerSignSaved] = useState(false);
-const [isEditManagerSignSaved, setIsEditManagerSignSaved] = useState(false);
+  const [isEditTechnicianSignSaved, setIsEditTechnicianSignSaved] =
+    useState(false);
+  const [isEditCustomerSignSaved, setIsEditCustomerSignSaved] = useState(false);
+  const [isEditManagerSignSaved, setIsEditManagerSignSaved] = useState(false);
 
   const [data, setData] = useState([
     {
@@ -230,32 +231,30 @@ const [isEditManagerSignSaved, setIsEditManagerSignSaved] = useState(false);
   };
 
   const parseDate = (dateStr) => {
-  if (!dateStr || dateStr === "N/A") return null;
+    if (!dateStr || dateStr === "N/A") return null;
 
-  const parsed = dayjs(
-    dateStr,
-    ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
-    true
-  );
+    const parsed = dayjs(
+      dateStr,
+      ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
+      true
+    );
 
-  return parsed.isValid() ? parsed : null;
-};
-
+    return parsed.isValid() ? parsed : null;
+  };
 
   const handleRemoveCauseImage = () => {
-  setCauseOfFailureImage(null);
-  setPreviewUrl(null);
-  setcauseOfFailure((prev) =>
-    prev
-      .split("\n")
-      .filter(
-        (line) => !line.startsWith("Image:") && !line.startsWith("Filename:")
-      )
-      .join("\n")
-      .trim()
-  );
-};
-
+    setCauseOfFailureImage(null);
+    setPreviewUrl(null);
+    setcauseOfFailure((prev) =>
+      prev
+        .split("\n")
+        .filter(
+          (line) => !line.startsWith("Image:") && !line.startsWith("Filename:")
+        )
+        .join("\n")
+        .trim()
+    );
+  };
 
   // const handleEditImageDelete = async () => {
   //   console.log("Deleting image at:", editViewUrl);
@@ -298,14 +297,52 @@ const [isEditManagerSignSaved, setIsEditManagerSignSaved] = useState(false);
   //   }
   // };
 
-
-
   const handleEditImageDelete = async () => {
-  const isDriveLink = editViewUrl?.includes("drive.google.com/file/d/");
+    const isDriveLink = editViewUrl?.includes("drive.google.com/file/d/");
 
-  if (!isDriveLink) {
-    // ✅ If not from Drive, just clear locally
-    message.success("Image removed from form");
+    if (!isDriveLink) {
+      // ✅ If not from Drive, just clear locally
+      message.success("Image removed from form");
+      setEditCauseOfFailureImage(null);
+      setEditPreviewUrl(null);
+      setEditViewUrl(null);
+      setDownloadUrl(null);
+      setEditCauseText((prev) =>
+        prev
+          .split("\n")
+          .filter(
+            (line) =>
+              !line.startsWith("Image:") && !line.startsWith("Filename:")
+          )
+          .join("\n")
+          .trim()
+      );
+      return;
+    }
+
+    // Otherwise, call backend
+    const res = await fetch(
+      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          action: "deleteCauseImage",
+          imageUrl: editViewUrl,
+        }),
+      }
+    );
+
+    const result = await res.json();
+    if (result.success) {
+      message.success("Image deleted successfully");
+    } else {
+      message.warning("Image not found in Drive, removed from form");
+    }
+
+    // In both cases, clear local state
     setEditCauseOfFailureImage(null);
     setEditPreviewUrl(null);
     setEditViewUrl(null);
@@ -319,49 +356,7 @@ const [isEditManagerSignSaved, setIsEditManagerSignSaved] = useState(false);
         .join("\n")
         .trim()
     );
-    return;
-  }
-
-  // Otherwise, call backend
-  const res = await fetch(
-    "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        action: "deleteCauseImage",
-        imageUrl: editViewUrl,
-      }),
-    }
-  );
-
-  const result = await res.json();
-  if (result.success) {
-    message.success("Image deleted successfully");
-  } else {
-    message.warning("Image not found in Drive, removed from form");
-  }
-
-  // In both cases, clear local state
-  setEditCauseOfFailureImage(null);
-  setEditPreviewUrl(null);
-  setEditViewUrl(null);
-  setDownloadUrl(null);
-  setEditCauseText((prev) =>
-    prev
-      .split("\n")
-      .filter(
-        (line) => !line.startsWith("Image:") && !line.startsWith("Filename:")
-      )
-      .join("\n")
-      .trim()
-  );
-};
-
-
-  
+  };
 
   // const saveEditTechnicianSignature = () => {
   //   if (editSigTechnician.current && !editSigTechnician.current.isEmpty()) {
@@ -452,53 +447,56 @@ const [isEditManagerSignSaved, setIsEditManagerSignSaved] = useState(false);
   //   return false; // Prevent AntD Upload from auto-uploading
   // };
 
-const saveEditTechnicianSignature = () => {
-  if (editSigTechnician.current && !editSigTechnician.current.isEmpty()) {
-    setEditSignatureTechnician(editSigTechnician.current.getCanvas().toDataURL("image/png"));
-    setIsEditTechnicianSignSaved(true);
-    message.success("Technician signature saved successfully (edit)");
-  } else {
-    message.warning("Please draw technician signature before saving.");
-  }
-};
+  const saveEditTechnicianSignature = () => {
+    if (editSigTechnician.current && !editSigTechnician.current.isEmpty()) {
+      setEditSignatureTechnician(
+        editSigTechnician.current.getCanvas().toDataURL("image/png")
+      );
+      setIsEditTechnicianSignSaved(true);
+      message.success("Technician signature saved successfully (edit)");
+    } else {
+      message.warning("Please draw technician signature before saving.");
+    }
+  };
 
-const clearEditTechnicianSignature = () => {
-  editSigTechnician.current?.clear();
-  setEditSignatureTechnician("");
-  setIsEditTechnicianSignSaved(false);
-};
+  const clearEditTechnicianSignature = () => {
+    editSigTechnician.current?.clear();
+    setEditSignatureTechnician("");
+    setIsEditTechnicianSignSaved(false);
+  };
 
   const saveEditCustomerSignature = () => {
-  if (editSigCustomer.current && !editSigCustomer.current.isEmpty()) {
-    setEditSignatureCustomer(editSigCustomer.current.getCanvas().toDataURL("image/png"));
-    setIsEditCustomerSignSaved(true);
-    message.success("Customer signature saved successfully (edit)");
-  } else {
-    message.warning("Please draw customer signature before saving.");
-  }
-};
-
-const clearEditCustomerSignature = () => {
-  editSigCustomer.current?.clear();
-  setEditSignatureCustomer("");
-  setIsEditCustomerSignSaved(false);
-};
-
-const handleEditManagerUpload = ({ file }) => {
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    setEditSignatureManager(reader.result);
-    setIsEditManagerSignSaved(true);
-    message.success("Manager signature uploaded successfully (edit)");
+    if (editSigCustomer.current && !editSigCustomer.current.isEmpty()) {
+      setEditSignatureCustomer(
+        editSigCustomer.current.getCanvas().toDataURL("image/png")
+      );
+      setIsEditCustomerSignSaved(true);
+      message.success("Customer signature saved successfully (edit)");
+    } else {
+      message.warning("Please draw customer signature before saving.");
+    }
   };
-  if (file) reader.readAsDataURL(file);
-};
 
-const clearEditManagerSignature = () => {
-  setEditSignatureManager(null);
-  setIsEditManagerSignSaved(false);
-};
+  const clearEditCustomerSignature = () => {
+    editSigCustomer.current?.clear();
+    setEditSignatureCustomer("");
+    setIsEditCustomerSignSaved(false);
+  };
 
+  const handleEditManagerUpload = ({ file }) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setEditSignatureManager(reader.result);
+      setIsEditManagerSignSaved(true);
+      message.success("Manager signature uploaded successfully (edit)");
+    };
+    if (file) reader.readAsDataURL(file);
+  };
+
+  const clearEditManagerSignature = () => {
+    setEditSignatureManager(null);
+    setIsEditManagerSignSaved(false);
+  };
 
   const handleCauseImageUpload = ({ file }) => {
     // ✅ Reject files over 3MB
@@ -590,16 +588,16 @@ const clearEditManagerSignature = () => {
       //   );
       // };
       const parseDate = (dateStr) => {
-  if (!dateStr || dateStr === "N/A") return null;
+        if (!dateStr || dateStr === "N/A") return null;
 
-  const parsed = dayjs(
-    dateStr,
-    ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
-    true
-  );
+        const parsed = dayjs(
+          dateStr,
+          ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
+          true
+        );
 
-  return parsed.isValid() ? parsed : null;
-};
+        return parsed.isValid() ? parsed : null;
+      };
 
       const fullCause = selectedRecord["Cause of Failure"] || "";
 
@@ -1122,15 +1120,14 @@ const clearEditManagerSignature = () => {
     //   .join("\n")
     //   .trim();
     const causeTextOnly = fullCause
-  .split("\n")
-  .filter(
-    (line) =>
-      !line.trim().startsWith("Image:") &&
-      !line.trim().startsWith("Filename:")
-  )
-  .join("\n")
-  .trim();
-
+      .split("\n")
+      .filter(
+        (line) =>
+          !line.trim().startsWith("Image:") &&
+          !line.trim().startsWith("Filename:")
+      )
+      .join("\n")
+      .trim();
 
     setEditCauseText(causeTextOnly);
     setEditPreviewUrl(extractDriveImagePreviewUrl(fullCause));
@@ -1285,7 +1282,13 @@ const clearEditManagerSignature = () => {
         });
       });
 
-      const finalData = Object.values(grouped);
+      // const finalData = Object.values(grouped);
+      const finalData = Object.values(grouped).sort((a, b) => {
+        const srnA = parseInt(a["Service Request Number"], 10);
+        const srnB = parseInt(b["Service Request Number"], 10);
+        return srnB - srnA; // Sort descending (largest first)
+      });
+
       setRawCustomerData(finalData);
       setCustomerDataList(finalData);
       setFilteredData(finalData);
@@ -1373,16 +1376,34 @@ const clearEditManagerSignature = () => {
     //   });
     // }
 
+    // if (searchText.trim()) {
+    //   const lower = searchText.toLowerCase().trim();
+
+    //   filtered = filtered.filter((item) => {
+    //     return Object.entries(item).some(([key, value]) => {
+    //       // ✅ Skip non-display fields
+    //       if (Array.isArray(value) || typeof value === "object") return false;
+
+    //       // ✅ Convert everything to string and search lowercase
+    //       const text = (value ?? "").toString().toLowerCase();
+
+    //       return text.includes(lower);
+    //     });
+    //   });
+    // }
+
     if (searchText.trim()) {
-      const lower = searchText.toLowerCase().trim();
+      const lower = searchText.toLowerCase().trim().replace(/\s+/g, " ");
 
       filtered = filtered.filter((item) => {
         return Object.entries(item).some(([key, value]) => {
-          // ✅ Skip non-display fields
+          // Skip arrays and objects
           if (Array.isArray(value) || typeof value === "object") return false;
 
-          // ✅ Convert everything to string and search lowercase
-          const text = (value ?? "").toString().toLowerCase();
+          const text = (value ?? "")
+            .toString()
+            .toLowerCase()
+            .replace(/\s+/g, " ");
 
           return text.includes(lower);
         });
@@ -1390,13 +1411,31 @@ const clearEditManagerSignature = () => {
     }
 
     // Filter by Installation Date
+    // if (searchInstallationDate) {
+    //   filtered = filtered.filter((item) => {
+    //     const rawDate = item["Installation Date"];
+    //     // const parsed = dayjs(rawDate); // ISO string support built-in
+    //     const parsed = parseDate(rawDate);
+
+    //     return parsed.isValid() && parsed.isSame(searchInstallationDate, "day");
+    //   });
+    // }
     if (searchInstallationDate) {
+      const searchDate = dayjs(
+        searchInstallationDate,
+        ["DD-MM-YYYY", "YYYY-MM-DD"],
+        true
+      );
+
       filtered = filtered.filter((item) => {
         const rawDate = item["Installation Date"];
-        // const parsed = dayjs(rawDate); // ISO string support built-in
         const parsed = parseDate(rawDate);
 
-        return parsed.isValid() && parsed.isSame(searchInstallationDate, "day");
+        return (
+          parsed?.isValid() &&
+          searchDate.isValid() &&
+          parsed.isSame(searchDate, "day")
+        );
       });
     }
 
@@ -1517,78 +1556,237 @@ const clearEditManagerSignature = () => {
     setEditModalOpen(true);
   };
 
-  const handleSerialNumberChange = (e) => {
-    let value = e.target.value;
-    let lines = value.split("\n");
+  // const handleSerialNumberChange = (e) => {
+  //   let value = e.target.value;
+  //   let lines = value.split("\n");
 
-    // Limit strictly to 5 rows
-    if (lines.length > 2 || value.length > 60) {
-      message.warning(
-        "Input limited to 2 lines, 60 characters. Excess text won't be included."
-      );
-      value = lines.slice(0, 2).join("\n"); // Trim excess lines
+  //   // Limit strictly to 5 rows
+  //   if (lines.length > 2 || value.length > 60) {
+  //     message.warning(
+  //       "Input limited to 2 lines, 60 characters. Excess text won't be included."
+  //     );
+  //     value = lines.slice(0, 2).join("\n"); // Trim excess lines
+  //   }
+
+  //   setSerialNumber(value); // Update state only if within limits
+  // };
+
+  // const handleAddressChange = (e) => {
+  //   let value = e.target.value;
+  //   let lines = value.split("\n");
+
+  //   // Limit strictly to 5 rows
+  //   if (lines.length > 2 || value.length > 100) {
+  //     message.warning(
+  //       "Input limited to 2 lines, 100 characters. Excess text won't be included."
+  //     );
+  //     value = lines.slice(0, 2).join("\n"); // Trim excess lines
+  //   }
+
+  //   setAddress(value); // Update state only if within limits
+  // };
+
+  // const handleDescriptionTextChange = (e) => {
+  //   let value = e.target.value;
+  //   let lines = value.split("\n");
+
+  //   // Limit strictly to 5 rows
+  //   if (lines.length > 4 || value.length > 1000) {
+  //     message.warning(
+  //       "Input limited to 4 lines, 1000 characters. Excess text won't be included."
+  //     );
+  //     value = lines.slice(0, 4).join("\n"); // Trim excess lines
+  //   }
+
+  //   setDescriptionText(value); // Update state only if within limits
+  // };
+
+  // const handleCauseTextChange = (e) => {
+  //   let value = e.target.value;
+  //   let lines = value.split("\n");
+
+  //   if (lines.length > 2 || value.length > 500) {
+  //     message.warning(
+  //       "Input limited to 2 lines, 500 characters. Excess text won't be included."
+  //     );
+  //     value = lines.slice(0, 2).join("\n"); // Trim excess lines
+  //   }
+
+  //   setcauseOfFailure(value); // Update state only if within limits
+  // };
+
+  // const handleNotesChange = (e) => {
+  //   let value = e.target.value;
+  //   let lines = value.split("\n");
+
+  //   // Limit strictly to 5 rows
+  //   if (lines.length > 1 || value.length > 200) {
+  //     message.warning(
+  //       "Input limited to 1 line, 200 characters. Excess text won't be included."
+  //     );
+  //     value = lines.slice(0, 1).join("\n"); // Trim excess lines
+  //   }
+
+  //   setNotes(value); // Update state only if within limits
+  // };
+
+  // Utility to enforce text limits
+  const enforceTextLimit = (value, maxLines, maxChars) => {
+    const lines = value.split("\n").slice(0, maxLines);
+    let trimmed = lines.join("\n");
+
+    if (trimmed.length > maxChars) {
+      trimmed = trimmed.substring(0, maxChars);
     }
 
-    setSerialNumber(value); // Update state only if within limits
+    return trimmed;
   };
 
   const handleAddressChange = (e) => {
-    let value = e.target.value;
-    let lines = value.split("\n");
+    const input = e.target.value;
+    const limited = enforceTextLimit(input, 2, 100);
 
-    // Limit strictly to 5 rows
-    if (lines.length > 2 || value.length > 100) {
+    if (input !== limited) {
       message.warning(
-        "Input limited to 2 lines, 100 characters. Excess text won't be included."
+        "Address limited to 2 lines, 100 characters. Excess removed."
       );
-      value = lines.slice(0, 2).join("\n"); // Trim excess lines
     }
 
-    setAddress(value); // Update state only if within limits
+    setAddress(limited);
+    form.setFieldsValue({ address: limited });
+  };
+
+  const handleSerialNumberChange = (e) => {
+    const input = e.target.value;
+    const limited = enforceTextLimit(input, 2, 100);
+
+    if (input !== limited) {
+      message.warning(
+        "Serial Number limited to 2 lines, 100 characters. Excess removed."
+      );
+    }
+
+    setSerialNumber(limited);
+    form.setFieldsValue({ serialNumber: limited });
   };
 
   const handleDescriptionTextChange = (e) => {
-    let value = e.target.value;
-    let lines = value.split("\n");
+    const input = e.target.value;
+    const limited = enforceTextLimit(input, 4, 1000);
 
-    // Limit strictly to 5 rows
-    if (lines.length > 4 || value.length > 1000) {
+    if (input !== limited) {
       message.warning(
-        "Input limited to 4 lines, 1000 characters. Excess text won't be included."
+        "Description limited to 4 lines, 1000 characters. Excess removed."
       );
-      value = lines.slice(0, 4).join("\n"); // Trim excess lines
     }
 
-    setDescriptionText(value); // Update state only if within limits
+    setDescriptionText(limited);
+    form.setFieldsValue({
+      ["description of work/of defect/failure mode"]: limited,
+    });
   };
 
   const handleCauseTextChange = (e) => {
-    let value = e.target.value;
-    let lines = value.split("\n");
+    // setCauseOfFailureText(e.target.value);
+    const input = e.target.value;
+    const limited = enforceTextLimit(input, 2, 500);
 
-    if (lines.length > 2 || value.length > 500) {
+    if (input !== limited) {
       message.warning(
-        "Input limited to 2 lines, 500 characters. Excess text won't be included."
+        "Cause of Failure limited to 2 lines, 500 characters. Excess removed."
       );
-      value = lines.slice(0, 2).join("\n"); // Trim excess lines
     }
 
-    setcauseOfFailure(value); // Update state only if within limits
+    // setcauseOfFailure(limited);
+    setCauseOfFailureText(limited);
+
+    form.setFieldsValue({ ["cause of failure"]: limited });
   };
 
   const handleNotesChange = (e) => {
-    let value = e.target.value;
-    let lines = value.split("\n");
+    const input = e.target.value;
+    const limited = enforceTextLimit(input, 1, 200);
 
-    // Limit strictly to 5 rows
-    if (lines.length > 1 || value.length > 200) {
+    if (input !== limited) {
       message.warning(
-        "Input limited to 1 line, 200 characters. Excess text won't be included."
+        "Notes limited to 1 line, 200 characters. Excess removed."
       );
-      value = lines.slice(0, 1).join("\n"); // Trim excess lines
     }
 
-    setNotes(value); // Update state only if within limits
+    setNotes(limited);
+    form.setFieldsValue({ ["notes/further action required"]: limited });
+  };
+
+  const handleEditSerialNumberChange = (e) => {
+    const input = e.target.value;
+    const limited = enforceTextLimit(input, 2, 100);
+
+    if (input !== limited) {
+      message.warning(
+        "Serial Number limited to 2 lines, 100 characters. Excess removed."
+      );
+    }
+
+    setSerialNumber(limited); // or setEditSerialNumber if you use a separate state
+    editForm.setFieldsValue({ serialNumber: limited });
+  };
+
+  const handleEditAddressChange = (e) => {
+    const input = e.target.value;
+    const limited = enforceTextLimit(input, 2, 100);
+
+    if (input !== limited) {
+      message.warning(
+        "Address limited to 2 lines, 100 characters. Excess removed."
+      );
+    }
+
+    setAddress(limited); // or setEditAddress
+    editForm.setFieldsValue({ address: limited });
+  };
+
+  const handleEditDescriptionChange = (e) => {
+    const input = e.target.value;
+    const limited = enforceTextLimit(input, 4, 1000);
+
+    if (input !== limited) {
+      message.warning(
+        "Description limited to 4 lines, 1000 characters. Excess removed."
+      );
+    }
+
+    setDescriptionText(limited); // or setEditDescriptionText
+    editForm.setFieldsValue({
+      ["description of work/of defect/failure mode"]: limited,
+    });
+  };
+
+  const handleEditCauseTextChange = (e) => {
+    const input = e.target.value;
+    const limited = enforceTextLimit(input, 2, 500);
+
+    if (input !== limited) {
+      message.warning(
+        "Cause of Failure limited to 2 lines, 500 characters. Excess removed."
+      );
+    }
+
+    setEditCauseText(limited);
+    editForm.setFieldsValue({ ["cause of failure"]: limited });
+  };
+
+  const handleEditNotesChange = (e) => {
+    const input = e.target.value;
+    const limited = enforceTextLimit(input, 1, 200);
+
+    if (input !== limited) {
+      message.warning(
+        "Notes limited to 1 line, 200 characters. Excess removed."
+      );
+    }
+
+    setNotes(limited); // or setEditNotes
+    editForm.setFieldsValue({ ["notes/further action required"]: limited });
   };
 
   const handleInputChange = (key, field, value) => {
@@ -1812,46 +2010,45 @@ const clearEditManagerSignature = () => {
       dataIndex: "Notes/Further action required",
     },
     // { title: "Cause of Failure", dataIndex: "Cause of Failure" },
-//     {
-//   title: "Cause of Failure",
-//   dataIndex: "Cause of Failure",
-//   render: (text) => {
-//     if (!text) return "";
+    //     {
+    //   title: "Cause of Failure",
+    //   dataIndex: "Cause of Failure",
+    //   render: (text) => {
+    //     if (!text) return "";
 
-//     // Remove lines starting with "Image:" or "Filename:"
-//     const cleaned = text
-//       .split("\n")
-//       .filter(
-//         (line) =>
-//           !line.trim().startsWith("Image:") &&
-//           !line.trim().startsWith("Filename:")
-//       )
-//       .join("\n")
-//       .trim();
+    //     // Remove lines starting with "Image:" or "Filename:"
+    //     const cleaned = text
+    //       .split("\n")
+    //       .filter(
+    //         (line) =>
+    //           !line.trim().startsWith("Image:") &&
+    //           !line.trim().startsWith("Filename:")
+    //       )
+    //       .join("\n")
+    //       .trim();
 
-//     return cleaned;
-//   },
-// },
-{
-  title: "Cause of Failure",
-  dataIndex: "Cause of Failure",
-  render: (text) => {
-    const str = (text ?? "").toString(); // ✅ ensures it's a string
+    //     return cleaned;
+    //   },
+    // },
+    {
+      title: "Cause of Failure",
+      dataIndex: "Cause of Failure",
+      render: (text) => {
+        const str = (text ?? "").toString(); // ✅ ensures it's a string
 
-    const cleaned = str
-      .split("\n")
-      .filter(
-        (line) =>
-          !line.trim().startsWith("Image:") &&
-          !line.trim().startsWith("Filename:")
-      )
-      .join("\n")
-      .trim();
+        const cleaned = str
+          .split("\n")
+          .filter(
+            (line) =>
+              !line.trim().startsWith("Image:") &&
+              !line.trim().startsWith("Filename:")
+          )
+          .join("\n")
+          .trim();
 
-    return cleaned;
-  },
-},
-
+        return cleaned;
+      },
+    },
 
     { title: "Part Number", dataIndex: "Part Number" },
     { title: "Description", dataIndex: "Description" },
@@ -1860,7 +2057,7 @@ const clearEditManagerSignature = () => {
     { title: "F.O.C Commissioning", dataIndex: "F.O.C Commissioning" },
     { title: "F.O.C Maintenance", dataIndex: "F.O.C Maintenance" },
     { title: "Guarantee", dataIndex: "Guarantee" },
-    { 
+    {
       title: "Chargeable Maintenance",
       dataIndex: "Chargeable Maintenance",
     },
@@ -2507,7 +2704,7 @@ const clearEditManagerSignature = () => {
       60
     );
 
-    nextY = 45;
+    nextY = 46;
     addField("Contact", formData.contact, startX, nextY + 4);
     // nextY = 49;
     nextY = 47;
@@ -3066,7 +3263,7 @@ const clearEditManagerSignature = () => {
       60
     );
 
-    nextY = 45;
+    nextY = 46;
     addField("Contact", formData.contact, startX, nextY + 4);
     // nextY = 49;
     nextY = 47;
@@ -3753,18 +3950,17 @@ const clearEditManagerSignature = () => {
   };
 
   const handleRefresh = async () => {
-  setRefreshing(true);
-  try {
-    await loadAllCustomerData(); // refetches and updates state
-    message.success("Table data refreshed. Showing updated data");
-  } catch (err) {
-    message.error("Failed to refresh data");
-    console.error("Refresh error:", err);
-  } finally {
-    setRefreshing(false);
-  }
-};
-
+    setRefreshing(true);
+    try {
+      await loadAllCustomerData(); // refetches and updates state
+      message.success("Table data refreshed. Showing updated data");
+    } catch (err) {
+      message.error("Failed to refresh data");
+      console.error("Refresh error:", err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   //   const handleSubmit = async (values) => {
   //     if (isSubmittingRef.current) return;
@@ -4123,6 +4319,19 @@ const clearEditManagerSignature = () => {
 
     try {
       if (!srn) return message.error("SRN missing.");
+      const isTooLong =
+        serialNumber.length > 100 ||
+        address.length > 100 ||
+        descriptionText.length > 1000 ||
+        causeOfFailureText.length > 500 ||
+        notes.length > 200;
+
+      if (isTooLong) {
+        message.error(
+          "Some inputs exceed allowed limits. Please fix them before submitting."
+        );
+        return;
+      }
       if (!signatureTechnician || !signatureManager || !signatureCustomer)
         return message.error("All signatures required.");
 
@@ -4294,9 +4503,9 @@ const clearEditManagerSignature = () => {
   const handleEditModalclose = () => {
     setEditModalOpen(false);
     hasInitializedEditForm.current = false;
-setIsEditTechnicianSignSaved(false);
-setIsEditCustomerSignSaved(false);
-setIsEditManagerSignSaved(false);
+    setIsEditTechnicianSignSaved(false);
+    setIsEditCustomerSignSaved(false);
+    setIsEditManagerSignSaved(false);
 
     editSigTechnician.current?.clear();
     editSigManager.current?.clear();
@@ -4556,20 +4765,40 @@ setIsEditManagerSignSaved(false);
       setIsEditSubmitting(true);
       setEditLoading(true);
       const values = await editForm.validateFields();
-const technicianCanvasEmpty = editSigTechnician.current?.isEmpty?.();
-const customerCanvasEmpty = editSigCustomer.current?.isEmpty?.();
-const managerEmpty = !editSignatureManager;
-if (
-  !isEditTechnicianSignSaved || technicianCanvasEmpty ||
-  !isEditCustomerSignSaved || customerCanvasEmpty ||
-  !isEditManagerSignSaved || managerEmpty
-) {
-message.error("The manager's signature must be uploaded. The technician's and customer's signatures must be saved before submitting.");
+      const isTooLong =
+        serialNumber.length > 100 ||
+        address.length > 100 ||
+        descriptionText.length > 1000 ||
+        editCauseText.length > 500 ||
+        notes.length > 200;
 
-  setIsEditSubmitting(false);
-  setEditLoading(false);
-  return;
-}
+      if (isTooLong) {
+        message.error(
+          "Some inputs exceed allowed limits. Please fix them before submitting."
+        );
+        setIsEditSubmitting(false);
+        setEditLoading(false);
+        return;
+      }
+      const technicianCanvasEmpty = editSigTechnician.current?.isEmpty?.();
+      const customerCanvasEmpty = editSigCustomer.current?.isEmpty?.();
+      const managerEmpty = !editSignatureManager;
+      if (
+        !isEditTechnicianSignSaved ||
+        technicianCanvasEmpty ||
+        !isEditCustomerSignSaved ||
+        customerCanvasEmpty ||
+        !isEditManagerSignSaved ||
+        managerEmpty
+      ) {
+        message.error(
+          "The manager's signature must be uploaded. The technician's and customer's signatures must be saved before submitting."
+        );
+
+        setIsEditSubmitting(false);
+        setEditLoading(false);
+        return;
+      }
       // Convert dates to proper string format
       const convertToDubaiTime = (date) =>
         date ? dayjs(date).tz("Asia/Dubai").format("DD-MM-YYYY") : "N/A";
@@ -4687,13 +4916,18 @@ message.error("The manager's signature must be uploaded. The technician's and cu
       // });
 
       reportOptions.forEach((option) => {
-  formData.append(option, values.report?.includes(option) ? "true" : "false");
-});
+        formData.append(
+          option,
+          values.report?.includes(option) ? "true" : "false"
+        );
+      });
 
-serviceOptions.forEach((option) => {
-  formData.append(option, values.serviceType?.includes(option) ? "true" : "false");
-});
-
+      serviceOptions.forEach((option) => {
+        formData.append(
+          option,
+          values.serviceType?.includes(option) ? "true" : "false"
+        );
+      });
 
       // ✅ Submit
       console.log("🧪 Submitting partsUsed", cleanedPartsUsed);
@@ -4743,8 +4977,8 @@ serviceOptions.forEach((option) => {
       generateEditPDF(pdfPayload, checkboxValues, cleanedPartsUsed);
       setEditModalOpen(false);
       setIsEditTechnicianSignSaved(false);
-setIsEditCustomerSignSaved(false);
-setIsEditManagerSignSaved(false);
+      setIsEditCustomerSignSaved(false);
+      setIsEditManagerSignSaved(false);
       hasInitializedEditForm.current = false;
 
       editSigTechnician.current?.clear();
@@ -4774,7 +5008,6 @@ setIsEditManagerSignSaved(false);
       message.success("Form updated successfully!");
       setEditModalOpen(false);
       hasInitializedEditForm.current = false;
-
     } else {
       message.error("Update failed: " + result.message);
     }
@@ -4871,8 +5104,12 @@ setIsEditManagerSignSaved(false);
           <div className="container-fluid  mt-3">
             <div className="row">
               <div className="col-12">
-                <Form form={form} layout="vertical" onFinish={handleSubmit}                       disabled={loading || isSubmittingRef.current}
->
+                <Form
+                  form={form}
+                  layout="vertical"
+                  onFinish={handleSubmit}
+                  disabled={loading || isSubmittingRef.current}
+                >
                   <div className="row ">
                     <div className="col-12 col-md-6">
                       <Form.Item
@@ -4949,8 +5186,9 @@ setIsEditManagerSignSaved(false);
                                 // installationDate: matched["Installation Date"]
                                 //   ? dayjs(matched["Installation Date"])
                                 //   : null,
-                                      installationDate: parseDate(matched["Installation Date"]),
-
+                                installationDate: parseDate(
+                                  matched["Installation Date"]
+                                ),
                               });
                               setAddress(matched["Address"] || "");
                               setSerialNumber(matched["Serial Number"] || "");
@@ -4962,7 +5200,6 @@ setIsEditManagerSignSaved(false);
                                 machineType: "",
                                 serialNumber: "",
                                 installationDate: null,
-
                               });
                               setAddress("");
                               setSerialNumber("");
@@ -5064,7 +5301,7 @@ setIsEditManagerSignSaved(false);
                           value={serialNumber}
                           onChange={handleSerialNumberChange}
                           autoSize={{ minRows: 3, maxRows: 3 }}
-                          maxLength={60}
+                          maxLength={100}
                           showCount
                         />
                       </Form.Item>
@@ -5263,7 +5500,13 @@ setIsEditManagerSignSaved(false);
                         rows={3}
                         placeholder="Describe the failure..."
                         value={causeOfFailureText}
-                        onChange={(e) => setCauseOfFailureText(e.target.value)}
+                        // onChange={(e) => {
+                        //   setCauseOfFailureText(e.target.value);
+                        //    handleCauseTextChange(e)}}
+                        //                            autoSize={{ minRows: 3, maxRows: 3 }}
+                        onChange={handleCauseTextChange}
+                        maxLength={500}
+                        showCount
                       />
 
                       {/* <Upload
@@ -5679,8 +5922,7 @@ setIsEditManagerSignSaved(false);
                 type="primary"
                 size="large"
                 loading={refreshing}
-                  onClick={handleRefresh}
-
+                onClick={handleRefresh}
                 icon={<ReloadOutlined />}
               >
                 {refreshing ? "Refreshing..." : "Refresh"}
@@ -5694,7 +5936,7 @@ setIsEditManagerSignSaved(false);
                     setSearchText("");
                     setSearchInstallationDate(null);
                     setSearchSRN("");
-                    message.success("All the filters cleared")
+                    message.success("All the filters cleared");
                   }}
                   className="ms-2 "
                 >
@@ -5936,7 +6178,7 @@ setIsEditManagerSignSaved(false);
                       variant="solid"
                       size="large"
                       className="text-center"
-                      style={{width:"35%"}}
+                      style={{ width: "35%" }}
                       onClick={() => setViewModalOpen(false)}
                     >
                       Close From
@@ -5957,7 +6199,6 @@ setIsEditManagerSignSaved(false);
                 layout="vertical"
                 onFinish={handleEditSubmit}
                 disabled={isEditSubmitting}
-
               >
                 <div className="row">
                   <div className="col-12">
@@ -5991,7 +6232,8 @@ setIsEditManagerSignSaved(false);
                       <TextArea
                         placeholder="Enter address"
                         value={address}
-                        onChange={handleAddressChange}
+                        // onChange={handleAddressChange}
+                        onChange={handleEditAddressChange}
                         autoSize={{ minRows: 3, maxRows: 3 }}
                         maxLength={100}
                         showCount
@@ -6060,9 +6302,10 @@ setIsEditManagerSignSaved(false);
                       <TextArea
                         placeholder="Enter serial number"
                         value={serialNumber}
-                        onChange={handleSerialNumberChange}
+                        // onChange={handleSerialNumberChange}
+                        onChange={handleEditSerialNumberChange}
                         autoSize={{ minRows: 3, maxRows: 3 }}
-                        maxLength={60}
+                        maxLength={100}
                         showCount
                       />
                     </Form.Item>
@@ -6083,9 +6326,9 @@ setIsEditManagerSignSaved(false);
                         format="DD-MM-YYYY" // Dubai Time Format
                         value={
                           editForm.getFieldValue("installationDate")
-                            ? dayjs(editForm.getFieldValue("installationDate")).tz(
-                                "Asia/Dubai"
-                              )
+                            ? dayjs(
+                                editForm.getFieldValue("installationDate")
+                              ).tz("Asia/Dubai")
                             : dayjs().tz("Asia/Dubai") // Default to Dubai Time
                         }
                         onChange={(date) => {
@@ -6176,7 +6419,9 @@ setIsEditManagerSignSaved(false);
                             //   "Selected Dubai Time:",
                             //   dubaiTime.format("YYYY-MM-DD hh:mm A")
                             // );
-                            editForm.setFieldsValue({ departureDate: dubaiTime });
+                            editForm.setFieldsValue({
+                              departureDate: dubaiTime,
+                            });
                           }
                         }}
                       />
@@ -6249,7 +6494,8 @@ setIsEditManagerSignSaved(false);
                     <TextArea
                       placeholder="Enter the description of work/of defect/failure mode"
                       value={descriptionText}
-                      onChange={handleDescriptionTextChange}
+                      // onChange={handleDescriptionTextChange}
+                      onChange={handleEditDescriptionChange}
                       autoSize={{ minRows: 5, maxRows: 5 }}
                       maxLength={1000}
                       showCount
@@ -6279,7 +6525,8 @@ setIsEditManagerSignSaved(false);
                   <Form.Item label="Cause of Failure">
                     <Input.TextArea
                       value={editCauseText}
-                      onChange={(e) => setEditCauseText(e.target.value)}
+                      // onChange={(e) => setEditCauseText(e.target.value)}
+                      onChange={handleEditCauseTextChange}
                       placeholder="Describe the failure"
                       autoSize={{ minRows: 3, maxRows: 3 }}
                       maxLength={500}
@@ -6433,7 +6680,8 @@ setIsEditManagerSignSaved(false);
                     <TextArea
                       placeholder="Enter the notes/further action required"
                       value={notes}
-                      onChange={handleNotesChange}
+                      // onChange={handleNotesChange}
+                      onChange={handleEditNotesChange}
                       autoSize={{ minRows: 3, maxRows: 3 }}
                       maxLength={200}
                       showCount
@@ -6622,9 +6870,18 @@ setIsEditManagerSignSaved(false);
           </div>
         </div>
         <div className="text-center mt-2">
-          <p className="text-center " style={{fontSize:"14px"}}>
-          Crafted and Maintained by <a href="https://www.stratifytechno.com/" target="_blank" className="text-primary" style={{textDecoration:"none"}}>Stratify Techologies</a></p>
-          </div>
+          <p className="text-center " style={{ fontSize: "14px" }}>
+            Crafted and Maintained by{" "}
+            <a
+              href="https://www.stratifytechno.com/"
+              target="_blank"
+              className="text-primary"
+              style={{ textDecoration: "none" }}
+            >
+              Stratify Techologies
+            </a>
+          </p>
+        </div>
       </div>
     </>
   );
