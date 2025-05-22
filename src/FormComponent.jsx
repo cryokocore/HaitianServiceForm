@@ -4333,7 +4333,7 @@ export default function FormComponent() {
         return;
       }
       if (!signatureTechnician || !signatureManager || !signatureCustomer)
-        return message.error("All signatures required.");
+        return message.error("The manager's signature must be uploaded. The technician's and customer's signatures must be saved before submitting.");
 
       const cleanedPartsUsed = data.map((row) => ({
         partNumber:
@@ -4766,11 +4766,11 @@ export default function FormComponent() {
       setEditLoading(true);
       const values = await editForm.validateFields();
       const isTooLong =
-        serialNumber.length > 100 ||
-        address.length > 100 ||
-        descriptionText.length > 1000 ||
-        editCauseText.length > 500 ||
-        notes.length > 200;
+  (values.serialNumber?.length || 0) > 100 ||
+  (values.address?.length || 0) > 100 ||
+  (values["description of work/of defect/failure mode"]?.length || 0) > 1000 ||
+  (values["cause of failure"]?.length || 0) > 500 ||
+  (values["notes/further action required"]?.length || 0) > 200;
 
       if (isTooLong) {
         message.error(
