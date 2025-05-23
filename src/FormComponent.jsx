@@ -184,7 +184,7 @@ export default function FormComponent() {
       payload.append("originalFilename", file.name);
 
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
+        "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -198,19 +198,7 @@ export default function FormComponent() {
       return { success: false, message: error.message || "Upload failed" };
     }
   };
-  // const handleRemoveImage = () => {
-  //   setEditCauseOfFailureImage(null);
-  //   setEditPreviewUrl(null);
-  //   setEditCauseText((prev) =>
-  //     prev
-  //       .split("\n")
-  //       .filter(
-  //         (line) => !line.startsWith("Image:") && !line.startsWith("Filename:")
-  //       )
-  //       .join("\n")
-  //       .trim()
-  //   );
-  // };
+  
 
   const handleRemoveImage = () => {
     setEditCauseOfFailureImage(null);
@@ -256,47 +244,7 @@ export default function FormComponent() {
     );
   };
 
-  // const handleEditImageDelete = async () => {
-  //   console.log("Deleting image at:", editViewUrl);
-
-  //   const res = await fetch(
-  //     "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
-  //     {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/x-www-form-urlencoded",
-  //       },
-  //       body: new URLSearchParams({
-  //         action: "deleteCauseImage",
-  //         imageUrl: editViewUrl,
-  //       }),
-  //     }
-  //   );
-
-  //   const result = await res.json();
-  //   if (result.success) {
-  //     message.success("Image deleted successfully");
-
-  //     setEditCauseOfFailureImage(null);
-  //     setEditPreviewUrl(null);
-  //     setEditViewUrl(null);
-  //     setDownloadUrl(null);
-
-  //     setEditCauseText((prev) =>
-  //       prev
-  //         .split("\n")
-  //         .filter(
-  //           (line) =>
-  //             !line.startsWith("Image:") && !line.startsWith("Filename:")
-  //         )
-  //         .join("\n")
-  //         .trim()
-  //     );
-  //   } else {
-  //     message.error("Image deletion failed");
-  //   }
-  // };
-
+ 
   const handleEditImageDelete = async () => {
     const isDriveLink = editViewUrl?.includes("drive.google.com/file/d/");
 
@@ -322,7 +270,7 @@ export default function FormComponent() {
 
     // Otherwise, call backend
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec",
+      "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
       {
         method: "POST",
         headers: {
@@ -358,95 +306,7 @@ export default function FormComponent() {
     );
   };
 
-  // const saveEditTechnicianSignature = () => {
-  //   if (editSigTechnician.current && !editSigTechnician.current.isEmpty()) {
-  //     setEditSignatureTechnician(
-  //       editSigTechnician.current.getCanvas().toDataURL("image/png")
-  //     );
-  //     message.success("Technician signature saved successfully (edit)");
-  //   } else {
-  //     message.warning("Please draw technician signature before saving.");
-  //   }
-  // };
-
-  // const clearEditTechnicianSignature = () => {
-  //   editSigTechnician.current?.clear();
-  //   setEditSignatureTechnician("");
-  // };
-
-  // const saveEditCustomerSignature = () => {
-  //   if (editSigCustomer.current && !editSigCustomer.current.isEmpty()) {
-  //     setEditSignatureCustomer(
-  //       editSigCustomer.current.getCanvas().toDataURL("image/png")
-  //     );
-  //     message.success("Customer signature saved successfully (edit)");
-  //   } else {
-  //     message.warning("Please draw customer signature before saving.");
-  //   }
-  // };
-
-  // const clearEditCustomerSignature = () => {
-  //   editSigCustomer.current?.clear();
-  //   setEditSignatureCustomer("");
-  // };
-
-  // const handleEditManagerUpload = ({ file }) => {
-  //   const reader = new FileReader();
-  //   reader.onloadend = () => {
-  //     console.log("Uploaded Image (Base64):", reader.result); // Debugging
-
-  //     setEditSignatureManager(reader.result);
-  //     message.success("Manager signature uploaded successfully (edit)");
-  //   };
-  //   if (file) reader.readAsDataURL(file);
-  // };
-
-  // const clearEditManagerSignature = () => {
-  //   setEditSignatureManager(null);
-  //   message.success("Manager signature cleared (edit)");
-  // };
-
-  // const handleCauseImageUpload = (event) => {
-  //   const file = event.target.files[0];
-  //   if (!file) return;
-
-  //   const reader = new FileReader();
-  //   reader.onloadend = () => {
-  //     setCauseImageBase64(reader.result); // Base64 string: "data:image/png;base64,..."
-  //   };
-  //   reader.readAsDataURL(file);
-  // };
-
-  // const handleCauseImageUpload = (event) => {
-  //   const file = event.target.files[0];
-  //   if (file) {
-  //     setCauseOfFailureImage(file);
-  //   }
-  // };
-
-  // const handleCauseImageUpload = ({file}) => {
-  //   const reader = new FileReader();
-  //   reader.onloadend = () => {
-  //     setCauseOfFailureImage(file);
-  //     setPreviewUrl(reader.result);
-  //       const base64 = reader.result;
-  //   console.log("Sending base64:", base64);
-  //     setCauseImageBase64(reader.result); // ✅ Needed for backend
-  //         console.log("Base64 Image URL:", reader.result); // ✅ Console it here
-  //         console.log("Base64 length:", reader.result.length)
-
-  //   };
-  //   reader.readAsDataURL(file);
-  //   return false; // Prevent Upload component from auto-uploading
-  // };
-  //   const handleCauseImageUpload = ({ file }) => {
-  //   setCauseOfFailureImage(file); // Store actual file object
-  //   const reader = new FileReader();
-  //   reader.onload = () => setPreviewUrl(reader.result); // For preview
-  //   reader.readAsDataURL(file);
-  //   return false; // Prevent AntD Upload from auto-uploading
-  // };
-
+  
   const saveEditTechnicianSignature = () => {
     if (editSigTechnician.current && !editSigTechnician.current.isEmpty()) {
       setEditSignatureTechnician(
@@ -535,7 +395,7 @@ export default function FormComponent() {
     formData.append("causeImage", causeOfFailureImage);
 
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
+      "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
       {
         method: "POST",
         body: formData,
@@ -657,7 +517,9 @@ export default function FormComponent() {
 
       // ✅ Set "Parts Used" table data
       const partRows = (selectedRecord.partsUsed || []).map((part, index) => ({
-        key: Date.now() + index,
+        // key: Date.now() + index,
+        key: `${Date.now()}-${index}`,
+
         partNumber: part.partNumber ?? "",
         description: part.description ?? "",
         quantity: part.quantity ?? 1,
@@ -678,7 +540,7 @@ export default function FormComponent() {
             ]
       );
     }
-    console.log("Selected Record:", selectedRecord);
+    // console.log("Selected Record:", selectedRecord);
   }, [selectedRecord, viewModalOpen]);
   const extractDriveImagePreviewUrl = (text) => {
     const match = text.match(
@@ -690,48 +552,7 @@ export default function FormComponent() {
     return null;
   };
 
-  // const extractFileInfoFromCauseText = (text) => {
-  //   const urlMatch = text.match(
-  //     /https:\/\/drive\.google\.com\/file\/d\/([^/]+)\//
-  //   );
-  //   const nameMatch = text.match(/Name:\s*(.+)$/m); // Extracts filename if saved as 'Name: ...'
-  //   return {
-  //     url: urlMatch
-  //       ? `https://drive.google.com/file/d/${urlMatch[1]}/view`
-  //       : null,
-  //     fileId: urlMatch ? urlMatch[1] : null,
-  //     filename: nameMatch ? nameMatch[1].trim() : "Cause_Failure_Image",
-  //   };
-  // };
-
-  // const extractFileInfoFromCauseText = (text) => {
-  //   const match = text.match(/\/d\/([a-zA-Z0-9_-]+)\//);
-  //   if (!match) return {};
-
-  //   const fileId = match[1];
-  //   return {
-  //     viewUrl: `https://drive.google.com/file/d/${fileId}/view`,
-  //     downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
-  //     fileId,
-  //     filename: "Uploaded Image",
-  //   };
-  // };
-
-  // const extractFileInfoFromCauseText = (text) => {
-  //   const match = text.match(/\/d\/([a-zA-Z0-9_-]+)\//);
-  //   const nameMatch = text.match(/Filename:\s*(.+)/);
-
-  //   if (!match) return {};
-
-  //   const fileId = match[1];
-  //   return {
-  //     viewUrl: `https://drive.google.com/file/d/${fileId}/view`,
-  //     downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
-  //     fileId,
-  //     filename: nameMatch ? nameMatch[1].trim() : "Uploaded_Image",
-  //   };
-  // };
-  const extractFileInfoFromCauseText = (text) => {
+    const extractFileInfoFromCauseText = (text) => {
     const match = text.match(/\/d\/([a-zA-Z0-9_-]+)/);
     const nameMatch = text.match(/Filename:\s*(.+)/);
 
@@ -750,299 +571,7 @@ export default function FormComponent() {
     handleSearchAndFilter();
   }, [searchText, searchInstallationDate, searchSRN, rawCustomerData]);
 
-  // useEffect(() => {
-  // if (!selectedRecord || !editModalOpen || hasInitializedEditForm.current) return;
-
-  //   if (selectedRecord && editModalOpen) {
-  //     const reportOptions = [
-  //       "Installation/Commission",
-  //       "Maintenance",
-  //       "Defect",
-  //       "Customer Visit (Report)",
-  //       "Other",
-  //     ];
-
-  //     const serviceOptions = [
-  //       "F.O.C Commissioning",
-  //       "F.O.C Maintenance",
-  //       "Chargeable Maintenance",
-  //       "Goodwill",
-  //       "Guarantee",
-  //       "Service contract",
-  //       "Customer Visit (Service)",
-  //       "Installation/Commission",
-  //     ];
-
-  //     const checkedReports = reportOptions.filter(
-  //       (option) => selectedRecord[option] === "Yes"
-  //     );
-
-  //     const checkedServices = serviceOptions.filter(
-  //       (option) => selectedRecord[option] === "Yes"
-  //     );
-
-  //     const parseDate = (dateStr) => {
-  //       return dayjs(
-  //         dateStr,
-  //         ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
-  //         true
-  //       );
-  //     };
-
-  //     editForm.setFieldsValue({
-  //       editsrn: selectedRecord["Service Request Number"],
-  //       customerName: selectedRecord["Customer Name"],
-  //       address: selectedRecord["Address"],
-  //       contact: selectedRecord["Contact"],
-  //       telephone: selectedRecord["Telephone"],
-  //       machineType: selectedRecord["Machine Type"],
-  //       serialNumber: selectedRecord["Serial Number"],
-  //       installationDate: selectedRecord["Installation Date"]
-  //         ? parseDate(selectedRecord["Installation Date"])
-  //         : null,
-  //       departureDate: selectedRecord["Departure Date"]
-  //         ? parseDate(selectedRecord["Departure Date"])
-  //         : null,
-  //       returnDate: selectedRecord["Return Date"]
-  //         ? parseDate(selectedRecord["Return Date"])
-  //         : null,
-
-  //       workTime: selectedRecord["Work Time"],
-  //       serviceTechnician: selectedRecord["Service Technician"],
-  //       report: checkedReports,
-  //       serviceType: checkedServices,
-  //       ["description of work/of defect/failure mode"]:
-  //         selectedRecord["Description of work/of defect/failure mode"],
-  //       ["cause of failure"]: selectedRecord["Cause of Failure"],
-
-  //       ["notes/further action required"]:
-  //         selectedRecord["Notes/Further action required"] ||
-  //         selectedRecord["Note "] ||
-  //         selectedRecord["Note\t"], // all variants
-  //     });
-
-  //     const fullCause = selectedRecord["Cause of Failure"] || "";
-  //     // const { url, fileId, filename } = extractFileInfoFromCauseText(fullCause);
-  //     const { viewUrl, downloadUrl, fileId, filename } =
-  //       extractFileInfoFromCauseText(fullCause);
-
-  //     // Extract image link
-  //     // const match = fullCause.match(
-  //     //   /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/
-  //     // );
-  //     // const fileId = match ? match[1] : null;
-  //     // const previewImage = fileId
-  //     //   ? `https://drive.google.com/uc?export=view&id=${fileId}` // direct viewable image
-  //     //   : null;
-
-  //     const previewImage = extractDriveImagePreviewUrl(fullCause);
-
-  //     // Extract only the text (excluding image line)
-  //     // const causeTextOnly = fullCause
-  //     //   .split("\n")
-  //     //   .filter((line) => !line.trim().startsWith("Image:"))
-  //     //   .join("\n")
-  //     //   .trim();
-  //     const causeTextOnly = fullCause
-  //       .split("\n")
-  //       .filter(
-  //         (line) =>
-  //           !line.trim().startsWith("Image:") &&
-  //           !line.trim().startsWith("Filename:")
-  //       )
-  //       .join("\n")
-  //       .trim();
-
-  //     setcauseOfFailure(causeTextOnly);
-  //     setPreviewUrl(previewImage);
-
-  //     setcauseOfFailure(causeTextOnly);
-  //     // setPreviewUrl(previewImage);
-  //     // setCauseOfFailureImage(null);
-  //     // setPreviewUrl(url);
-  //     // setPreviewUrl(viewUrl);
-  //     setEditPreviewUrl(viewUrl);
-
-  //     setDownloadUrl(downloadUrl);
-  //     // setCauseOfFailureImage({ fileId, name: filename }); // Simulate file object
-
-  //     // ✅ Set "Parts Used" table data
-  //     const partRows = (selectedRecord.partsUsed || []).map((part, index) => ({
-  //       key: Date.now() + index,
-  //       partNumber: part.partNumber ?? "",
-  //       description: part.description ?? "",
-  //       quantity: part.quantity ?? 1,
-  //       note: part.note ?? "",
-  //     }));
-  //     setEditTableData(
-  //       partRows.length > 0
-  //         ? partRows
-  //         : [
-  //             {
-  //               key: Date.now(),
-  //               partNumber: "",
-  //               description: "",
-  //               quantity: "",
-  //               note: "",
-  //             },
-  //           ]
-  //     );
-  //   }
-  //   console.log("Selected Record:", selectedRecord);
-  //     hasInitializedEditForm.current = true;
-  // }, [selectedRecord, editModalOpen]);
-
-  // useEffect(() => {
-  //     if (!selectedRecord || !editModalOpen) return;
-
-  // if (editTabledata.length > 0) return;
-
-  //   if (selectedRecord && editModalOpen) {
-  //     const reportOptions = [
-  //       "Installation/Commission",
-  //       "Maintenance",
-  //       "Defect",
-  //       "Customer Visit (Report)",
-  //       "Other",
-  //     ];
-
-  //     const serviceOptions = [
-  //       "F.O.C Commissioning",
-  //       "F.O.C Maintenance",
-  //       "Chargeable Maintenance",
-  //       "Goodwill",
-  //       "Guarantee",
-  //       "Service contract",
-  //       "Customer Visit (Service)",
-  //       "Installation/Commission",
-  //     ];
-
-  //     const checkedReports = reportOptions.filter(
-  //       (option) => selectedRecord[option] === "Yes"
-  //     );
-
-  //     const checkedServices = serviceOptions.filter(
-  //       (option) => selectedRecord[option] === "Yes"
-  //     );
-
-  //     const parseDate = (dateStr) => {
-  //       return dayjs(
-  //         dateStr,
-  //         ["DD-MM-YYYY", "DD MMM YYYY", "YYYY-MM-DD", dayjs.ISO_8601],
-  //         true
-  //       );
-  //     };
-
-  //     editForm.setFieldsValue({
-  //       editsrn: selectedRecord["Service Request Number"],
-  //       customerName: selectedRecord["Customer Name"],
-  //       address: selectedRecord["Address"],
-  //       contact: selectedRecord["Contact"],
-  //       telephone: selectedRecord["Telephone"],
-  //       machineType: selectedRecord["Machine Type"],
-  //       serialNumber: selectedRecord["Serial Number"],
-  //       installationDate: selectedRecord["Installation Date"]
-  //         ? parseDate(selectedRecord["Installation Date"])
-  //         : null,
-  //       departureDate: selectedRecord["Departure Date"]
-  //         ? parseDate(selectedRecord["Departure Date"])
-  //         : null,
-  //       returnDate: selectedRecord["Return Date"]
-  //         ? parseDate(selectedRecord["Return Date"])
-  //         : null,
-
-  //       workTime: selectedRecord["Work Time"],
-  //       serviceTechnician: selectedRecord["Service Technician"],
-  //       report: checkedReports,
-  //       serviceType: checkedServices,
-  //       ["description of work/of defect/failure mode"]:
-  //         selectedRecord["Description of work/of defect/failure mode"],
-  //       ["cause of failure"]: selectedRecord["Cause of Failure"],
-
-  //       ["notes/further action required"]:
-  //         selectedRecord["Notes/Further action required"] ||
-  //         selectedRecord["Note "] ||
-  //         selectedRecord["Note\t"], // all variants
-  //     });
-
-  //     const fullCause = selectedRecord["Cause of Failure"] || "";
-  //     // const { url, fileId, filename } = extractFileInfoFromCauseText(fullCause);
-  //     const { viewUrl, downloadUrl, fileId, filename } =
-  //       extractFileInfoFromCauseText(fullCause);
-  //     setEditViewUrl(viewUrl);
-  //     console.log("Set editViewUrl to:", viewUrl);
-  //     console.log("Full Cause text:", fullCause);
-
-  //     // Extract image link
-  //     // const match = fullCause.match(
-  //     //   /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/
-  //     // );
-  //     // const fileId = match ? match[1] : null;
-  //     // const previewImage = fileId
-  //     //   ? `https://drive.google.com/uc?export=view&id=${fileId}` // direct viewable image
-  //     //   : null;
-
-  //     const previewImage = extractDriveImagePreviewUrl(fullCause);
-
-  //     // Extract only the text (excluding image line)
-  //     // const causeTextOnly = fullCause
-  //     //   .split("\n")
-  //     //   .filter((line) => !line.trim().startsWith("Image:"))
-  //     //   .join("\n")
-  //     //   .trim();
-  //     const causeTextOnly = fullCause
-  //       .split("\n")
-  //       .filter(
-  //         (line) =>
-  //           !line.trim().startsWith("Image:") &&
-  //           !line.trim().startsWith("Filename:")
-  //       )
-  //       .join("\n")
-  //       .trim();
-
-  //     setEditCauseText(causeTextOnly);
-  //     setEditPreviewUrl(previewImage);
-  //     setEditCauseOfFailureImage({ name: filename });
-  //     setDownloadUrl(downloadUrl);
-  //     // setCauseOfFailureImage({ fileId, name: filename }); // Simulate file object
-
-  //     // ✅ Set "Parts Used" table data
-  //     // const partRows = (selectedRecord.partsUsed || []).map((part, index) => ({
-  //     //   key: Date.now() + index,
-  //     //   partNumber: part.partNumber ?? "",
-  //     //   description: part.description ?? "",
-  //     //   quantity: part.quantity ?? 1,
-  //     //   note: part.note ?? "",
-  //     // }));
-  //     // setEditTableData(
-  //     //   partRows.length > 0
-  //     //     ? partRows
-  //     //     : [
-  //     //         {
-  //     //           key: Date.now(),
-  //     //           partNumber: "",
-  //     //           description: "",
-  //     //           quantity: "",
-  //     //           note: "",
-  //     //         },
-  //     //       ]
-  //     // );
-
-  //       if (selectedRecord.partsUsed && selectedRecord.partsUsed.length > 0) {
-  //   const partRows = selectedRecord.partsUsed.map((part, index) => ({
-  //     key: Date.now() + index,
-  //     partNumber: part.partNumber ?? "",
-  //     description: part.description ?? "",
-  //     quantity: part.quantity ?? 1,
-  //     note: part.note ?? "",
-  //   }));
-  //   setEditTableData(partRows);
-  // }
-  //   }
-  //   console.log("Selected Record:", selectedRecord);
-  //   hasInitializedEditForm.current = true;
-  // }, [selectedRecord, editModalOpen]);
-
+ 
   useEffect(() => {
     if (!selectedRecord || !editModalOpen || hasInitializedEditForm.current)
       return;
@@ -1112,13 +641,7 @@ export default function FormComponent() {
     const { viewUrl, downloadUrl, fileId, filename } =
       extractFileInfoFromCauseText(fullCause);
     setEditViewUrl(viewUrl);
-    // const causeTextOnly = fullCause
-    //   .split("\n")
-    //   .filter(
-    //     (line) => !line.startsWith("Image:") && !line.startsWith("Filename:")
-    //   )
-    //   .join("\n")
-    //   .trim();
+  
     const causeTextOnly = fullCause
       .split("\n")
       .filter(
@@ -1136,7 +659,9 @@ export default function FormComponent() {
 
     // ✅ Only initialize editTableData ONCE
     const partRows = (selectedRecord.partsUsed || []).map((part, index) => ({
-      key: Date.now() + index,
+      // key: Date.now() + index,
+      key: `${Date.now()}-${index}`,
+
       partNumber: part.partNumber ?? "",
       description: part.description ?? "",
       quantity: part.quantity ?? 1,
@@ -1155,113 +680,16 @@ export default function FormComponent() {
   }, [selectedRecord]);
 
   useEffect(() => {
-    // const loadAllCustomerData = async () => {
-    //   try {
-    //     const res = await fetch(
-    //       `https://script.google.com/macros/s/AKfycbwMRtiav5hplr-NV3Ai5QKmjHyKGtM8l0jrmmv1GPChjtj9FvaHJuhiPleHNaH_BTq1gw/exec?action=getAllCustomerData`
-    //     );
-    //     const result = await res.json();
-    //     if (result.success) {
-    //       const allData = result.customers || [];
-
-    //       // ✅ For table: keep raw unsorted data
-    //       setCustomerDataList(allData);
-
-    //       // ✅ For dropdown: dedupe + sort alphabetically
-    //       const seenNames = new Set();
-    //       const dropdownNames = [];
-
-    //       for (let i = allData.length - 1; i >= 0; i--) {
-    //         const name = allData[i]["Customer Name"]?.trim();
-    //         if (name && !seenNames.has(name.toLowerCase())) {
-    //           seenNames.add(name.toLowerCase());
-    //           dropdownNames.push(name);
-    //         }
-    //       }
-
-    //       dropdownNames.sort((a, b) => a.localeCompare(b));
-    //       setCustomerOptions(dropdownNames);
-    //     }
-    //   } catch (err) {
-    //     console.error("Error fetching customers:", err);
-    //   }
-    // };
-
+    
     loadAllCustomerData();
     form.setFieldsValue({ customerName: "" });
     setInputCustomer("");
   }, []);
 
-  // const loadAllCustomerData = async () => {
-  //   const res = await fetch(
-  //     "https://script.google.com/macros/s/AKfycbwdgfTUpXQkJ0dwuwUg0WUpQ9FNwHzrpAhbnnN3Tsbv1xxyVM11FrHcHJGQb4QUEs1eHQ/exec?action=getAllCustomerData"
-  //   );
-  //   const result = await res.json();
-
-  //   if (result.success && Array.isArray(result.customers)) {
-  //     const grouped = {};
-
-  //     result.customers.forEach((row) => {
-  //       const srn = row["Service Request Number"];
-  //       if (!grouped[srn]) {
-  //         grouped[srn] = { ...row, partsUsed: [] };
-  //       }
-
-  //       grouped[srn].partsUsed.push({
-  //         partNumber: row["Part Number"],
-  //         description: row["Description"],
-  //         quantity: row["Quantity"],
-  //         note: row["Note"] || row["Note "] || row["Note\t"],
-  //       });
-  //     });
-
-  //     setCustomerDataList(Object.values(grouped));
-  //   }
-  // };
-
-  //   const loadAllCustomerData = async () => {
-  //     const res = await fetch(
-  //       "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec?action=getAllCustomerData"
-  //     );
-  //     const result = await res.json();
-
-  //     if (result.success && Array.isArray(result.customers)) {
-  //       const grouped = {};
-
-  //       result.customers.forEach((row) => {
-  //         const srn = row["Service Request Number"];
-  //         if (!grouped[srn]) {
-  //           grouped[srn] = { ...row, partsUsed: [] };
-  //         }
-
-  //         grouped[srn].partsUsed.push({
-  //           partNumber: row["Part Number"],
-  //           description: row["Description"],
-  //           quantity: row["Quantity"],
-  //           note: row["Note"] || row["Note "] || row["Note\t"],
-  //         });
-  //       });
-
-  //       const finalData = Object.values(grouped);
-  //       setRawCustomerData(finalData);
-  //       setCustomerDataList(finalData); // show all initially
-  //   if (editModalOpen && selectedRecord && !hasInitializedEditForm.current) {
-  //   const updatedRecord = finalData.find(
-  //     (rec) =>
-  //       rec["Service Request Number"] === selectedRecord["Service Request Number"]
-  //   );
-  //   if (updatedRecord) {
-  //     setSelectedRecord(updatedRecord);
-  //   }
-  // }
-
-  //       setFilteredData(finalData); // also show all initially
-  //     }
-  //   };
-
+  
   const loadAllCustomerData = async () => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec?action=getAllCustomerData"
+      "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec?action=getAllCustomerData"
     );
     const result = await res.json();
 
@@ -1307,90 +735,11 @@ export default function FormComponent() {
     }
   };
 
-  // const handleSearchAndFilter = () => {
-  //   let filtered = [...rawCustomerData];
-
-  //   // Filter by search text (customer name, machine type, etc.)
-  //   if (searchText) {
-  //     const lower = searchText.toLowerCase();
-  //     filtered = filtered.filter((item) => {
-  //       const customerName =
-  //         item["Customer Name"]?.toString().toLowerCase() || "";
-  //       const machineType =
-  //         item["Machine Type"]?.toString().toLowerCase() || "";
-  //       const technician =
-  //         item["Service Technician"]?.toString().toLowerCase() || "";
-
-  //       return (
-  //         customerName.includes(lower) ||
-  //         machineType.includes(lower) ||
-  //         technician.includes(lower)
-  //       );
-  //     });
-  //   }
-
-  //   // Filter by date range
-  //   if (fromDate && toDate) {
-  //     const from = dayjs(fromDate).startOf("day");
-  //     const to = dayjs(toDate).endOf("day");
-
-  //     filtered = filtered.filter((item) => {
-  //       const rawDate = item["Installation Date"];
-  //       const parsed = dayjs(rawDate, [
-  //         "DD-MM-YYYY",
-  //         "YYYY-MM-DD",
-  //         "DD MMM YYYY",
-  //       ]);
-  //       return parsed.isValid() && parsed.isBetween(from, to, null, "[]");
-  //     });
-  //   }
-
-  //   setCustomerDataList(filtered);
-  // };
-
+ 
   const handleSearchAndFilter = () => {
     let filtered = [...rawCustomerData];
 
-    // General text filter
-    // if (searchText) {
-    //   const lower = searchText.toLowerCase();
-    //   filtered = filtered.filter((item) => {
-    //     const customerName = item["Customer Name"]?.toString().toLowerCase() || "";
-    //     const machineType = item["Machine Type"]?.toString().toLowerCase() || "";
-    //     const technician = item["Service Technician"]?.toString().toLowerCase() || "";
-    //     return (
-    //       customerName.includes(lower) ||
-    //       machineType.includes(lower) ||
-    //       technician.includes(lower)
-    //     );
-    //   });
-    // }
-
-    //   if (searchText) {
-    //   const lower = searchText.toLowerCase();
-
-    //   filtered = filtered.filter((item) => {
-    //     return Object.values(item).some((value) =>
-    //       value?.toString().toLowerCase().includes(lower)
-    //     );
-    //   });
-    // }
-
-    // if (searchText.trim()) {
-    //   const lower = searchText.toLowerCase().trim();
-
-    //   filtered = filtered.filter((item) => {
-    //     return Object.entries(item).some(([key, value]) => {
-    //       // ✅ Skip non-display fields
-    //       if (Array.isArray(value) || typeof value === "object") return false;
-
-    //       // ✅ Convert everything to string and search lowercase
-    //       const text = (value ?? "").toString().toLowerCase();
-
-    //       return text.includes(lower);
-    //     });
-    //   });
-    // }
+    
 
     if (searchText.trim()) {
       const lower = searchText.toLowerCase().trim().replace(/\s+/g, " ");
@@ -1410,16 +759,7 @@ export default function FormComponent() {
       });
     }
 
-    // Filter by Installation Date
-    // if (searchInstallationDate) {
-    //   filtered = filtered.filter((item) => {
-    //     const rawDate = item["Installation Date"];
-    //     // const parsed = dayjs(rawDate); // ISO string support built-in
-    //     const parsed = parseDate(rawDate);
-
-    //     return parsed.isValid() && parsed.isSame(searchInstallationDate, "day");
-    //   });
-    // }
+   
     if (searchInstallationDate) {
       const searchDate = dayjs(
         searchInstallationDate,
@@ -1453,7 +793,7 @@ export default function FormComponent() {
   const fetchCustomerNames = async () => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec?action=getAllCustomerData`
+        `https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec?action=getAllCustomerData`
       );
       const result = await res.json();
 
@@ -1476,14 +816,14 @@ export default function FormComponent() {
         setCustomerOptions(uniqueSorted.map((c) => c["Customer Name"]));
       }
     } catch (err) {
-      console.error("Error fetching customers:", err);
+      // console.error("Error fetching customers:", err);
     }
   };
 
   const handleCustomerSelect = async (selectedName) => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec?action=getCustomerData&name=${encodeURIComponent(
+        `https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec?action=getCustomerData&name=${encodeURIComponent(
           selectedName
         )}`
       );
@@ -1501,7 +841,7 @@ export default function FormComponent() {
         });
       }
     } catch (err) {
-      console.error("Error fetching customer data:", err);
+      // console.error("Error fetching customer data:", err);
     }
   };
 
@@ -1512,7 +852,7 @@ export default function FormComponent() {
   const fetchSRN = async () => {
     try {
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec"
+        "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec"
       );
       const data = await response.json(); // ✅ Parse JSON directly
 
@@ -1536,7 +876,8 @@ export default function FormComponent() {
     setEditTableData(
       parts.length
         ? parts.map((part, i) => ({
-            key: Date.now() + i,
+            // key: Date.now() + i,
+                 key: `${Date.now()}-${i}`,
             partNumber: part.partNumber ?? "",
             description: part.description ?? "",
             quantity: part.quantity ?? 1,
@@ -1544,7 +885,8 @@ export default function FormComponent() {
           }))
         : [
             {
-              key: Date.now(),
+              // key: Date.now(),
+                 key: `${Date.now()}-0`,
               partNumber: "",
               description: "",
               quantity: "",
@@ -1556,80 +898,7 @@ export default function FormComponent() {
     setEditModalOpen(true);
   };
 
-  // const handleSerialNumberChange = (e) => {
-  //   let value = e.target.value;
-  //   let lines = value.split("\n");
-
-  //   // Limit strictly to 5 rows
-  //   if (lines.length > 2 || value.length > 60) {
-  //     message.warning(
-  //       "Input limited to 2 lines, 60 characters. Excess text won't be included."
-  //     );
-  //     value = lines.slice(0, 2).join("\n"); // Trim excess lines
-  //   }
-
-  //   setSerialNumber(value); // Update state only if within limits
-  // };
-
-  // const handleAddressChange = (e) => {
-  //   let value = e.target.value;
-  //   let lines = value.split("\n");
-
-  //   // Limit strictly to 5 rows
-  //   if (lines.length > 2 || value.length > 100) {
-  //     message.warning(
-  //       "Input limited to 2 lines, 100 characters. Excess text won't be included."
-  //     );
-  //     value = lines.slice(0, 2).join("\n"); // Trim excess lines
-  //   }
-
-  //   setAddress(value); // Update state only if within limits
-  // };
-
-  // const handleDescriptionTextChange = (e) => {
-  //   let value = e.target.value;
-  //   let lines = value.split("\n");
-
-  //   // Limit strictly to 5 rows
-  //   if (lines.length > 4 || value.length > 1000) {
-  //     message.warning(
-  //       "Input limited to 4 lines, 1000 characters. Excess text won't be included."
-  //     );
-  //     value = lines.slice(0, 4).join("\n"); // Trim excess lines
-  //   }
-
-  //   setDescriptionText(value); // Update state only if within limits
-  // };
-
-  // const handleCauseTextChange = (e) => {
-  //   let value = e.target.value;
-  //   let lines = value.split("\n");
-
-  //   if (lines.length > 2 || value.length > 500) {
-  //     message.warning(
-  //       "Input limited to 2 lines, 500 characters. Excess text won't be included."
-  //     );
-  //     value = lines.slice(0, 2).join("\n"); // Trim excess lines
-  //   }
-
-  //   setcauseOfFailure(value); // Update state only if within limits
-  // };
-
-  // const handleNotesChange = (e) => {
-  //   let value = e.target.value;
-  //   let lines = value.split("\n");
-
-  //   // Limit strictly to 5 rows
-  //   if (lines.length > 1 || value.length > 200) {
-  //     message.warning(
-  //       "Input limited to 1 line, 200 characters. Excess text won't be included."
-  //     );
-  //     value = lines.slice(0, 1).join("\n"); // Trim excess lines
-  //   }
-
-  //   setNotes(value); // Update state only if within limits
-  // };
-
+ 
   // Utility to enforce text limits
   const enforceTextLimit = (value, maxLines, maxChars) => {
     const lines = value.split("\n").slice(0, maxLines);
@@ -1947,20 +1216,7 @@ export default function FormComponent() {
     }
   };
 
-  // const validateFields = () => {
-  //   for (const row of data) {
-  //     if (
-  //       !row.partNumber ||
-  //       !row.description ||
-  //       row.quantity === "" ||
-  //       !row.note
-  //     ) {
-  //       message.error("Please fill all required fields!");
-  //       return false;
-  //     }
-  //   }
-  //   return true;
-  // };
+
 
   const formatDate = (date) => {
     const parsed = dayjs(
@@ -2009,32 +1265,12 @@ export default function FormComponent() {
       title: "Notes/Further action required",
       dataIndex: "Notes/Further action required",
     },
-    // { title: "Cause of Failure", dataIndex: "Cause of Failure" },
-    //     {
-    //   title: "Cause of Failure",
-    //   dataIndex: "Cause of Failure",
-    //   render: (text) => {
-    //     if (!text) return "";
-
-    //     // Remove lines starting with "Image:" or "Filename:"
-    //     const cleaned = text
-    //       .split("\n")
-    //       .filter(
-    //         (line) =>
-    //           !line.trim().startsWith("Image:") &&
-    //           !line.trim().startsWith("Filename:")
-    //       )
-    //       .join("\n")
-    //       .trim();
-
-    //     return cleaned;
-    //   },
-    // },
+   
     {
       title: "Cause of Failure",
       dataIndex: "Cause of Failure",
       render: (text) => {
-        const str = (text ?? "").toString(); // ✅ ensures it's a string
+        const str = (text ?? "").toString(); 
 
         const cleaned = str
           .split("\n")
@@ -2085,19 +1321,7 @@ export default function FormComponent() {
           >
             View
           </Button>
-          {/* <Button
-            color="danger"
-            variant="filled"
-            size="large"
-            icon={<EditOutlined />}
-            onClick={() => {
-              setSelectedRecord(record);
-              editForm.setFieldsValue(record);
-              setEditModalOpen(true);
-            }}
-          >
-            Edit
-          </Button> */}
+         
           <Button
             color="danger"
             variant="filled"
@@ -2345,30 +1569,7 @@ export default function FormComponent() {
         </Tooltip>
       ),
     },
-    // {
-    //   title: "Action",
-    //   key: "action",
-    //   width: "13%", // Reduced size
-    //   render: (_, record) => (
-    //     <Space size="middle">
-    //       <Button
-    //         type="primary"
-    //         onClick={handleEditFormAddRow}
-    //         disabled={isSubmitting}
-    //       >
-    //         Add
-    //       </Button>
-    //       <Button
-    //         type="primary"
-    //         danger
-    //         onClick={() => handleEditFormDeleteRow(record.key)}
-    //         disabled={isSubmitting || editTabledata.length === 1}
-    //       >
-    //         Delete
-    //       </Button>
-    //     </Space>
-    //   ),
-    // },
+   
   ];
 
   const viewModalcolumns = [
@@ -2479,32 +1680,18 @@ export default function FormComponent() {
   const sigManager = useRef();
   const sigCustomer = useRef();
 
-  // Separate state for each signature
   const [signatureTechnician, setSignatureTechnician] = useState("");
-  // const [signatureManager, setSignatureManager] = useState("");
   const [signatureManager, setSignatureManager] = useState(null);
 
   const [signatureCustomer, setSignatureCustomer] = useState("");
 
-  // const handleUpload = (info) => {
-  //   const file = info.file.originFileObj;
-  //   const reader = new FileReader();
-
-  //   reader.onloadend = () => {
-  //     setSignatureManager(reader.result); // Store Base64 URL
-  //     message.success("Manager Signature uploaded successfully!");
-  //   };
-
-  //   if (file) {
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
+  
   const handleUpload = ({ file }) => {
     const reader = new FileReader();
 
     reader.onloadend = () => {
-      console.log("Uploaded Image (Base64):", reader.result); // Debugging
-      setSignatureManager(reader.result); // ✅ Convert image to Base64 and store it
+      // console.log("Uploaded Image (Base64):", reader.result); // Debugging
+      setSignatureManager(reader.result); 
       message.success("Manager Signature uploaded successfully!");
     };
 
@@ -2546,21 +1733,7 @@ export default function FormComponent() {
     setSignatureTechnician("");
   };
 
-  // Service Manager Signature
-  // const saveManagerSignature = () => {
-  //   if (sigManager.current && !sigManager.current.isEmpty()) {
-  //     setSignatureManager(
-  //       sigManager.current.getCanvas().toDataURL("image/png")
-  //     );
-  //     message.success("Manager Signature saved successfully!");
-  //   } else {
-  //     message.error("Please draw a signature before saving.");
-  //   }
-  // };
-  // const clearManagerSignature = () => {
-  //   sigManager.current.clear();
-  //   setSignatureManager("");
-  // };
+
 
   // Customer Signature
   const saveCustomerSignature = () => {
@@ -2950,17 +2123,6 @@ export default function FormComponent() {
     const serviceRowHeight = 10; // Height per row (for 2-line text)
     let maxServiceRowHeight = serviceRowHeight; // Track max row height
 
-    // Define manual spacing for each option
-    // const serviceOptionSpacing = {
-    //   "F.O.C Commissioning": 33,
-    //   "F.O.C Maintenance": 28,
-    //   Guarantee: 26,
-    //   "Chargeable Commissioning": 33,
-    //   "Customer Visit  (Service)": 25,
-    //   "Service contract": 25,
-    //   Goodwill: 25,
-    // };
-
     const serviceOptionSpacing = {
       "F.O.C Commissioning": 33,
       "F.O.C Maintenance": 28,
@@ -3055,21 +2217,7 @@ export default function FormComponent() {
         );
       }
       doc.setFont("Emirates", "bold");
-      // if (signatures.manager) {
-      //   doc.setTextColor("#0C3C74");
-
-      //   doc.text("Signature of service manager:", col2X, nextY);
-      //   doc.setTextColor(0, 0, 0);
-
-      //   doc.addImage(
-      //     signatures.manager,
-      //     "PNG",
-      //     col2X,
-      //     baseY + 2,
-      //     signatureWidth,
-      //     signatureHeight
-      //   );
-      // }
+      
 
       if (signatureManager) {
         doc.setTextColor("#0C3C74");
@@ -3509,16 +2657,7 @@ export default function FormComponent() {
     const serviceRowHeight = 10; // Height per row (for 2-line text)
     let maxServiceRowHeight = serviceRowHeight; // Track max row height
 
-    // Define manual spacing for each option
-    // const serviceOptionSpacing = {
-    //   "F.O.C Commissioning": 33,
-    //   "F.O.C Maintenance": 28,
-    //   Guarantee: 26,
-    //   "Chargeable Commissioning": 33,
-    //   "Customer Visit  (Service)": 25,
-    //   "Service contract": 25,
-    //   Goodwill: 25,
-    // };
+ 
 
     const serviceOptionSpacing = {
       "F.O.C Commissioning": 33,
@@ -3614,21 +2753,7 @@ export default function FormComponent() {
         );
       }
       doc.setFont("Emirates", "bold");
-      // if (signatures.manager) {
-      //   doc.setTextColor("#0C3C74");
-
-      //   doc.text("Signature of service manager:", col2X, nextY);
-      //   doc.setTextColor(0, 0, 0);
-
-      //   doc.addImage(
-      //     signatures.manager,
-      //     "PNG",
-      //     col2X,
-      //     baseY + 2,
-      //     signatureWidth,
-      //     signatureHeight
-      //   );
-      // }
+      
 
       if (signatures.manager) {
         doc.setTextColor("#0C3C74");
@@ -3723,219 +2848,14 @@ export default function FormComponent() {
 
   // console.log("Dubai Time:", nowDubai);
 
-  // const handleSubmit = async (values) => {
-  //   //  if (isSubmitting) return;
-  //   //  setIsSubmitting(true);
-  //   if (isSubmittingRef.current) return;
-  //   isSubmittingRef.current = true; // Block further clicks
-  //   setIsSubmitting(true);
-  //   try {
-  //     // await form.validateFields();
-  //     if (!srn) {
-  //       message.error(
-  //         "Service Request Number (SRN) is missing. Please try again."
-  //       );
-  //       return;
-  //     }
-  //     // const emptyRows = data.some(
-  //     //   (row) =>
-  //     //     !row.partNumber?.trim() || !row.description?.trim() || !row.quantity
-  //     // );
-
-  //     // if (data.length === 0 || emptyRows) {
-  //     //   message.error("Please fill in all fields in the 'Parts Used' table.");
-  //     //   return; // ✅ Prevent submission
-  //     // }
-
-  //     let checkboxValues = {};
-  //     [...reportOptions, ...serviceOptions].forEach((option) => {
-  //       checkboxValues[option] = false;
-  //     });
-
-  //     if (values.report) {
-  //       values.report.forEach((option) => {
-  //         checkboxValues[option] = true;
-  //       });
-  //     }
-
-  //     if (values.serviceType) {
-  //       values.serviceType.forEach((option) => {
-  //         checkboxValues[option] = true;
-  //       });
-  //     }
-  //     // console.log("Checkbox Values Before Submission:", checkboxValues);
-
-  //     // ✅ Process parts used table data code working correctly
-  //     // const partsUsed = data
-  //     //   .filter((row) => row.partNumber && row.description && row.quantity)
-  //     //   .map((row) => ({
-  //     //     partNumber: row.partNumber.trim(),
-  //     //     description: row.description.trim(),
-  //     //     quantity: isNaN(Number(row.quantity)) ? 0 : Number(row.quantity),
-  //     //     note: row.note?.trim() || "",
-  //     //   }));
-
-  //     //Parts used table changed code after haitian call
-  //     // const partsUsed = data
-  //     //   .filter((row) => row.partNumber || row.description || row.quantity)
-  //     //   .map((row) => ({
-  //     //     partNumber: row.partNumber.trim(),
-  //     //     description: row.description.trim(),
-  //     //     quantity: isNaN(Number(row.quantity)) ? 0 : Number(row.quantity),
-  //     //     note: row.note?.trim() || "",
-  //     //   }));
-  //     const partsUsed = data
-  //       .filter(
-  //         (row) =>
-  //           row.partNumber?.trim() || row.description?.trim() || row.quantity
-  //       )
-  //       .map((row) => ({
-  //         partNumber: row.partNumber?.trim() || "",
-  //         description: row.description?.trim() || "",
-  //         // quantity: isNaN(Number(row.quantity)) ? 0 : Number(row.quantity),
-  //         quantity:
-  //           isNaN(Number(row.quantity)) || row.quantity === ""
-  //             ? ""
-  //             : Number(row.quantity),
-
-  //         note: row.note?.trim() || "",
-  //       }));
-
-  //     // ✅ Show warning but allow submission
-  //     if (partsUsed.length === 0) {
-  //       // message.warning("Parts Used table is empty. Proceeding with submission.");
-  //     }
-
-  //     // if (partsUsed.length === 0) {
-  //     //   message.error("Please fill in the fields in the Parts Used table");
-  //     //   return;
-  //     // }
-
-  //     if (!signatureTechnician) {
-  //       message.error(
-  //         "Please provide the Service Technician signature and click 'Save Signature."
-  //       );
-  //       return;
-  //     }
-  //     if (!signatureManager) {
-  //       message.error("Please upload the service manager's signature.");
-  //       return;
-  //     }
-  //     if (!signatureCustomer) {
-  //       message.error(
-  //         "Please provide the Customer signature and click 'Save Signature."
-  //       );
-  //       return;
-  //     }
-
-  //     const convertToDubaiTime = (date) => {
-  //       return date ? dayjs(date).tz("Asia/Dubai").format("DD-MM-YYYY") : "N/A";
-  //     };
-
-  //     // ✅ Prepare final form data
-  //     const formData = {
-  //       action: "new",
-  //       srn, // ✅ Include SRN
-
-  //       customerName: values.customerName,
-  //       machineType: values.machineType,
-  //       // address: values.address,
-  //       address: address,
-
-  //       serialNumber: values.serialNumber,
-  //       contact: values.contact,
-  //       // installationDate: values.installationDate,
-  //       installationDate: convertToDubaiTime(values.installationDate),
-
-  //       telephone: values.telephone,
-  //       workTime: values.workTime,
-  //       serviceTechnician: values.serviceTechnician,
-  //       // departureDate: values.departureDate,
-  //       // returnDate: values.returnDate,
-  //       departureDate: convertToDubaiTime(values.departureDate),
-  //       returnDate: convertToDubaiTime(values.returnDate),
-  //       // description: values["description of work/of defect/failure mode"],
-  //       description: descriptionText,
-  //       // notes: values["notes/further action required"],
-  //       notes: notes,
-  //       // causeOfFailure: values["cause of failure"],
-  //       causeOfFailure: causeOfFailure,
-  //       // partsUsed: partsUsed,
-  //       partsUsed: partsUsed.length > 0 ? partsUsed : [],
-  //       signatures: {
-  //         technician: sigTechnician.current?.toDataURL(),
-  //         manager: sigManager.current?.toDataURL(),
-  //         customer: sigCustomer.current?.toDataURL(),
-  //       },
-  //       ...checkboxValues, // ✅ Ensures "Yes" for checked and "No" for unchecked
-  //     };
-
-  //     // console.log("Final formData:", JSON.stringify(formData, null, 2)); // ✅ Debugging
-  //     // console.log("Installation Date:", formData.installationDate);
-  //     // console.log("Departure Date:", formData.departureDate);
-  //     // console.log("Return Date:", formData.returnDate);
-
-  //     setLoading(true);
-
-  //     const response = await fetch(
-  //       "https://script.google.com/macros/s/AKfycbyz--cKjxuMiQbO1W0-W-cIn7FjMDGIuMgpKnSash8x0xXUsWzYeK6rtwocEyGO5Wgo2g/exec",
-  //       {
-  //         method: "POST",
-  //         // headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  //         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-
-  //         body: JSON.stringify(formData),
-  //       }
-  //     );
-
-  //     const result = await response.json();
-
-  //     if (result.success) {
-  //       message.success("Form submitted successfully!");
-  //       setSRN(result.srn);
-  //       generatePDF(formData, checkboxValues, partsUsed);
-
-  //       form.resetFields();
-  //       setAddress("");
-  //       setSerialNumber("");
-  //       setDescriptionText("");
-  //       setcauseOfFailure("");
-  //       setNotes("");
-
-  //       setData([
-  //         {
-  //           key: Date.now(),
-  //           partNumber: "",
-  //           description: "",
-  //           quantity: "",
-  //           note: "",
-  //         },
-  //       ]);
-  //       sigTechnician.current?.clear();
-  //       sigManager.current?.clear();
-  //       sigCustomer.current?.clear();
-  //       setSignatureManager(null);
-  //       await fetchSRN();
-  //     } else {
-  //       throw new Error(result.message);
-  //     }
-  //   } catch (error) {
-  //     // console.error("Error:", error);
-  //     message.error("Submission failed. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //     setIsSubmitting(false);
-  //     isSubmittingRef.current = false;
-  //   }
-  // };
-
+  
   const uploadImageToDrive = async (imageFile) => {
     const formData = new FormData();
     formData.append("file", imageFile);
 
     // Sending the file to the Google Apps Script for uploading to Drive
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
+      "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
       {
         method: "POST",
         headers: {
@@ -3956,361 +2876,13 @@ export default function FormComponent() {
       message.success("Table data refreshed. Showing updated data");
     } catch (err) {
       message.error("Failed to refresh data");
-      console.error("Refresh error:", err);
+      // console.error("Refresh error:", err);
     } finally {
       setRefreshing(false);
     }
   };
 
-  //   const handleSubmit = async (values) => {
-  //     if (isSubmittingRef.current) return;
-  //     isSubmittingRef.current = true;
-  //     setIsSubmitting(true);
-
-  //     try {
-  //       if (!srn) {
-  //         message.error("Service Request Number (SRN) is missing.");
-  //         return;
-  //       }
-
-  //       if (!signatureTechnician || !signatureManager || !signatureCustomer) {
-  //         message.error("All signatures are required.");
-  //         return;
-  //       }
-  //       let causeImageBase64 = "";
-  // if (causeOfFailureImage) {
-  //   const reader = new FileReader();
-  //   const base64 = await new Promise((resolve, reject) => {
-  //     reader.onloadend = () => resolve(reader.result);
-  //     reader.onerror = reject;
-  //     reader.readAsDataURL(causeOfFailureImage);
-  //   });
-  //   causeImageBase64 = base64;
-  // }
-
-  //       // Prepare checkbox values
-  //       let checkboxValues = {};
-  //       [...reportOptions, ...serviceOptions].forEach((option) => {
-  //         checkboxValues[option] = false;
-  //       });
-  //       values.report?.forEach((option) => (checkboxValues[option] = true));
-  //       values.serviceType?.forEach((option) => (checkboxValues[option] = true));
-
-  //       // Prepare parts used
-  //       const partsUsed = data
-  //         .filter(
-  //           (row) =>
-  //             row.partNumber?.trim() || row.description?.trim() || row.quantity
-  //         )
-  //         .map((row) => ({
-  //           partNumber: row.partNumber?.trim() || "",
-  //           description: row.description?.trim() || "",
-  //           quantity:
-  //             isNaN(Number(row.quantity)) || row.quantity === ""
-  //               ? ""
-  //               : Number(row.quantity),
-  //           note: row.note?.trim() || "",
-  //         }));
-
-  //       const convertToDubaiTime = (date) => {
-  //         return date ? dayjs(date).tz("Asia/Dubai").format("DD-MM-YYYY") : "N/A";
-  //       };
-
-  //       // Prepare form data (without signatures for backend)
-  //       const formData = {
-  //         action: "new",
-  //         srn,
-  //         customerName: values.customerName,
-  //         machineType: values.machineType,
-  //         address,
-  //         serialNumber: values.serialNumber,
-  //         contact: values.contact,
-  //         installationDate: convertToDubaiTime(values.installationDate),
-  //         telephone: values.telephone,
-  //         workTime: values.workTime,
-  //         serviceTechnician: values.serviceTechnician,
-  //         departureDate: convertToDubaiTime(values.departureDate),
-  //         returnDate: convertToDubaiTime(values.returnDate),
-  //         description: descriptionText,
-  //         notes,
-  //         // causeOfFailure,
-  //         causeOfFailure: JSON.stringify(causeOfFailure), // your existing text/checkbox input
-  // causeImageBase64: causeImageBase64,
-  //         partsUsed: JSON.stringify(partsUsed),
-  //         ...Object.fromEntries(
-  //           Object.entries(checkboxValues).map(([k, v]) => [k, String(v)])
-  //         ),
-  //       };
-
-  //       // Encode for x-www-form-urlencoded
-  //       const formBody = Object.entries(formData)
-  //         .map(
-  //           ([key, value]) =>
-  //             `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
-  //         )
-  //         .join("&");
-
-  //       setLoading(true);
-
-  //       const res = await fetch(
-  //         "https://script.google.com/macros/s/AKfycbyAcLK2eZ0ylhRiuDKwTU0UgUOIIk-QeBGSyNyBfogUjqd1K6RfEwXWkLK5sHitcND7Rg/exec",
-  //         {
-  //           method: "POST",
-  //           headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  //           body: formBody,
-  //         }
-  //       );
-
-  //       const result = await res.json();
-
-  //       if (!result.success) {
-  //         message.error(result.message || "Submission failed.");
-  //         return;
-  //       }
-
-  //       // ✅ Generate PDF with signature data (not sent to backend)
-  //       const signatures = {
-  //         technician: sigTechnician.current?.toDataURL(),
-  //         manager: sigManager.current?.toDataURL(),
-  //         customer: sigCustomer.current?.toDataURL(),
-  //       };
-
-  //       message.success("Form submitted successfully!");
-  //       setSRN(result.srn);
-  //       generatePDF({ ...formData, signatures }, checkboxValues, partsUsed);
-
-  //       // ✅ Reset form only on success
-  //       form.resetFields();
-  //       setAddress("");
-  //       setSerialNumber("");
-  //       setDescriptionText("");
-  //       // setcauseOfFailure("");
-  //       setCauseOfFailureText("");
-  //       setCauseOfFailureImage(null);
-  //       setNotes("");
-
-  //       setData([
-  //         {
-  //           key: Date.now(),
-  //           partNumber: "",
-  //           description: "",
-  //           quantity: "",
-  //           note: "",
-  //         },
-  //       ]);
-
-  //       sigTechnician.current?.clear();
-  //       sigManager.current?.clear();
-  //       sigCustomer.current?.clear();
-  //       setSignatureManager(null);
-
-  //       await fetchSRN();
-  //       loadAllCustomerData();
-  //     } catch (err) {
-  //       console.error("Submission error:", err);
-  //       message.error("Something went wrong. Please try again.");
-  //     } finally {
-  //       setLoading(false);
-  //       setIsSubmitting(false);
-  //       isSubmittingRef.current = false;
-  //     }
-  //   };
-
-  // const handleSubmit = async (values) => {
-  //   if (isSubmittingRef.current) return;
-  //   isSubmittingRef.current = true;
-  //   setIsSubmitting(true);
-
-  //   try {
-  //     if (!srn) return message.error("SRN missing.");
-  //     if (!signatureTechnician || !signatureManager || !signatureCustomer)
-  //       return message.error("All signatures required.");
-
-  //     // ✅ 1. Prepare image as Base64
-  //     let causeImageBase64 = "";
-  //     if (causeOfFailureImage) {
-  //       const reader = new FileReader();
-  //       causeImageBase64 = await new Promise((resolve, reject) => {
-  //         reader.onloadend = () => resolve(reader.result);
-  //         reader.onerror = reject;
-  //         reader.readAsDataURL(causeOfFailureImage);
-  //       });
-  //     }
-
-  //     // ✅ 2. Build full causeOfFailure string
-  //     const causeOfFailurePayload = JSON.stringify({
-  //       text: causeOfFailureText,
-  //     });
-
-  //     // ✅ 3. Build partsUsed
-  //     // const partsUsed = data.filter(
-  //     //   (row) =>
-  //     //     row.partNumber?.trim() || row.description?.trim() || row.quantity
-  //     // );
-
-  //     const cleanedPartsUsed = data.map((row) => ({
-  //       partNumber:
-  //         typeof row.partNumber === "string" ? row.partNumber.trim() : "",
-  //       description:
-  //         typeof row.description === "string" ? row.description.trim() : "",
-  //       quantity: row.quantity ? parseFloat(row.quantity) : "",
-  //       note: typeof row.note === "string" ? row.note.trim() : "",
-  //     }));
-
-  //     const convertToDubaiTime = (date) =>
-  //       date ? dayjs(date).tz("Asia/Dubai").format("DD-MM-YYYY") : "N/A";
-
-  //     // ✅ 4. Use FormData for large payloads
-  //     const formData = new FormData();
-  //     formData.append("action", "new");
-  //     formData.append("srn", srn);
-  //     formData.append("customerName", values.customerName);
-  //     formData.append("machineType", values.machineType);
-  //     formData.append("address", address);
-  //     formData.append("serialNumber", values.serialNumber);
-  //     formData.append("contact", values.contact);
-  //     formData.append(
-  //       "installationDate",
-  //       convertToDubaiTime(values.installationDate)
-  //     );
-  //     formData.append("telephone", values.telephone);
-  //     formData.append("workTime", values.workTime);
-  //     formData.append("serviceTechnician", values.serviceTechnician);
-  //     formData.append(
-  //       "departureDate",
-  //       convertToDubaiTime(values.departureDate)
-  //     );
-  //     formData.append("returnDate", convertToDubaiTime(values.returnDate));
-  //     formData.append("description", descriptionText);
-  //     formData.append("notes", notes);
-  //     formData.append("causeOfFailure", causeOfFailurePayload);
-  //     if (causeOfFailureImage) {
-  //       formData.append("causeImage", causeOfFailureImage); // raw binary
-  //     }
-  //     // formData.append("causeImageBase64", causeImageBase64);
-  //     // formData.append("partsUsed", JSON.stringify(partsUsed));
-  //     formData.append("partsUsed", JSON.stringify(cleanedPartsUsed));
-
-  //     // Checkboxes
-  //     [...reportOptions, ...serviceOptions].forEach((option) => {
-  //       formData.append(
-  //         option,
-  //         values.report?.includes(option) ||
-  //           values.serviceType?.includes(option)
-  //           ? "true"
-  //           : "false"
-  //       );
-  //     });
-
-  //     setLoading(true);
-  //     console.log("Submitting base64:", causeImageBase64);
-
-  //     const res = await fetch(
-  //       "https://script.google.com/macros/s/AKfycbyRWEov3azkB7oWPSmFsgGQpUQ5wWcfAFKGzzxJ6729Rq7--hSMYdrEbI7PRJy8koo1/exec",
-  //       {
-  //         method: "POST",
-  //         body: formData,
-  //       }
-  //     );
-
-  //     const result = await res.json();
-
-  //     if (!result.success) {
-  //       message.error(result.message || "Submission failed.");
-  //       alert("Error: " + result.message);
-
-  //       return;
-  //     }
-
-  //     message.success("Form submitted successfully!");
-  //     alert("Upload successful!\nImage URL:\n" + result.imageUrl);
-
-  //     const signatures = {
-  //       technician: signatureTechnician,
-  //       manager: signatureManager,
-  //       customer: signatureCustomer,
-  //     };
-  //     const checkboxValues = {};
-
-  //     // Initialize all checkboxes with false
-  //     [...reportOptions, ...serviceOptions].forEach((option) => {
-  //       checkboxValues[option] = false;
-  //     });
-
-  //     // Set the checkboxes that are checked to true
-  //     values.report?.forEach((option) => {
-  //       if (checkboxValues.hasOwnProperty(option))
-  //         checkboxValues[option] = true;
-  //     });
-  //     values.serviceType?.forEach((option) => {
-  //       if (checkboxValues.hasOwnProperty(option))
-  //         checkboxValues[option] = true;
-  //     });
-
-  //     // generatePDF({ ...formData, signatures }, checkboxValues, partsUsed);
-  //     const pdfPayload = {
-  //       srn,
-  //       customerName: values.customerName,
-  //       machineType: values.machineType,
-  //       address,
-  //       serialNumber: values.serialNumber,
-  //       contact: values.contact,
-  //       installationDate: convertToDubaiTime(values.installationDate),
-  //       telephone: values.telephone,
-  //       workTime: values.workTime,
-  //       serviceTechnician: values.serviceTechnician,
-  //       departureDate: convertToDubaiTime(values.departureDate),
-  //       returnDate: convertToDubaiTime(values.returnDate),
-  //       description: descriptionText,
-  //       notes,
-  //       causeOfFailure: causeOfFailureText,
-  //       causeImageBase64,
-  //       partsUsed: cleanedPartsUsed,
-  //       signatures,
-  //     };
-
-  //     // generatePDF(pdfPayload, checkboxValues, partsUsed);
-  //     generatePDF(pdfPayload, checkboxValues, cleanedPartsUsed);
-
-  //     // ✅ Reset form only on success
-  //     form.resetFields();
-  //     setAddress("");
-  //     setSerialNumber("");
-  //     setDescriptionText("");
-  //     // setcauseOfFailure("");
-  //     setCauseOfFailureText("");
-  //     setCauseOfFailureImage(null);
-  //     setPreviewUrl(null);
-
-  //     setNotes("");
-
-  //     setData([
-  //       {
-  //         key: Date.now(),
-  //         partNumber: "",
-  //         description: "",
-  //         quantity: "",
-  //         note: "",
-  //       },
-  //     ]);
-
-  //     sigTechnician.current?.clear();
-  //     sigManager.current?.clear();
-  //     sigCustomer.current?.clear();
-  //     setSignatureManager(null);
-
-  //     await fetchSRN();
-  //     loadAllCustomerData();
-  //   } catch (err) {
-  //     console.error("Submission error:", err);
-  //     message.error("Something went wrong.");
-  //   } finally {
-  //     setLoading(false);
-  //     setIsSubmitting(false);
-  //     isSubmittingRef.current = false;
-  //   }
-  // };
-
+  
   const handleSubmit = async (values) => {
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
@@ -4407,7 +2979,7 @@ export default function FormComponent() {
       // setLoading(true);
 
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
+        "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
         {
           method: "POST",
           body: formData,
@@ -4491,7 +3063,7 @@ export default function FormComponent() {
       await fetchSRN();
       loadAllCustomerData();
     } catch (err) {
-      console.error("Submission error:", err);
+      // console.error("Submission error:", err);
       message.error("Something went wrong.");
     } finally {
       setLoading(false);
@@ -4514,251 +3086,7 @@ export default function FormComponent() {
     loadAllCustomerData();
   };
 
-  // const handleEditSubmit = async () => {
-  //   setIsEditSubmitting(true);
-
-  //   try {
-  //     // Validate fields — stops if required fields are empty
-  //     const values = await editForm.validateFields();
-
-  //     // Additional manual validation for signature
-  //     if (!signatureTechnician) {
-  //       message.error(
-  //         "Please provide the Service Technician signature and click 'Save Signature."
-  //       );
-  //       return;
-  //     }
-  //     if (!signatureManager) {
-  //       message.error("Please upload the service manager's signature.");
-  //       return;
-  //     }
-  //     if (!signatureCustomer) {
-  //       message.error(
-  //         "Please provide the Customer signature and click 'Save Signature."
-  //       );
-  //       return;
-  //     }
-
-  //     let checkboxValues = {};
-  //     [...reportOptions, ...serviceOptions].forEach((option) => {
-  //       checkboxValues[option] = false;
-  //     });
-
-  //     if (values.report) {
-  //       values.report.forEach((option) => {
-  //         checkboxValues[option] = true;
-  //       });
-  //     }
-
-  //     if (values.serviceType) {
-  //       values.serviceType.forEach((option) => {
-  //         checkboxValues[option] = true;
-  //       });
-  //     }
-
-  //     const partsUsed = editTabledata
-  //       .filter(
-  //         (row) =>
-  //           String(row.partNumber || "").trim() ||
-  //           String(row.description || "").trim() ||
-  //           row.quantity
-  //       )
-  //       .map((row) => ({
-  //         partNumber: String(row.partNumber || "").trim(),
-  //         description: String(row.description || "").trim(),
-  //         quantity:
-  //           isNaN(Number(row.quantity)) || row.quantity === ""
-  //             ? ""
-  //             : Number(row.quantity),
-  //         note: String(row.note || "").trim(),
-  //       }));
-
-  //     const payload = {
-  //       action: "updateData",
-  //       srn: selectedRecord["Service Request Number"],
-  //       customerName: values.customerName,
-  //       address: values.address,
-  //       contact: values.contact,
-  //       telephone: values.telephone,
-  //       machineType: values.machineType,
-  //       serialNumber: values.serialNumber,
-  //       installationDate: values.installationDate
-  //         ? values.installationDate.format("DD-MM-YYYY")
-  //         : "",
-  //       departureDate: values.departureDate
-  //         ? values.departureDate.format("DD-MM-YYYY")
-  //         : "",
-  //       returnDate: values.returnDate
-  //         ? values.returnDate.format("DD-MM-YYYY")
-  //         : "",
-  //       workTime: values.workTime,
-  //       serviceTechnician: values.serviceTechnician,
-  //       description: values["description of work/of defect/failure mode"],
-  //       causeOfFailure: values["cause of failure"],
-  //       notes: values["notes/further action required"],
-  //       partsUsed: JSON.stringify(partsUsed),
-  //       signatures: {
-  //         technician: sigTechnician.current?.toDataURL(),
-  //         manager: sigManager.current?.toDataURL(),
-  //         customer: sigCustomer.current?.toDataURL(),
-  //       },
-  //       ...Object.fromEntries(
-  //         Object.entries(checkboxValues).map(([key, value]) => [
-  //           key,
-  //           String(value),
-  //         ])
-  //       ),
-  //     };
-
-  //     const formBody = Object.entries(payload)
-  //       .map(
-  //         ([key, value]) =>
-  //           `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
-  //       )
-  //       .join("&");
-  //     setEditLoading(true);
-  //     const res = await fetch(
-  //       "https://script.google.com/macros/s/AKfycbzNtcZBy1d26MqjBUGDRPlVCUT0tRDE0mhGtV_20lQehh810CyxV8ntKK7eA0uRXen3uA/exec",
-  //       {
-  //         method: "POST",
-  //         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  //         body: formBody,
-  //       }
-  //     );
-
-  //     const result = await res.json();
-
-  //     if (result.success) {
-  //       message.success("Record updated successfully.");
-  //       generateEditPDF(payload, checkboxValues, partsUsed); // ✅ Use updated payload
-  //       setEditModalOpen(false);
-  //       sigTechnician.current?.clear();
-  //       sigManager.current?.clear();
-  //       sigCustomer.current?.clear();
-  //       setSignatureManager(null);
-  //       loadAllCustomerData();
-  //     } else {
-  //       message.error(result.message || "Failed to update record.");
-  //     }
-  //   } catch (err) {
-  //     console.error("Edit submit error:", err);
-  //     message.error("Error during update.");
-  //   } finally {
-  //     setIsEditSubmitting(false);
-  //     setEditLoading(false);
-  //   }
-  // };
-
-  //   const handleEditSubmit = async () => {
-  //     try {
-  //       setIsEditSubmitting(true);
-  //       const values = await editForm.validateFields();
-
-  //       // Convert dates to proper string format
-  //       const convertToDubaiTime = (date) =>
-  //         date ? dayjs(date).tz("Asia/Dubai").format("DD-MM-YYYY") : "N/A";
-
-  //       const installationDate = convertToDubaiTime(values.installationDate);
-  //       const departureDate = convertToDubaiTime(values.departureDate);
-  //       const returnDate = convertToDubaiTime(values.returnDate);
-
-  //       // Prepare partsUsed
-  //       const partsUsed = editTabledata.filter(
-  //         (row) =>
-  //           row.partNumber?.trim() || row.description?.trim() || row.quantity
-  //       );
-
-  //       // Prepare causeOfFailure text
-  //       const causeOfFailureTextOnly = causeOfFailure?.trim() || "";
-
-  //       // Create FormData
-  //       const formData = new FormData();
-  //       formData.append("action", "updateData");
-  //       formData.append("srn", selectedRecord?.["Service Request Number"]);
-  //       formData.append("customerName", values.customerName);
-  //       formData.append("machineType", values.machineType);
-  //       formData.append("address", values.address);
-  //       formData.append("serialNumber", values.serialNumber);
-  //       formData.append("contact", values.contact);
-  //       formData.append("installationDate", installationDate);
-  //       formData.append("telephone", values.telephone);
-  //       formData.append("workTime", values.workTime);
-  //       formData.append("serviceTechnician", values.serviceTechnician);
-  //       formData.append("departureDate", departureDate);
-  //       formData.append("returnDate", returnDate);
-  //       formData.append(
-  //         "description",
-  //         values["description of work/of defect/failure mode"]
-  //       );
-  //       formData.append("notes", values["notes/further action required"]);
-  //       // formData.append("causeOfFailure", causeOfFailureTextOnly);
-  //       formData.append("causeOfFailure", updatedCauseText);
-
-  //       formData.append("partsUsed", JSON.stringify(partsUsed));
-
-  //       // ✅ Append checkbox values individually
-  //       [...reportOptions, ...serviceOptions].forEach((option) => {
-  //         formData.append(
-  //           option,
-  //           values.report?.includes(option) ||
-  //             values.serviceType?.includes(option)
-  //             ? "true"
-  //             : "false"
-  //         );
-  //       });
-
-  //       // ✅ If there's an image, add base64
-  //       // if (causeOfFailureImage) {
-  //       //   const reader = new FileReader();
-  //       //   reader.onloadend = async () => {
-  //       //     formData.append("causeImageBase64", reader.result);
-  //       //     await postUpdate(formData);
-  //       //   };
-  //       //   reader.readAsDataURL(causeOfFailureImage);
-  //       // } else {
-  //       //   await postUpdate(formData);
-  //       // }
-  //       // Check if a new image was selected
-  //       if (causeOfFailureImage && causeOfFailureImage.originFileObj) {
-  //         const result = await uploadImageBase64(
-  //           causeOfFailureImage.originFileObj
-  //         );
-  //         if (result.success) {
-  //           const newImageUrl = result.imageUrl;
-  //           const originalFilename = causeOfFailureImage.originFileObj.name;
-
-  //           // Append image info to cause of failure text
-  //           // const updatedCauseText = `${causeOfFailureTextOnly}\nImage: ${newImageUrl}\nName: ${originalFilename}`;
-  //           // formData.set("causeOfFailure", updatedCauseText); // update field
-
-  //           let updatedCauseText = causeOfFailure?.trim() || "";
-
-  // if (causeOfFailureImage && (causeOfFailureImage.originFileObj || causeOfFailureImage instanceof File)) {
-  //   const fileToUpload = causeOfFailureImage.originFileObj || causeOfFailureImage;
-  //   const result = await uploadImageBase64(fileToUpload);
-
-  //   if (result.success) {
-  //     updatedCauseText += `\nImage: ${result.imageUrl}\nName: ${fileToUpload.name}`;
-  //   } else {
-  //     message.error("Image upload failed, submission aborted.");
-  //     setIsEditSubmitting(false);
-  //     return;
-  //   }
-  // }
-  //         } else {
-  //           message.error("Image upload failed, submission aborted.");
-  //           setIsEditSubmitting(false);
-  //           return;
-  //         }
-  //       }
-
-  //       await postUpdate(formData);
-  //     } catch (err) {
-  //       message.error("Failed to submit update: " + err.message);
-  //     } finally {
-  //       setIsEditSubmitting(false);
-  //     }
-  //   };
+  
 
   const handleEditSubmit = async () => {
     try {
@@ -4807,18 +3135,7 @@ export default function FormComponent() {
       const departureDate = convertToDubaiTime(values.departureDate);
       const returnDate = convertToDubaiTime(values.returnDate);
 
-      // const cleanedPartsUsed = editTabledata.map((row) => ({
-      //   partNumber:
-      //     typeof row.partNumber === "string" ? row.partNumber.trim() : "",
-      //   description:
-      //     typeof row.description === "string" ? row.description.trim() : "",
-      //   quantity: row.quantity ? parseFloat(row.quantity) : "",
-      //   note: typeof row.note === "string" ? row.note.trim() : "",
-      // }));
-      // Prepare partsUsed
-      // const partsUsed = cleanedPartsUsed.filter(
-      //   (row) => row.partNumber || row.description || row.quantity
-      // );
+     
 
       const cleanedPartsUsed = (editTabledata || []).map((row) => ({
         partNumber: row?.partNumber?.toString().trim() || "",
@@ -4833,25 +3150,7 @@ export default function FormComponent() {
       // Prepare causeOfFailure text (initial)
       let updatedCauseText = editCauseText?.trim() || "";
 
-      // if (
-      //   editCauseOfFailureImage &&
-      //   (editCauseOfFailureImage.originFileObj ||
-      //     editCauseOfFailureImage instanceof File)
-      // ) {
-      //   const fileToUpload =
-      //     editCauseOfFailureImage.originFileObj || editCauseOfFailureImage;
-      //   const result = await uploadImageBase64(fileToUpload);
-
-      //   if (result.success) {
-      //     const newImageUrl = result.imageUrl;
-      //     updatedCauseText += `\nImage: ${newImageUrl}\nFilename: ${fileToUpload.name}`;
-      //   } else {
-      //     message.error("Image upload failed, submission aborted.");
-      //     setIsEditSubmitting(false);
-      //     return;
-      //   }
-      // }
-
+     
       if (
         editCauseOfFailureImage &&
         (editCauseOfFailureImage.originFileObj ||
@@ -4904,16 +3203,7 @@ export default function FormComponent() {
         formData.append(`Note[${index}]`, part.note);
       });
 
-      // ✅ Append checkbox values individually
-      // [...reportOptions, ...serviceOptions].forEach((option) => {
-      //   formData.append(
-      //     option,
-      //     values.report?.includes(option) ||
-      //       values.serviceType?.includes(option)
-      //       ? "true"
-      //       : "false"
-      //   );
-      // });
+
 
       reportOptions.forEach((option) => {
         formData.append(
@@ -4930,17 +3220,13 @@ export default function FormComponent() {
       });
 
       // ✅ Submit
-      console.log("🧪 Submitting partsUsed", cleanedPartsUsed);
-      formData.forEach((value, key) => console.log(`${key}: ${value}`));
+      // console.log("Submitting partsUsed", cleanedPartsUsed);
+      // formData.forEach((value, key) => console.log(`${key}: ${value}`));
 
-      console.log("Parts used about to be submitted:", cleanedPartsUsed);
+      // console.log("Parts used about to be submitted:", cleanedPartsUsed);
 
       await postUpdate(formData);
-      // const signatures = {
-      //   technician: editSignatureTechnician,
-      //   manager: editSignatureManager,
-      //   customer: editSignatureCustomer,
-      // };
+
 
       const checkboxValues = {};
       [...reportOptions, ...serviceOptions].forEach((option) => {
@@ -4996,7 +3282,7 @@ export default function FormComponent() {
 
   const postUpdate = async (formData) => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
+      "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
       {
         method: "POST",
         body: formData,
@@ -5015,7 +3301,7 @@ export default function FormComponent() {
 
   const submitUpdate = async (payload) => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
+      "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
       {
         method: "POST",
         body: new URLSearchParams(payload),
@@ -5040,7 +3326,7 @@ export default function FormComponent() {
     payload.append("imageUrl", url);
 
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
+      "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
       {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -5057,18 +3343,7 @@ export default function FormComponent() {
     setEditPreviewUrl(null);
   };
 
-  // const handleRemoveEditImage = async () => {
-  //   if (previewUrl) {
-  //     const deleted = await deleteCauseImageFromDrive(previewUrl);
-  //     if (deleted) {
-  //       setPreviewUrl(null);
-  //       setCauseOfFailureImage(null);
-  //       message.success("Image deleted from Drive.");
-  //     } else {
-  //       message.error("Failed to delete image.");
-  //     }
-  //   }
-  // };
+
 
   const styl = `.ant-modal-root .ant-modal {
     width: var(--ant-modal-xs-width);
@@ -5183,9 +3458,7 @@ export default function FormComponent() {
                                 telephone: matched["Telephone"] || "",
                                 machineType: matched["Machine Type"] || "",
                                 serialNumber: matched["Serial Number"] || "",
-                                // installationDate: matched["Installation Date"]
-                                //   ? dayjs(matched["Installation Date"])
-                                //   : null,
+                            
                                 installationDate: parseDate(
                                   matched["Installation Date"]
                                 ),
@@ -5224,8 +3497,7 @@ export default function FormComponent() {
                           { required: true, message: "Please enter address" },
                         ]}
                       >
-                        {/* <TextArea placeholder="Enter address" 
-                       /> */}
+                
                         <TextArea
                           placeholder="Enter address"
                           value={address}
@@ -5362,11 +3634,7 @@ export default function FormComponent() {
                             required: true,
                             message: "Please select a service technician",
                           },
-                          // {
-                          //   pattern: /^[A-Za-z. ]+$/,
-                          //   message:
-                          //     "Only letters, spaces, and '.' are allowed",
-                          // },
+                   
                         ]}
                       >
                         {/* <Input placeholder="Enter service technician name" /> */}
@@ -5500,52 +3768,13 @@ export default function FormComponent() {
                         rows={3}
                         placeholder="Describe the failure..."
                         value={causeOfFailureText}
-                        // onChange={(e) => {
-                        //   setCauseOfFailureText(e.target.value);
-                        //    handleCauseTextChange(e)}}
-                        //                            autoSize={{ minRows: 3, maxRows: 3 }}
+                   
                         onChange={handleCauseTextChange}
                         maxLength={500}
                         showCount
                       />
 
-                      {/* <Upload
-                        accept="image/*"
-                        showUploadList={false}
-                        beforeUpload={(file) => {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setCauseOfFailureImage(reader.result); // base64
-                          };
-                          reader.readAsDataURL(file);
-                          return false; // prevent auto-upload
-                        }}
-                      >
-                        <Button
-                          icon={<UploadOutlined />}
-                          style={{ marginTop: 8 }}
-                        >
-                          Upload Image
-                        </Button>
-                      </Upload>
-
-                      {causeOfFailureImage && (
-                        <div style={{ marginTop: 10 }}>
-                          <strong>Image Preview:</strong>
-                          <br />
-                          <img
-                            src={causeOfFailureImage}
-                            alt="preview"
-                            style={{
-                              maxWidth: "150px",
-                              maxHeight: "150px",
-                              marginTop: 8,
-                              border: "1px solid #ccc",
-                              borderRadius: 4,
-                            }}
-                          />
-                        </div>
-                      )} */}
+                     
                       <div
                         style={{
                           marginTop: 8,
@@ -5580,7 +3809,6 @@ export default function FormComponent() {
                         </div>
                       )}
 
-                      {/* <input type="file" accept="image/*" onChange={handleCauseImageUpload} /> */}
                     </Form.Item>
 
                     <Form.Item
@@ -5662,68 +3890,29 @@ export default function FormComponent() {
                       </Form.Item>
                     </div>
 
-                    {/* Service Manager Signature */}
-                    {/* <div className="col-12  col-lg-6 col-xl-4  mt-2 d-flex justify-content-center">
-                      <Form.Item label="Signature of service manager" required>
-                        <SignatureCanvas
-                          ref={sigManager}
-                          penColor="black"
-                          canvasProps={{
-                            width: canvasSize.width,
-                            height: canvasSize.height,
-                            className: "border rounded border-3",
-                          }}
-                        />
-                        <div className="d-flex justify-content-start  justify-content-md-start justify-content-lg-start gap-2 mt-1">
-                          <Button
-                            type="primary"
-                            onClick={saveManagerSignature}
-                            disabled={isSubmitting}
-                          >
-                            Save Signature
-                          </Button>
-                          <Button
-                            type="primary"
-                            danger
-                            onClick={clearManagerSignature}
-                            disabled={isSubmitting}
-                          >
-                            Clear
-                          </Button>
-                        </div>
-                      </Form.Item>
-                    </div> */}
-
                     <div className="col-12 col-lg-6 col-xl-4 mt-2 d-flex justify-content-center">
                       <div>
-                        {/* <label className="form-label">
-                          Signature of Service Manager
-                        </label> */}
+                      
                         <Form.Item
                           label="Signature of Service Manager"
                           name="serviceManagerSignature"
                           required
-                          // rules={[
-                          //   {
-                          //     required: true,
-                          //     message: "Service Manager's signature is required.",
-                          //   },
-                          // ]}
+                       
                         >
                           <div
                             className="border rounded border-3 p-2 d-flex flex-column align-items-center"
                             style={{
-                              width: canvasSize.width, // ✅ Same width as other signatures
-                              height: canvasSize.height, // ✅ Same height as other signatures
+                              width: canvasSize.width, 
+                              height: canvasSize.height, 
                               display: "flex",
                               justifyContent: "center",
                               alignItems: "center",
                               backgroundColor: "#fff",
-                              overflow: "hidden", // ✅ Ensures image fits nicely
+                              overflow: "hidden", 
                             }}
                           >
                             {signatureManager ? (
-                              // ✅ Show uploaded image inside border
+                    
                               <Image
                                 src={signatureManager}
                                 alt="Manager Signature"
@@ -5732,13 +3921,13 @@ export default function FormComponent() {
                                 style={{ objectFit: "contain" }}
                               />
                             ) : (
-                              // ✅ Show Upload Button when no image
+                            
                               <Upload
-                                showUploadList={false} // ✅ Hide default file name list
+                                showUploadList={false} 
                                 accept="image/png, image/jpeg"
                                 beforeUpload={(file) => {
-                                  handleUpload({ file }); // ✅ Handle upload manually
-                                  return false; // ✅ Prevent automatic upload
+                                  handleUpload({ file }); 
+                                  return false; 
                                 }}
                                 className="d-flex"
                               >
@@ -5797,88 +3986,7 @@ export default function FormComponent() {
                       </Form.Item>
                     </div>
 
-                    {/* <div className="col-12 col-lg-6 col-xl-4 mt-2 d-flex justify-content-center">
-                      <div>
-                        <label className="form-label">
-                          Signature of Service Manager
-                        </label>
-
-                        {signatureManager ? (
-                          // Show uploaded signature
-                          // <div className="border rounded border-3 p-2 d-flex flex-column align-items-center">
-                          //   <Image
-                          //     src={signatureManager}
-                          //     alt="Manager Signature"
-                          //     width={canvasSize.width} // ✅ Set width same as other signatures
-                          //     height={canvasSize.height} // ✅ Set height same as other signatures
-                          //     style={{ objectFit: "contain" }}
-                          //      />
-                          //   <Button
-                          //     type="primary"
-                          //     danger
-                          //     icon={<DeleteOutlined />}
-                          //     onClick={clearManagerSignature}
-                          //     className="mt-2"
-                          //   >
-                          //     Clear Signature
-                          //   </Button>
-                          // </div>
-                          <div
-                            className="border rounded border-3 p-2 d-flex flex-column align-items-center"
-                            style={{
-                              width: canvasSize.width, // ✅ Ensure same width as other signature boxes
-                              height: canvasSize.height, // ✅ Ensure same height as other signature boxes
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              backgroundColor: "#fff",
-                            }}
-                          >
-                            <Image
-                              src={signatureManager}
-                              alt="Manager Signature"
-                              width="100%"
-                              height="100%"
-                              style={{ objectFit: "contain" }} // ✅ Keeps image proportionate
-                            />
-                            <Button
-                              type="primary"
-                              danger
-                              icon={<DeleteOutlined />}
-                              onClick={clearManagerSignature}
-                              className="mt-2"
-                            >
-                              Clear Signature
-                            </Button>
-                          </div>
-                        ) : (
-                          // Show upload button when no signature is uploaded
-                          // <Upload
-                          //   showUploadList={true}
-                          //   accept="image/png, image/jpeg"
-                          //   beforeUpload={() => true}
-                          //   onChange={handleUpload}
-                          //   className="d-flex"
-                          // >
-                          //   <Button icon={<UploadOutlined />}>
-                          //     Upload Signature
-                          //   </Button>
-                          // </Upload>
-                          <Upload
-                          showUploadList={true} // ❌ Hide file name display
-                          accept="image/png, image/jpeg"
-                          // beforeUpload={() => false} // Prevent auto-upload
-                          beforeUpload={(file) => {
-                            handleUpload({ file }); // ✅ Handle upload manually
-                            return false; // ✅ Prevent automatic upload
-                          }}
-                          className="d-flex"
-                        >
-                          <Button icon={<UploadOutlined />}>Upload Signature</Button>
-                        </Upload>
-                        )}
-                      </div>
-                    </div> */}
+                   
                   </div>
                   <div className="text-center mt-4 ">
                     <Button
@@ -5949,15 +4057,13 @@ export default function FormComponent() {
                 placeholder="Search form data"
                 prefix={<SearchOutlined />}
                 allowClear
-                // value={searchText}
-                // onChange={handleSearch}
+               
                 value={searchText}
                 onChange={(e) => {
                   setSearchText(e.target.value);
                   handleSearchAndFilter();
                 }}
-                // onPressEnter={handleSearchAndFilter}
-                // onBlur={handleSearchAndFilter}
+              
                 style={{ width: "100%" }}
                 className="mt-md-3 mt-lg-0 ms-0 ms-md-2"
                 size="large"
@@ -6115,17 +4221,10 @@ export default function FormComponent() {
                       />
                     </Form.Item>
 
-                    {/* <Form.Item label="Cause of Failure" name="cause of failure">
-                      <TextArea
-                        readOnly
-                        autoSize={{ minRows: 3, maxRows: 3 }}
-                      />
-                    </Form.Item> */}
+                 
 
                     <Form.Item label="Cause of Failure">
-                      {/* <div style={{ whiteSpace: "pre-wrap", marginBottom: 8 }}>
-                        {viewCauseOfFailureText}
-                      </div> */}
+                     
                       <TextArea
                         readOnly
                         autoSize={{ minRows: 3, maxRows: 3 }}
@@ -6227,12 +4326,10 @@ export default function FormComponent() {
                         { required: true, message: "Please enter address" },
                       ]}
                     >
-                      {/* <TextArea placeholder="Enter address" 
-                       /> */}
+                 
                       <TextArea
                         placeholder="Enter address"
                         value={address}
-                        // onChange={handleAddressChange}
                         onChange={handleEditAddressChange}
                         autoSize={{ minRows: 3, maxRows: 3 }}
                         maxLength={100}
@@ -6302,7 +4399,6 @@ export default function FormComponent() {
                       <TextArea
                         placeholder="Enter serial number"
                         value={serialNumber}
-                        // onChange={handleSerialNumberChange}
                         onChange={handleEditSerialNumberChange}
                         autoSize={{ minRows: 3, maxRows: 3 }}
                         maxLength={100}
@@ -6322,7 +4418,6 @@ export default function FormComponent() {
                     >
                       <DatePicker
                         className="w-100"
-                        // showTime
                         format="DD-MM-YYYY" // Dubai Time Format
                         value={
                           editForm.getFieldValue("installationDate")
@@ -6366,11 +4461,7 @@ export default function FormComponent() {
                           required: true,
                           message: "Please select a service technician",
                         },
-                        // {
-                        //   pattern: /^[A-Za-z. ]+$/,
-                        //   message:
-                        //     "Only letters, spaces, and '.' are allowed",
-                        // },
+                 
                       ]}
                     >
                       {/* <Input placeholder="Enter service technician name" /> */}
@@ -6402,8 +4493,7 @@ export default function FormComponent() {
                     >
                       <DatePicker
                         className="w-100"
-                        // showTime
-                        // format="YYYY-MM-DD" // Dubai Time Format
+                    
                         format="DD-MM-YYYY" // Dubai Time Format
                         value={
                           editForm.getFieldValue("departureDate")
@@ -6502,26 +4592,6 @@ export default function FormComponent() {
                     />
                   </Form.Item>
 
-                  {/* <Form.Item
-                      label="Cause of Failure"
-                      name="cause of failure"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please enter the cause of failure",
-                        },
-                      ]}
-                    >
-                      <TextArea
-                        placeholder="Enter the cause of failure"
-                        value={causeOfFailure}
-                        onChange={handleCauseTextChange}
-                        autoSize={{ minRows: 3, maxRows: 3 }}
-                        maxLength={500}
-                        showCount
-                      />
-                    </Form.Item> */}
-
                   <Form.Item label="Cause of Failure">
                     <Input.TextArea
                       value={editCauseText}
@@ -6533,67 +4603,7 @@ export default function FormComponent() {
                       showCount
                     />
 
-                    {/* Show preview and delete if image exists */}
-                    {/* {editPreviewUrl && (
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 8,
-                          marginTop: 10,
-                        }}
-                      >
-                        <PaperClipOutlined />
-                        <a href={downloadUrl} download>
-                          {editCauseOfFailureImage?.name || "Uploaded Image"}
-                        </a>
-                        <Popconfirm
-  title="Are you sure you want to delete this image?"
-  okText="Yes"
-  cancelText="No"
-  onConfirm={async () => {
-    console.log("Deleting image at:", editViewUrl);
-
-    const res = await fetch(
-      "https://script.google.com/macros/s/AKfycby0ITQJJDwqcPParI7EOfrtVi-Soi1G-6F2o7kwxUhKyEN2uyInyL2u00UeG8nNZbBp2w/exec",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          action: "deleteCauseImage",
-          imageUrl: editViewUrl,
- // ✅ Use viewUrl here, not downloadUrl
-        }),
-      }
-    );
-
-    const result = await res.json();
-    if (result.success) {
-      message.success("Image deleted successfully");
-      setEditCauseOfFailureImage(null);
-      setEditPreviewUrl(null);
-      setEditCauseText((prev) =>
-        prev
-          .split("\n")
-          .filter(
-            (line) =>
-              !line.startsWith("Image:") && !line.startsWith("Filename:")
-          )
-          .join("\n")
-          .trim()
-      );
-    } else {
-      message.error("Image deletion failed");
-    }
-  }}
->
-  <Button size="small" icon={<DeleteOutlined />} danger />
-</Popconfirm>
-
-                      </div>
-                    )} */}
+                   
 
                     {editPreviewUrl && (
                       <div
@@ -6723,11 +4733,7 @@ export default function FormComponent() {
                           className: "border rounded border-3",
                         }}
                       />
-                      {/* <SignatureCanvas
-  ref={editSigTechnician}
-  penColor="black"
-  canvasProps={{ width: 300, height: 100, className: "sigCanvas" }}
-/> */}
+                    
                       <div className="d-flex justify-content-start justify-content-md-start justify-content-lg-start  gap-2 mt-1">
                         <Button
                           type="primary"
@@ -6760,17 +4766,17 @@ export default function FormComponent() {
                         <div
                           className="border rounded border-3 p-2 d-flex flex-column align-items-center"
                           style={{
-                            width: canvasSize.width, // ✅ Same width as other signatures
-                            height: canvasSize.height, // ✅ Same height as other signatures
+                            width: canvasSize.width, 
+                            height: canvasSize.height, 
                             display: "flex",
                             justifyContent: "center",
                             alignItems: "center",
                             backgroundColor: "#fff",
-                            overflow: "hidden", // ✅ Ensures image fits nicely
+                            overflow: "hidden", 
                           }}
                         >
                           {editSignatureManager ? (
-                            // ✅ Show uploaded image inside border
+                       
                             <Image
                               src={editSignatureManager}
                               alt="Manager Signature"
@@ -6779,13 +4785,13 @@ export default function FormComponent() {
                               style={{ objectFit: "contain" }}
                             />
                           ) : (
-                            // ✅ Show Upload Button when no image
+                    
                             <Upload
-                              showUploadList={false} // ✅ Hide default file name list
+                              showUploadList={false} 
                               accept="image/png, image/jpeg"
                               beforeUpload={(file) => {
-                                handleEditManagerUpload({ file }); // ✅ Handle upload manually
-                                return false; // ✅ Prevent automatic upload
+                                handleEditManagerUpload({ file }); 
+                                return false; 
                               }}
                               className="d-flex"
                             >
