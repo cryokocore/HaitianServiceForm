@@ -31,6 +31,8 @@ import {
   DatabaseFilled,
   SearchOutlined,
   ReloadOutlined,
+  ExportOutlined,
+  FilterOutlined,
 } from "@ant-design/icons";
 import SignatureCanvas from "react-signature-canvas";
 import jsPDF from "jspdf";
@@ -47,7 +49,6 @@ import isBetween from "dayjs/plugin/isBetween";
 // import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx-js-style";
-
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -67,7 +68,6 @@ const reportOptions = [
   "Customer Visit (Report)",
   "Other",
 ];
-
 
 const technicianOptions = [
   "Palani",
@@ -146,11 +146,12 @@ export default function FormComponent() {
   const [isEditCustomerSignSaved, setIsEditCustomerSignSaved] = useState(false);
   const [isEditManagerSignSaved, setIsEditManagerSignSaved] = useState(false);
   const [selectedTechnicians, setSelectedTechnicians] = useState([]);
-    const handleTechChange = (value) => {
+  const handleTechChange = (value) => {
     setSelectedTechnicians(value);
   };
   const [selectedEditTechnicians, setSelectedEditTechnicians] = useState([]);
-  const [isEditImageMarkedForDeletion, setIsEditImageMarkedForDeletion] = useState(false);
+  const [isEditImageMarkedForDeletion, setIsEditImageMarkedForDeletion] =
+    useState(false);
   const [data, setData] = useState([
     {
       key: Date.now(),
@@ -217,7 +218,6 @@ export default function FormComponent() {
       return { success: false, message: error.message || "Upload failed" };
     }
   };
-  
 
   const handleRemoveImage = () => {
     setEditCauseOfFailureImage(null);
@@ -263,7 +263,6 @@ export default function FormComponent() {
     );
   };
 
- 
   // const handleEditImageDelete = async () => {
   //   const isDriveLink = editViewUrl?.includes("drive.google.com/file/d/");
 
@@ -325,29 +324,26 @@ export default function FormComponent() {
   //   );
   // };
 
-const handleEditImageDelete = () => {
-  // message.info("Image marked for deletion. It will be removed after record is updated.");
-  setIsEditImageMarkedForDeletion(true); // ✅ Mark only
+  const handleEditImageDelete = () => {
+    // message.info("Image marked for deletion. It will be removed after record is updated.");
+    setIsEditImageMarkedForDeletion(true); // ✅ Mark only
 
-  // Don't clear editViewUrl — it's needed for backend deletion
-  setEditCauseOfFailureImage(null);
-  setEditPreviewUrl(null);
-  setDownloadUrl(null);
+    // Don't clear editViewUrl — it's needed for backend deletion
+    setEditCauseOfFailureImage(null);
+    setEditPreviewUrl(null);
+    setDownloadUrl(null);
 
-  setEditCauseText((prev) =>
-    prev
-      .split("\n")
-      .filter(
-        (line) => !line.startsWith("Image:") && !line.startsWith("Filename:")
-      )
-      .join("\n")
-      .trim()
-  );
-};
+    setEditCauseText((prev) =>
+      prev
+        .split("\n")
+        .filter(
+          (line) => !line.startsWith("Image:") && !line.startsWith("Filename:")
+        )
+        .join("\n")
+        .trim()
+    );
+  };
 
-
-
-  
   const saveEditTechnicianSignature = () => {
     if (editSigTechnician.current && !editSigTechnician.current.isEmpty()) {
       setEditSignatureTechnician(
@@ -610,28 +606,26 @@ const handleEditImageDelete = () => {
   // };
 
   const extractFileInfoFromCauseText = (text) => {
-  const safeText = typeof text === "string" ? text : "";
+    const safeText = typeof text === "string" ? text : "";
 
-  const match = safeText.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  const nameMatch = safeText.match(/Filename:\s*(.+)/);
+    const match = safeText.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    const nameMatch = safeText.match(/Filename:\s*(.+)/);
 
-  if (!match) return {};
+    if (!match) return {};
 
-  const fileId = match[1];
-  return {
-    viewUrl: `https://drive.google.com/file/d/${fileId}/view`,
-    downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
-    fileId,
-    filename: nameMatch ? nameMatch[1].trim() : "Uploaded_Image",
+    const fileId = match[1];
+    return {
+      viewUrl: `https://drive.google.com/file/d/${fileId}/view`,
+      downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
+      fileId,
+      filename: nameMatch ? nameMatch[1].trim() : "Uploaded_Image",
+    };
   };
-};
-
 
   useEffect(() => {
     handleSearchAndFilter();
   }, [searchText, searchInstallationDate, searchSRN, rawCustomerData]);
 
- 
   useEffect(() => {
     if (!selectedRecord || !editModalOpen || hasInitializedEditForm.current)
       return;
@@ -672,14 +666,15 @@ const handleEditImageDelete = () => {
           )
         : null;
 
-        const initialTechnicians = Array.isArray(selectedRecord["Service Technician"])
-  ? selectedRecord["Service Technician"]
-  : (selectedRecord["Service Technician"] || "")
-      .split(",")
-      .map((tech) => tech.trim())
-      .filter(Boolean);
-      setSelectedEditTechnicians(initialTechnicians);
-
+    const initialTechnicians = Array.isArray(
+      selectedRecord["Service Technician"]
+    )
+      ? selectedRecord["Service Technician"]
+      : (selectedRecord["Service Technician"] || "")
+          .split(",")
+          .map((tech) => tech.trim())
+          .filter(Boolean);
+    setSelectedEditTechnicians(initialTechnicians);
 
     editForm.setFieldsValue({
       editsrn: selectedRecord["Service Request Number"],
@@ -694,7 +689,7 @@ const handleEditImageDelete = () => {
       returnDate: parseDate(selectedRecord["Return Date"]),
       workTime: selectedRecord["Work Time"],
       // serviceTechnician: selectedRecord["Service Technician"],
-        serviceTechnician: initialTechnicians,
+      serviceTechnician: initialTechnicians,
 
       report: checkedReports,
       serviceType: checkedServices,
@@ -712,7 +707,7 @@ const handleEditImageDelete = () => {
     const { viewUrl, downloadUrl, fileId, filename } =
       extractFileInfoFromCauseText(fullCause);
     setEditViewUrl(viewUrl);
-  
+
     const causeTextOnly = fullCause
       .split("\n")
       .filter(
@@ -751,13 +746,11 @@ const handleEditImageDelete = () => {
   }, [selectedRecord]);
 
   useEffect(() => {
-    
     loadAllCustomerData();
     form.setFieldsValue({ customerName: "" });
     setInputCustomer("");
   }, []);
 
-  
   const loadAllCustomerData = async () => {
     const res = await fetch(
       "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec?action=getAllCustomerData"
@@ -806,11 +799,8 @@ const handleEditImageDelete = () => {
     }
   };
 
- 
   const handleSearchAndFilter = () => {
     let filtered = [...rawCustomerData];
-
-    
 
     if (searchText.trim()) {
       const lower = searchText.toLowerCase().trim().replace(/\s+/g, " ");
@@ -830,7 +820,6 @@ const handleEditImageDelete = () => {
       });
     }
 
-   
     if (searchInstallationDate) {
       const searchDate = dayjs(
         searchInstallationDate,
@@ -948,7 +937,7 @@ const handleEditImageDelete = () => {
       parts.length
         ? parts.map((part, i) => ({
             // key: Date.now() + i,
-                 key: `${Date.now()}-${i}`,
+            key: `${Date.now()}-${i}`,
             partNumber: part.partNumber ?? "",
             description: part.description ?? "",
             quantity: part.quantity ?? 1,
@@ -957,7 +946,7 @@ const handleEditImageDelete = () => {
         : [
             {
               // key: Date.now(),
-                 key: `${Date.now()}-0`,
+              key: `${Date.now()}-0`,
               partNumber: "",
               description: "",
               quantity: "",
@@ -969,7 +958,6 @@ const handleEditImageDelete = () => {
     setEditModalOpen(true);
   };
 
- 
   // Utility to enforce text limits
   const enforceTextLimit = (value, maxLines, maxChars) => {
     const lines = value.split("\n").slice(0, maxLines);
@@ -1287,8 +1275,6 @@ const handleEditImageDelete = () => {
     }
   };
 
-
-
   const formatDate = (date) => {
     const parsed = dayjs(
       date,
@@ -1336,12 +1322,12 @@ const handleEditImageDelete = () => {
       title: "Notes/Further action required",
       dataIndex: "Notes/Further action required",
     },
-   
+
     {
       title: "Cause of Failure",
       dataIndex: "Cause of Failure",
       render: (text) => {
-        const str = (text ?? "").toString(); 
+        const str = (text ?? "").toString();
 
         const cleaned = str
           .split("\n")
@@ -1392,7 +1378,7 @@ const handleEditImageDelete = () => {
           >
             View
           </Button>
-         
+
           <Button
             color="danger"
             variant="filled"
@@ -1640,7 +1626,6 @@ const handleEditImageDelete = () => {
         </Tooltip>
       ),
     },
-   
   ];
 
   const viewModalcolumns = [
@@ -1756,13 +1741,12 @@ const handleEditImageDelete = () => {
 
   const [signatureCustomer, setSignatureCustomer] = useState("");
 
-  
   const handleUpload = ({ file }) => {
     const reader = new FileReader();
 
     reader.onloadend = () => {
       // console.log("Uploaded Image (Base64):", reader.result); // Debugging
-      setSignatureManager(reader.result); 
+      setSignatureManager(reader.result);
       message.success("Manager Signature uploaded successfully!");
     };
 
@@ -1803,8 +1787,6 @@ const handleEditImageDelete = () => {
     sigTechnician.current.clear();
     setSignatureTechnician("");
   };
-
-
 
   // Customer Signature
   const saveCustomerSignature = () => {
@@ -1966,7 +1948,7 @@ const handleEditImageDelete = () => {
     nextY = 59;
     addField(
       "Service Technician",
-      // formData.serviceTechnician, 
+      // formData.serviceTechnician,
       formData.serviceTechnician?.join(", "),
       startX,
       nextY + 2
@@ -1974,7 +1956,7 @@ const handleEditImageDelete = () => {
     // nextY = 68;
     nextY = 62;
     addField("Departure Date", formData.departureDate, startX, nextY + 5);
-    nextY += 4.5;
+    nextY += 5;
     addField("Return Date", formData.returnDate, rightX, nextY);
 
     // nextY = 81;
@@ -2289,7 +2271,6 @@ const handleEditImageDelete = () => {
         );
       }
       doc.setFont("Emirates", "bold");
-      
 
       if (signatureManager) {
         doc.setTextColor("#0C3C74");
@@ -2508,7 +2489,7 @@ const handleEditImageDelete = () => {
     // nextY = 68;
     nextY = 62;
     addField("Departure Date", formData.departureDate, startX, nextY + 5);
-    nextY += 4.5;
+    nextY += 5;
     addField("Return Date", formData.returnDate, rightX, nextY);
 
     // nextY = 81;
@@ -2729,8 +2710,6 @@ const handleEditImageDelete = () => {
     const serviceRowHeight = 10; // Height per row (for 2-line text)
     let maxServiceRowHeight = serviceRowHeight; // Track max row height
 
- 
-
     const serviceOptionSpacing = {
       "F.O.C Commissioning": 33,
       "F.O.C Maintenance": 28,
@@ -2825,7 +2804,6 @@ const handleEditImageDelete = () => {
         );
       }
       doc.setFont("Emirates", "bold");
-      
 
       if (signatures.manager) {
         doc.setTextColor("#0C3C74");
@@ -2920,7 +2898,6 @@ const handleEditImageDelete = () => {
 
   // console.log("Dubai Time:", nowDubai);
 
-  
   const uploadImageToDrive = async (imageFile) => {
     const formData = new FormData();
     formData.append("file", imageFile);
@@ -2940,437 +2917,441 @@ const handleEditImageDelete = () => {
     const result = await res.json();
     return result.fileUrl; // Assuming Apps Script returns the file URL after successful upload
   };
-const EXPORT_COLUMNS = [
-  "Service Request Number",
-  "Customer Name",
-  "Machine Type",
-  "Address",
-  "Serial Number",
-  "Contact",
-  "Telephone",
-  "Installation Date",
-  "Departure Date",
-  "Return Date",
-  "Work Time",
-  "Service Technician",
-  "Installation/Commission",
-  "Maintenance",
-  "Defect",
-  "Customer Visit (Report)",
-  "Other",
-  "Description of work/of defect/failure mode",
-  "Cause of Failure",
-  "Notes/Further action required",
-  "Part Number",
-  "Description",
-  "Quantity",
-  "Note",
-  "F.O.C Commissioning",
-  "F.O.C Maintenance",
-  "Guarantee",
-  "Chargeable Maintenance",
-  "Customer Visit (Service)",
-  "Service contract",
-  "Goodwill",
-];
-
-//   const handleExportToExcel = () => {
-//   if (!customerDataList.length) {
-//     message.warning("No data to export.");
-//     return;
-//   }
-
-//   const flatData = customerDataList.map((record) => ({
-//     "Service Request Number": record["Service Request Number"],
-//     "Customer Name": record["Customer Name"],
-//     "Machine Type": record["Machine Type"],
-//     "Address": record["Address"],
-//     "Serial Number": record["Serial Number"],
-//     "Contact": record["Contact"],
-//     "Telephone": record["Telephone"],
-//     "Installation Date": formatDate(record["Installation Date"]),
-//     "Departure Date": formatDate(record["Departure Date"]),
-//     "Return Date": formatDate(record["Return Date"]),
-//     "Work Time": record["Work Time"],
-//     "Service Technician": record["Service Technician"],
-//     "Description": record["Description of work/of defect/failure mode"],
-//     "Cause of Failure": record["Cause of Failure"],
-//     "Notes": record["Notes/Further action required"],
-//   }));
-
-//   const worksheet = XLSX.utils.json_to_sheet(flatData);
-//   const workbook = XLSX.utils.book_new();
-//   XLSX.utils.book_append_sheet(workbook, worksheet, "Customer Data");
-
-//   const excelBuffer = XLSX.write(workbook, {
-//     bookType: "xlsx",
-//     type: "array",
-//   });
-
-//   const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-//   saveAs(blob, `CustomerData_${dayjs().format("YYYY-MM-DD_HH-mm-ss")}.xlsx`);
-// };
-
-
-// const handleExportToExcel = () => {
-//   if (!customerDataList.length) {
-//     message.warning("No data to export.");
-//     return;
-//   }
-
-//   const flatData = customerDataList.map((record) => {
-//     const row = {};
-
-//     EXPORT_COLUMNS.forEach((key) => {
-//       let value = record[key];
-
-//       // Convert boolean-like fields to "Yes"/"No"
-//       if (typeof value === "boolean") {
-//         value = value ? "Yes" : "No";
-//       }
-
-//       // Convert date to string
-//       if (key.toLowerCase().includes("date")) {
-//         value = formatDate(value);
-//       }
-
-//       // Clean up cause of failure
-//       if (key === "Cause of Failure") {
-//         value = (value ?? "")
-//           .toString()
-//           .split("\n")
-//           .filter((line) => !line.trim().startsWith("Image:") && !line.trim().startsWith("Filename:"))
-//           .join(" ")
-//           .trim();
-//       }
-
-//       row[key] = value ?? ""; // Default to empty string
-//     });
-
-//     return row;
-//   });
-
-//   const worksheet = XLSX.utils.json_to_sheet(flatData);
-//   const workbook = XLSX.utils.book_new();
-//   XLSX.utils.book_append_sheet(workbook, worksheet, "Service Report");
-
-//   const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-//   const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-
-//   saveAs(blob, `Haitian_Service_Report_${dayjs().format("YYYY-MM-DD_HH-mm-ss")}.xlsx`);
-// };
-
-// const handleExportToExcel = () => {
-//   if (!customerDataList.length) {
-//     message.warning("No data to export.");
-//     return;
-//   }
-
-//   // Sort by SRN in ascending order (numeric comparison)
-//   const sortedData = [...customerDataList].sort((a, b) => {
-//     const aSRN = parseInt(a["Service Request Number"], 10);
-//     const bSRN = parseInt(b["Service Request Number"], 10);
-//     return aSRN - bSRN;
-//   });
-
-//   const flatData = sortedData.map((record) => {
-//     const row = {};
-
-//     EXPORT_COLUMNS.forEach((key) => {
-//       let value = record[key];
-
-//       // Convert boolean-like fields to "Yes"/"No"
-//       if (typeof value === "boolean") {
-//         value = value ? "Yes" : "No";
-//       }
-
-//       // Format date values
-//       if (key.toLowerCase().includes("date")) {
-//         value = formatDate(value);
-//       }
-
-//       // Handle Cause of Failure with image link & filename
-//       if (key === "Cause of Failure") {
-//         const fullText = value ?? "";
-//         const { downloadUrl, filename } = extractFileInfoFromCauseText(fullText);
-
-//         const cleanedText = fullText
-//           .toString()
-//           .split("\n")
-//           .filter(
-//             (line) =>
-//               !line.trim().startsWith("Image:") &&
-//               !line.trim().startsWith("Filename:")
-//           )
-//           .join(" ")
-//           .trim();
-
-//         value = cleanedText;
-//         if (filename || downloadUrl) {
-//           value += `\nFilename: ${filename || "N/A"}\nImage: ${downloadUrl || "N/A"}`;
-//         }
-//       }
-
-//       row[key] = value ?? "";
-//     });
-
-//     return row;
-//   });
-
-//   const worksheet = XLSX.utils.json_to_sheet(flatData);
-//   const workbook = XLSX.utils.book_new();
-//   XLSX.utils.book_append_sheet(workbook, worksheet, "Service Report");
-
-//   const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-//   const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-
-//   saveAs(blob, `Haitian_Service_Report_${dayjs().format("YYYY-MM-DD_HH-mm-ss")}.xlsx`);
-// };
-
-// const handleExportToExcel = () => {
-//   if (!customerDataList.length) {
-//     message.warning("No data to export.");
-//     return;
-//   }
-
-//   const sortedData = [...customerDataList].sort((a, b) => {
-//     const aSRN = parseInt(a["Service Request Number"], 10);
-//     const bSRN = parseInt(b["Service Request Number"], 10);
-//     return aSRN - bSRN;
-//   });
-
-//   const flatData = sortedData.map((record) => {
-//     const row = {};
-
-//     EXPORT_COLUMNS.forEach((key) => {
-//       let value = record[key];
-
-//       if (typeof value === "boolean") value = value ? "Yes" : "No";
-
-//       if (key.toLowerCase().includes("date")) {
-//         value = formatDate(value);
-//       }
-
-//       if (key === "Cause of Failure") {
-//         const fullText = value ?? "";
-//         const { downloadUrl, filename } = extractFileInfoFromCauseText(fullText);
-
-//         const cleanedText = fullText
-//           .toString()
-//           .split("\n")
-//           .filter(
-//             (line) =>
-//               !line.trim().startsWith("Image:") &&
-//               !line.trim().startsWith("Filename:")
-//           )
-//           .join(" ")
-//           .trim();
-
-//         value = cleanedText;
-//         if (filename || downloadUrl) {
-//           value += `\nFilename: ${filename || "N/A"}\nImage: ${downloadUrl || "N/A"}`;
-//         }
-//       }
-
-//       row[key] = value ?? "";
-//     });
-
-//     return row;
-//   });
-
-//   // Create worksheet and workbook
-//   const worksheet = XLSX.utils.json_to_sheet(flatData, { header: EXPORT_COLUMNS });
-
-//   // Apply styles manually
-//   const range = XLSX.utils.decode_range(worksheet['!ref']);
-//   for (let R = range.s.r; R <= range.e.r; ++R) {
-//     for (let C = range.s.c; C <= range.e.c; ++C) {
-//       const cellAddress = { c: C, r: R };
-//       const cellRef = XLSX.utils.encode_cell(cellAddress);
-//       if (!worksheet[cellRef]) continue;
-
-//       worksheet[cellRef].s = {
-//         font: {
-//           bold: R === 0, // bold headers
-//           sz: R === 0 ? 14 : 12,
-//         },
-//         alignment: {
-//           wrapText: true,
-//           vertical: "center",
-//           horizontal: "left",
-//         },
-//         fill: R === 0 ? { fgColor: { rgb: "FFFF00" } } : undefined, // yellow background for headers
-//         border: {
-//           top: { style: "thin", color: { rgb: "000000" } },
-//           bottom: { style: "thin", color: { rgb: "000000" } },
-//           left: { style: "thin", color: { rgb: "000000" } },
-//           right: { style: "thin", color: { rgb: "000000" } },
-//         },
-//       };
-//     }
-//   }
-
-//   // Adjust column widths
-//   worksheet["!cols"] = EXPORT_COLUMNS.map(() => ({ wch: 25 }));
-
-//   const workbook = XLSX.utils.book_new();
-//   XLSX.utils.book_append_sheet(workbook, worksheet, "Service Report");
-
-//   const excelBuffer = XLSX.write(workbook, {
-//     bookType: "xlsx",
-//     type: "array",
-//     cellStyles: true, // enables style support
-//   });
-
-//   const blob = new Blob([excelBuffer], {
-//     type: "application/octet-stream",
-//   });
-
-//   saveAs(blob, `Haitian_Service_Report_${dayjs().format("YYYY-MM-DD_HH-mm-ss")}.xlsx`);
-// };
-
-
-const handleExportToExcel = () => {
-  if (!customerDataList.length) {
-    message.warning("No data to export.");
-    return;
-  }
-
-  // Sort by SRN (ascending)
-  const sortedData = [...customerDataList].sort((a, b) => {
-    const aSRN = parseInt(a["Service Request Number"], 10);
-    const bSRN = parseInt(b["Service Request Number"], 10);
-    return aSRN - bSRN;
-  });
-
-  // Flatten and format records
-  const flatData = sortedData.map((record) => {
-    const row = {};
-    EXPORT_COLUMNS.forEach((key) => {
-      let value = record[key];
-
-      if (typeof value === "boolean") value = value ? "Yes" : "No";
-      if (key.toLowerCase().includes("date")) value = formatDate(value);
-
-      if (key === "Cause of Failure") {
-        const fullText = value ?? "";
-        const { downloadUrl, filename } = extractFileInfoFromCauseText(fullText);
-        const cleanedText = fullText
-          .toString()
-          .split("\n")
-          .filter(
-            (line) =>
-              !line.trim().startsWith("Image:") &&
-              !line.trim().startsWith("Filename:")
-          )
-          .join(" ")
-          .trim();
-
-        value = cleanedText;
-        if (filename || downloadUrl) {
-          value += `\nFilename: ${filename || "N/A"}\nImage: ${downloadUrl || "N/A"}`;
-        }
-      }
-
-      row[key] = value ?? "";
-    });
-    return row;
-  });
-
-  // Generate 2D array [headers, ...rows]
-  const worksheetData = [
-    EXPORT_COLUMNS,
-    ...flatData.map((item) => EXPORT_COLUMNS.map((col) => item[col])),
+  const EXPORT_COLUMNS = [
+    "Service Request Number",
+    "Customer Name",
+    "Machine Type",
+    "Address",
+    "Serial Number",
+    "Contact",
+    "Telephone",
+    "Installation Date",
+    "Departure Date",
+    "Return Date",
+    "Work Time",
+    "Service Technician",
+    "Installation/Commission",
+    "Maintenance",
+    "Defect",
+    "Customer Visit (Report)",
+    "Other",
+    "Description of work/of defect/failure mode",
+    "Cause of Failure",
+    "Notes/Further action required",
+    "Part Number",
+    "Description",
+    "Quantity",
+    "Note",
+    "F.O.C Commissioning",
+    "F.O.C Maintenance",
+    "Guarantee",
+    "Chargeable Maintenance",
+    "Customer Visit (Service)",
+    "Service contract",
+    "Goodwill",
   ];
 
-  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+  //   const handleExportToExcel = () => {
+  //   if (!customerDataList.length) {
+  //     message.warning("No data to export.");
+  //     return;
+  //   }
 
-  // Apply styles
-  const range = XLSX.utils.decode_range(worksheet["!ref"]);
-  for (let R = range.s.r; R <= range.e.r; ++R) {
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-      const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
-      if (!worksheet[cellRef]) continue;
+  //   const flatData = customerDataList.map((record) => ({
+  //     "Service Request Number": record["Service Request Number"],
+  //     "Customer Name": record["Customer Name"],
+  //     "Machine Type": record["Machine Type"],
+  //     "Address": record["Address"],
+  //     "Serial Number": record["Serial Number"],
+  //     "Contact": record["Contact"],
+  //     "Telephone": record["Telephone"],
+  //     "Installation Date": formatDate(record["Installation Date"]),
+  //     "Departure Date": formatDate(record["Departure Date"]),
+  //     "Return Date": formatDate(record["Return Date"]),
+  //     "Work Time": record["Work Time"],
+  //     "Service Technician": record["Service Technician"],
+  //     "Description": record["Description of work/of defect/failure mode"],
+  //     "Cause of Failure": record["Cause of Failure"],
+  //     "Notes": record["Notes/Further action required"],
+  //   }));
 
-      const isHeader = R === 0;
-      worksheet[cellRef].s = {
-        font: {
-          bold: isHeader,
-          sz: isHeader ? 14 : 11,
-          name: "Arial",
-        },
-        alignment: {
-          wrapText: true,
-          vertical: "center",
-          horizontal: "left",
-        },
-        fill: isHeader ? { fgColor: { rgb: "FFF200" } } : undefined,
-        border: {
-          top: { style: "thin", color: { rgb: "000000" } },
-          bottom: { style: "thin", color: { rgb: "000000" } },
-          left: { style: "thin", color: { rgb: "000000" } },
-          right: { style: "thin", color: { rgb: "000000" } },
-        },
-      };
+  //   const worksheet = XLSX.utils.json_to_sheet(flatData);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Customer Data");
+
+  //   const excelBuffer = XLSX.write(workbook, {
+  //     bookType: "xlsx",
+  //     type: "array",
+  //   });
+
+  //   const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+  //   saveAs(blob, `CustomerData_${dayjs().format("YYYY-MM-DD_HH-mm-ss")}.xlsx`);
+  // };
+
+  // const handleExportToExcel = () => {
+  //   if (!customerDataList.length) {
+  //     message.warning("No data to export.");
+  //     return;
+  //   }
+
+  //   const flatData = customerDataList.map((record) => {
+  //     const row = {};
+
+  //     EXPORT_COLUMNS.forEach((key) => {
+  //       let value = record[key];
+
+  //       // Convert boolean-like fields to "Yes"/"No"
+  //       if (typeof value === "boolean") {
+  //         value = value ? "Yes" : "No";
+  //       }
+
+  //       // Convert date to string
+  //       if (key.toLowerCase().includes("date")) {
+  //         value = formatDate(value);
+  //       }
+
+  //       // Clean up cause of failure
+  //       if (key === "Cause of Failure") {
+  //         value = (value ?? "")
+  //           .toString()
+  //           .split("\n")
+  //           .filter((line) => !line.trim().startsWith("Image:") && !line.trim().startsWith("Filename:"))
+  //           .join(" ")
+  //           .trim();
+  //       }
+
+  //       row[key] = value ?? ""; // Default to empty string
+  //     });
+
+  //     return row;
+  //   });
+
+  //   const worksheet = XLSX.utils.json_to_sheet(flatData);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Service Report");
+
+  //   const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  //   const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+
+  //   saveAs(blob, `Haitian_Service_Report_${dayjs().format("YYYY-MM-DD_HH-mm-ss")}.xlsx`);
+  // };
+
+  // const handleExportToExcel = () => {
+  //   if (!customerDataList.length) {
+  //     message.warning("No data to export.");
+  //     return;
+  //   }
+
+  //   // Sort by SRN in ascending order (numeric comparison)
+  //   const sortedData = [...customerDataList].sort((a, b) => {
+  //     const aSRN = parseInt(a["Service Request Number"], 10);
+  //     const bSRN = parseInt(b["Service Request Number"], 10);
+  //     return aSRN - bSRN;
+  //   });
+
+  //   const flatData = sortedData.map((record) => {
+  //     const row = {};
+
+  //     EXPORT_COLUMNS.forEach((key) => {
+  //       let value = record[key];
+
+  //       // Convert boolean-like fields to "Yes"/"No"
+  //       if (typeof value === "boolean") {
+  //         value = value ? "Yes" : "No";
+  //       }
+
+  //       // Format date values
+  //       if (key.toLowerCase().includes("date")) {
+  //         value = formatDate(value);
+  //       }
+
+  //       // Handle Cause of Failure with image link & filename
+  //       if (key === "Cause of Failure") {
+  //         const fullText = value ?? "";
+  //         const { downloadUrl, filename } = extractFileInfoFromCauseText(fullText);
+
+  //         const cleanedText = fullText
+  //           .toString()
+  //           .split("\n")
+  //           .filter(
+  //             (line) =>
+  //               !line.trim().startsWith("Image:") &&
+  //               !line.trim().startsWith("Filename:")
+  //           )
+  //           .join(" ")
+  //           .trim();
+
+  //         value = cleanedText;
+  //         if (filename || downloadUrl) {
+  //           value += `\nFilename: ${filename || "N/A"}\nImage: ${downloadUrl || "N/A"}`;
+  //         }
+  //       }
+
+  //       row[key] = value ?? "";
+  //     });
+
+  //     return row;
+  //   });
+
+  //   const worksheet = XLSX.utils.json_to_sheet(flatData);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Service Report");
+
+  //   const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+  //   const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+
+  //   saveAs(blob, `Haitian_Service_Report_${dayjs().format("YYYY-MM-DD_HH-mm-ss")}.xlsx`);
+  // };
+
+  // const handleExportToExcel = () => {
+  //   if (!customerDataList.length) {
+  //     message.warning("No data to export.");
+  //     return;
+  //   }
+
+  //   const sortedData = [...customerDataList].sort((a, b) => {
+  //     const aSRN = parseInt(a["Service Request Number"], 10);
+  //     const bSRN = parseInt(b["Service Request Number"], 10);
+  //     return aSRN - bSRN;
+  //   });
+
+  //   const flatData = sortedData.map((record) => {
+  //     const row = {};
+
+  //     EXPORT_COLUMNS.forEach((key) => {
+  //       let value = record[key];
+
+  //       if (typeof value === "boolean") value = value ? "Yes" : "No";
+
+  //       if (key.toLowerCase().includes("date")) {
+  //         value = formatDate(value);
+  //       }
+
+  //       if (key === "Cause of Failure") {
+  //         const fullText = value ?? "";
+  //         const { downloadUrl, filename } = extractFileInfoFromCauseText(fullText);
+
+  //         const cleanedText = fullText
+  //           .toString()
+  //           .split("\n")
+  //           .filter(
+  //             (line) =>
+  //               !line.trim().startsWith("Image:") &&
+  //               !line.trim().startsWith("Filename:")
+  //           )
+  //           .join(" ")
+  //           .trim();
+
+  //         value = cleanedText;
+  //         if (filename || downloadUrl) {
+  //           value += `\nFilename: ${filename || "N/A"}\nImage: ${downloadUrl || "N/A"}`;
+  //         }
+  //       }
+
+  //       row[key] = value ?? "";
+  //     });
+
+  //     return row;
+  //   });
+
+  //   // Create worksheet and workbook
+  //   const worksheet = XLSX.utils.json_to_sheet(flatData, { header: EXPORT_COLUMNS });
+
+  //   // Apply styles manually
+  //   const range = XLSX.utils.decode_range(worksheet['!ref']);
+  //   for (let R = range.s.r; R <= range.e.r; ++R) {
+  //     for (let C = range.s.c; C <= range.e.c; ++C) {
+  //       const cellAddress = { c: C, r: R };
+  //       const cellRef = XLSX.utils.encode_cell(cellAddress);
+  //       if (!worksheet[cellRef]) continue;
+
+  //       worksheet[cellRef].s = {
+  //         font: {
+  //           bold: R === 0, // bold headers
+  //           sz: R === 0 ? 14 : 12,
+  //         },
+  //         alignment: {
+  //           wrapText: true,
+  //           vertical: "center",
+  //           horizontal: "left",
+  //         },
+  //         fill: R === 0 ? { fgColor: { rgb: "FFFF00" } } : undefined, // yellow background for headers
+  //         border: {
+  //           top: { style: "thin", color: { rgb: "000000" } },
+  //           bottom: { style: "thin", color: { rgb: "000000" } },
+  //           left: { style: "thin", color: { rgb: "000000" } },
+  //           right: { style: "thin", color: { rgb: "000000" } },
+  //         },
+  //       };
+  //     }
+  //   }
+
+  //   // Adjust column widths
+  //   worksheet["!cols"] = EXPORT_COLUMNS.map(() => ({ wch: 25 }));
+
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Service Report");
+
+  //   const excelBuffer = XLSX.write(workbook, {
+  //     bookType: "xlsx",
+  //     type: "array",
+  //     cellStyles: true, // enables style support
+  //   });
+
+  //   const blob = new Blob([excelBuffer], {
+  //     type: "application/octet-stream",
+  //   });
+
+  //   saveAs(blob, `Haitian_Service_Report_${dayjs().format("YYYY-MM-DD_HH-mm-ss")}.xlsx`);
+  // };
+
+  const handleExportToExcel = () => {
+    if (!customerDataList.length) {
+      message.warning("No data to export.");
+      return;
     }
-  }
 
-  // Custom column widths
-  const columnWidths = {
-    "Service Request Number": 32,
-    "Customer Name": 45,
-    "Machine Type": 45,
-    "Address": 40,
-    "Serial Number": 45,
-    "Contact": 30,
-    "Telephone": 40,
-    "Installation Date": 30,
-    "Departure Date": 30,
-    "Return Date": 18,
-    "Work Time": 30,
-    "Service Technician": 30,
-    "Installation/Commission": 40,
-    "Maintenance": 20,
-    "Defect": 20,
-    "Customer Visit (Report)": 40,
-    "Other": 20,
-    "Description of work/of defect/failure mode": 100,
-    "Cause of Failure": 100,
-    "Notes/Further action required": 100,
-    "Part Number": 40,
-    "Description": 50,
-    "Quantity": 20,
-    "Note": 40,
-    "F.O.C Commissioning": 40,
-    "F.O.C Maintenance": 40,
-    "Guarantee": 25,
-    "Chargeable Maintenance": 40,
-    "Customer Visit (Service)": 50,
-    "Service contract": 40,
-    "Goodwill": 20,
+    // Sort by SRN (ascending)
+    const sortedData = [...customerDataList].sort((a, b) => {
+      const aSRN = parseInt(a["Service Request Number"], 10);
+      const bSRN = parseInt(b["Service Request Number"], 10);
+      return aSRN - bSRN;
+    });
+
+    // Flatten and format records
+    const flatData = sortedData.map((record) => {
+      const row = {};
+      EXPORT_COLUMNS.forEach((key) => {
+        let value = record[key];
+
+        if (typeof value === "boolean") value = value ? "Yes" : "No";
+        if (key.toLowerCase().includes("date")) value = formatDate(value);
+
+        if (key === "Cause of Failure") {
+          const fullText = value ?? "";
+          const { downloadUrl, filename } =
+            extractFileInfoFromCauseText(fullText);
+          const cleanedText = fullText
+            .toString()
+            .split("\n")
+            .filter(
+              (line) =>
+                !line.trim().startsWith("Image:") &&
+                !line.trim().startsWith("Filename:")
+            )
+            .join(" ")
+            .trim();
+
+          value = cleanedText;
+          if (filename || downloadUrl) {
+            value += `\nFilename: ${filename || "N/A"}\nImage: ${
+              downloadUrl || "N/A"
+            }`;
+          }
+        }
+
+        row[key] = value ?? "";
+      });
+      return row;
+    });
+
+    // Generate 2D array [headers, ...rows]
+    const worksheetData = [
+      EXPORT_COLUMNS,
+      ...flatData.map((item) => EXPORT_COLUMNS.map((col) => item[col])),
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+
+    // Apply styles
+    const range = XLSX.utils.decode_range(worksheet["!ref"]);
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+        if (!worksheet[cellRef]) continue;
+
+        const isHeader = R === 0;
+        worksheet[cellRef].s = {
+          font: {
+            bold: isHeader,
+            sz: isHeader ? 14 : 11,
+            name: "Arial",
+          },
+          alignment: {
+            wrapText: true,
+            vertical: "center",
+            horizontal: "left",
+          },
+          fill: isHeader ? { fgColor: { rgb: "FFF200" } } : undefined,
+          border: {
+            top: { style: "thin", color: { rgb: "000000" } },
+            bottom: { style: "thin", color: { rgb: "000000" } },
+            left: { style: "thin", color: { rgb: "000000" } },
+            right: { style: "thin", color: { rgb: "000000" } },
+          },
+        };
+      }
+    }
+
+    // Custom column widths
+    const columnWidths = {
+      "Service Request Number": 32,
+      "Customer Name": 45,
+      "Machine Type": 45,
+      Address: 40,
+      "Serial Number": 45,
+      Contact: 30,
+      Telephone: 40,
+      "Installation Date": 30,
+      "Departure Date": 30,
+      "Return Date": 18,
+      "Work Time": 30,
+      "Service Technician": 30,
+      "Installation/Commission": 40,
+      Maintenance: 20,
+      Defect: 20,
+      "Customer Visit (Report)": 40,
+      Other: 20,
+      "Description of work/of defect/failure mode": 100,
+      "Cause of Failure": 100,
+      "Notes/Further action required": 100,
+      "Part Number": 40,
+      Description: 50,
+      Quantity: 20,
+      Note: 40,
+      "F.O.C Commissioning": 40,
+      "F.O.C Maintenance": 40,
+      Guarantee: 25,
+      "Chargeable Maintenance": 40,
+      "Customer Visit (Service)": 50,
+      "Service contract": 40,
+      Goodwill: 20,
+    };
+
+    worksheet["!cols"] = EXPORT_COLUMNS.map((col) => ({
+      wch: columnWidths[col] || 25,
+    }));
+
+    // Finalize workbook
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Service Report");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const blob = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+
+    saveAs(
+      blob,
+      `Haitian_Service_Report_Excel_Exported_On_${dayjs().format(
+        "DD-MM-YY_HH-mm-ss"
+      )}.xlsx`
+    );
   };
-
-  worksheet["!cols"] = EXPORT_COLUMNS.map((col) => ({
-    wch: columnWidths[col] || 25,
-  }));
-
-  // Finalize workbook
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Service Report");
-
-  const excelBuffer = XLSX.write(workbook, {
-    bookType: "xlsx",
-    type: "array",
-  });
-
-  const blob = new Blob([excelBuffer], {
-    type: "application/octet-stream",
-  });
-
-  saveAs(blob, `Haitian_Service_Report_${dayjs().format("DD-MM-YY_HH-mm-ss")}.xlsx`);
-};
-
-
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -3385,7 +3366,6 @@ const handleExportToExcel = () => {
     }
   };
 
-  
   const handleSubmit = async (values) => {
     if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
@@ -3408,7 +3388,9 @@ const handleExportToExcel = () => {
         return;
       }
       if (!signatureTechnician || !signatureManager || !signatureCustomer)
-        return message.error("The manager's signature must be uploaded. The technician's and customer's signatures must be saved before submitting.");
+        return message.error(
+          "The manager's signature must be uploaded. The technician's and customer's signatures must be saved before submitting."
+        );
 
       const cleanedPartsUsed = data.map((row) => ({
         partNumber:
@@ -3501,7 +3483,7 @@ const handleExportToExcel = () => {
 
       message.success("Form submitted successfully!");
       if (causeImageUrl) {
-        message.success("Upload successful!\nImage URL:\n" + causeImageUrl);
+        // message.success("Upload successful!\nImage URL:\n" + causeImageUrl);
       }
 
       // ✅ 3. Generate PDF
@@ -3550,7 +3532,7 @@ const handleExportToExcel = () => {
       setCauseOfFailureImage(null);
       setPreviewUrl(null);
       setNotes("");
-      
+
       setData([
         {
           key: Date.now(),
@@ -3591,8 +3573,6 @@ const handleExportToExcel = () => {
     setEditSignatureManager(null);
     loadAllCustomerData();
   };
-
-  
 
   // const handleEditSubmit = async () => {
   //   try {
@@ -3641,8 +3621,6 @@ const handleExportToExcel = () => {
   //     const departureDate = convertToDubaiTime(values.departureDate);
   //     const returnDate = convertToDubaiTime(values.returnDate);
 
-     
-
   //     const cleanedPartsUsed = (editTabledata || []).map((row) => ({
   //       partNumber: row?.partNumber?.toString().trim() || "",
   //       description: row?.description?.toString().trim() || "",
@@ -3656,7 +3634,6 @@ const handleExportToExcel = () => {
   //     // Prepare causeOfFailure text (initial)
   //     let updatedCauseText = editCauseText?.trim() || "";
 
-     
   //     if (
   //       editCauseOfFailureImage &&
   //       (editCauseOfFailureImage.originFileObj ||
@@ -3710,8 +3687,6 @@ const handleExportToExcel = () => {
   //       formData.append(`Note[${index}]`, part.note);
   //     });
 
-
-
   //     reportOptions.forEach((option) => {
   //       formData.append(
   //         option,
@@ -3733,7 +3708,6 @@ const handleExportToExcel = () => {
   //     // console.log("Parts used about to be submitted:", cleanedPartsUsed);
 
   //     await postUpdate(formData);
-
 
   //     const checkboxValues = {};
   //     [...reportOptions, ...serviceOptions].forEach((option) => {
@@ -3788,197 +3762,219 @@ const handleExportToExcel = () => {
   // };
 
   const handleEditSubmit = async () => {
-  try {
-    setIsEditSubmitting(true);
-    setEditLoading(true);
-    const values = await editForm.validateFields();
+    try {
+      setIsEditSubmitting(true);
+      setEditLoading(true);
+      const values = await editForm.validateFields();
 
-    const isTooLong =
-      (values.serialNumber?.length || 0) > 100 ||
-      (values.address?.length || 0) > 100 ||
-      (values["description of work/of defect/failure mode"]?.length || 0) > 1000 ||
-      (values["cause of failure"]?.length || 0) > 500 ||
-      (values["notes/further action required"]?.length || 0) > 200;
+      const isTooLong =
+        (values.serialNumber?.length || 0) > 100 ||
+        (values.address?.length || 0) > 100 ||
+        (values["description of work/of defect/failure mode"]?.length || 0) >
+          1000 ||
+        (values["cause of failure"]?.length || 0) > 500 ||
+        (values["notes/further action required"]?.length || 0) > 200;
 
-    if (isTooLong) {
-      message.error("Some inputs exceed allowed limits. Please fix them before submitting.");
-      setIsEditSubmitting(false);
-      setEditLoading(false);
-      return;
-    }
-
-    const technicianCanvasEmpty = editSigTechnician.current?.isEmpty?.();
-    const customerCanvasEmpty = editSigCustomer.current?.isEmpty?.();
-    const managerEmpty = !editSignatureManager;
-
-    if (
-      !isEditTechnicianSignSaved || technicianCanvasEmpty ||
-      !isEditCustomerSignSaved || customerCanvasEmpty ||
-      !isEditManagerSignSaved || managerEmpty
-    ) {
-      message.error("The manager's signature must be uploaded. The technician's and customer's signatures must be saved before submitting.");
-      setIsEditSubmitting(false);
-      setEditLoading(false);
-      return;
-    }
-
-    const convertToDubaiTime = (date) =>
-      date ? dayjs(date).tz("Asia/Dubai").format("DD-MM-YYYY") : "N/A";
-
-    const installationDate = convertToDubaiTime(values.installationDate);
-    const departureDate = convertToDubaiTime(values.departureDate);
-    const returnDate = convertToDubaiTime(values.returnDate);
-
-    const cleanedPartsUsed = (editTabledata || []).map((row) => ({
-      partNumber: row?.partNumber?.toString().trim() || "",
-      description: row?.description?.toString().trim() || "",
-      quantity: row?.quantity ? Number(row.quantity) : "",
-      note: row?.note?.toString().trim() || "",
-    }));
-    const partsUsed = cleanedPartsUsed.length > 0 ? cleanedPartsUsed : [{}];
-
-    // ✅ Delete previous image if marked
-if (isEditImageMarkedForDeletion && editViewUrl) {
-  try {
-    const deleteRes = await fetch(
-      "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          action: "deleteCauseImage",
-          imageUrl: editViewUrl,
-        }),
-      }
-    );
-
-    const result = await deleteRes.json();
-    // console.log("Image deletion result:", result);
-
-    if (result.success) {
-      message.success("Image deleted from Drive.");
-    } else {
-      message.warning("Image deletion failed: " + result.message);
-    }
-  } catch (err) {
-    // console.error("Image deletion request failed:", err);
-    message.error("Failed to delete image from Drive.");
-  }
-}
-
-    // ✅ Prepare Cause of Failure text
-    let updatedCauseText = editCauseText?.trim() || "";
-
-    if (
-      editCauseOfFailureImage &&
-      (editCauseOfFailureImage.originFileObj || editCauseOfFailureImage instanceof File)
-    ) {
-      const fileToUpload = editCauseOfFailureImage.originFileObj || editCauseOfFailureImage;
-      const result = await uploadImageBase64(fileToUpload);
-
-      if (result.success) {
-        const newImageUrl = result.imageUrl;
-        updatedCauseText += `\nImage: ${newImageUrl}\nFilename: ${fileToUpload.name}`;
-      } else {
-        message.error("Image upload failed, submission aborted.");
+      if (isTooLong) {
+        message.error(
+          "Some inputs exceed allowed limits. Please fix them before submitting."
+        );
         setIsEditSubmitting(false);
+        setEditLoading(false);
         return;
       }
-    } else if (editPreviewUrl && editCauseOfFailureImage?.name && !isEditImageMarkedForDeletion) {
-      updatedCauseText += `\nImage: ${editViewUrl}\nFilename: ${editCauseOfFailureImage.name}`;
+
+      const technicianCanvasEmpty = editSigTechnician.current?.isEmpty?.();
+      const customerCanvasEmpty = editSigCustomer.current?.isEmpty?.();
+      const managerEmpty = !editSignatureManager;
+
+      if (
+        !isEditTechnicianSignSaved ||
+        technicianCanvasEmpty ||
+        !isEditCustomerSignSaved ||
+        customerCanvasEmpty ||
+        !isEditManagerSignSaved ||
+        managerEmpty
+      ) {
+        message.error(
+          "The manager's signature must be uploaded. The technician's and customer's signatures must be saved before submitting."
+        );
+        setIsEditSubmitting(false);
+        setEditLoading(false);
+        return;
+      }
+
+      const convertToDubaiTime = (date) =>
+        date ? dayjs(date).tz("Asia/Dubai").format("DD-MM-YYYY") : "N/A";
+
+      const installationDate = convertToDubaiTime(values.installationDate);
+      const departureDate = convertToDubaiTime(values.departureDate);
+      const returnDate = convertToDubaiTime(values.returnDate);
+
+      const cleanedPartsUsed = (editTabledata || []).map((row) => ({
+        partNumber: row?.partNumber?.toString().trim() || "",
+        description: row?.description?.toString().trim() || "",
+        quantity: row?.quantity ? Number(row.quantity) : "",
+        note: row?.note?.toString().trim() || "",
+      }));
+      const partsUsed = cleanedPartsUsed.length > 0 ? cleanedPartsUsed : [{}];
+
+      // ✅ Delete previous image if marked
+      if (isEditImageMarkedForDeletion && editViewUrl) {
+        try {
+          const deleteRes = await fetch(
+            "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: new URLSearchParams({
+                action: "deleteCauseImage",
+                imageUrl: editViewUrl,
+              }),
+            }
+          );
+
+          const result = await deleteRes.json();
+          // console.log("Image deletion result:", result);
+
+          if (result.success) {
+            message.success("Image deleted from Drive.");
+          } else {
+            message.warning("Image deletion failed: " + result.message);
+          }
+        } catch (err) {
+          // console.error("Image deletion request failed:", err);
+          message.error("Failed to delete image from Drive.");
+        }
+      }
+
+      // ✅ Prepare Cause of Failure text
+      let updatedCauseText = editCauseText?.trim() || "";
+
+      if (
+        editCauseOfFailureImage &&
+        (editCauseOfFailureImage.originFileObj ||
+          editCauseOfFailureImage instanceof File)
+      ) {
+        const fileToUpload =
+          editCauseOfFailureImage.originFileObj || editCauseOfFailureImage;
+        const result = await uploadImageBase64(fileToUpload);
+
+        if (result.success) {
+          const newImageUrl = result.imageUrl;
+          updatedCauseText += `\nImage: ${newImageUrl}\nFilename: ${fileToUpload.name}`;
+        } else {
+          message.error("Image upload failed, submission aborted.");
+          setIsEditSubmitting(false);
+          return;
+        }
+      } else if (
+        editPreviewUrl &&
+        editCauseOfFailureImage?.name &&
+        !isEditImageMarkedForDeletion
+      ) {
+        updatedCauseText += `\nImage: ${editViewUrl}\nFilename: ${editCauseOfFailureImage.name}`;
+      }
+
+      // ✅ Build form data
+      const formData = new FormData();
+      formData.append("action", "updateData");
+      formData.append("srn", selectedRecord?.["Service Request Number"]);
+      formData.append("customerName", values.customerName);
+      formData.append("machineType", values.machineType);
+      formData.append("address", values.address);
+      formData.append("serialNumber", values.serialNumber);
+      formData.append("contact", values.contact);
+      formData.append("installationDate", installationDate);
+      formData.append("telephone", values.telephone);
+      formData.append("workTime", values.workTime);
+      formData.append("serviceTechnician", values.serviceTechnician.join(", "));
+      formData.append("departureDate", departureDate);
+      formData.append("returnDate", returnDate);
+      formData.append(
+        "description",
+        values["description of work/of defect/failure mode"]
+      );
+      formData.append("notes", values["notes/further action required"]);
+      formData.append("causeOfFailure", updatedCauseText);
+
+      partsUsed.forEach((part, index) => {
+        formData.append(`Part Number[${index}]`, part.partNumber);
+        formData.append(`Description[${index}]`, part.description);
+        formData.append(`Quantity[${index}]`, part.quantity);
+        formData.append(`Note[${index}]`, part.note);
+      });
+
+      reportOptions.forEach((option) => {
+        formData.append(
+          option,
+          values.report?.includes(option) ? "true" : "false"
+        );
+      });
+
+      serviceOptions.forEach((option) => {
+        formData.append(
+          option,
+          values.serviceType?.includes(option) ? "true" : "false"
+        );
+      });
+
+      await postUpdate(formData);
+
+      // ✅ PDF
+      const checkboxValues = {};
+      [...reportOptions, ...serviceOptions].forEach((option) => {
+        checkboxValues[option] = false;
+      });
+      values.report?.forEach((option) => (checkboxValues[option] = true));
+      values.serviceType?.forEach((option) => (checkboxValues[option] = true));
+
+      const pdfPayload = {
+        srn: selectedRecord?.["Service Request Number"] || "N/A",
+        customerName: values.customerName,
+        machineType: values.machineType,
+        address: values.address,
+        serialNumber: values.serialNumber,
+        contact: values.contact,
+        installationDate,
+        telephone: values.telephone,
+        workTime: values.workTime,
+        serviceTechnician: values.serviceTechnician,
+        departureDate,
+        returnDate,
+        description: values["description of work/of defect/failure mode"],
+        causeOfFailure: editCauseText?.trim() || "",
+        notes: values["notes/further action required"],
+        partsUsed: cleanedPartsUsed,
+        signatures: {
+          technician: editSignatureTechnician,
+          manager: editSignatureManager,
+          customer: editSignatureCustomer,
+        },
+      };
+
+      generateEditPDF(pdfPayload, checkboxValues, cleanedPartsUsed);
+
+      // ✅ Reset
+      setEditModalOpen(false);
+      setIsEditTechnicianSignSaved(false);
+      setIsEditCustomerSignSaved(false);
+      setIsEditManagerSignSaved(false);
+      hasInitializedEditForm.current = false;
+      setIsEditImageMarkedForDeletion(false);
+
+      editSigTechnician.current?.clear();
+      editSigManager.current?.clear();
+      editSigCustomer.current?.clear();
+      setEditSignatureManager(null);
+      loadAllCustomerData();
+    } catch (err) {
+      message.error("Failed to submit update: " + err.message);
+    } finally {
+      setIsEditSubmitting(false);
+      setEditLoading(false);
     }
-
-    // ✅ Build form data
-    const formData = new FormData();
-    formData.append("action", "updateData");
-    formData.append("srn", selectedRecord?.["Service Request Number"]);
-    formData.append("customerName", values.customerName);
-    formData.append("machineType", values.machineType);
-    formData.append("address", values.address);
-    formData.append("serialNumber", values.serialNumber);
-    formData.append("contact", values.contact);
-    formData.append("installationDate", installationDate);
-    formData.append("telephone", values.telephone);
-    formData.append("workTime", values.workTime);
-    formData.append("serviceTechnician", values.serviceTechnician.join(", "));
-    formData.append("departureDate", departureDate);
-    formData.append("returnDate", returnDate);
-    formData.append("description", values["description of work/of defect/failure mode"]);
-    formData.append("notes", values["notes/further action required"]);
-    formData.append("causeOfFailure", updatedCauseText);
-
-    partsUsed.forEach((part, index) => {
-      formData.append(`Part Number[${index}]`, part.partNumber);
-      formData.append(`Description[${index}]`, part.description);
-      formData.append(`Quantity[${index}]`, part.quantity);
-      formData.append(`Note[${index}]`, part.note);
-    });
-
-    reportOptions.forEach((option) => {
-      formData.append(option, values.report?.includes(option) ? "true" : "false");
-    });
-
-    serviceOptions.forEach((option) => {
-      formData.append(option, values.serviceType?.includes(option) ? "true" : "false");
-    });
-
-    await postUpdate(formData);
-
-    // ✅ PDF
-    const checkboxValues = {};
-    [...reportOptions, ...serviceOptions].forEach((option) => {
-      checkboxValues[option] = false;
-    });
-    values.report?.forEach((option) => (checkboxValues[option] = true));
-    values.serviceType?.forEach((option) => (checkboxValues[option] = true));
-
-    const pdfPayload = {
-      srn: selectedRecord?.["Service Request Number"] || "N/A",
-      customerName: values.customerName,
-      machineType: values.machineType,
-      address: values.address,
-      serialNumber: values.serialNumber,
-      contact: values.contact,
-      installationDate,
-      telephone: values.telephone,
-      workTime: values.workTime,
-      serviceTechnician: values.serviceTechnician,
-      departureDate,
-      returnDate,
-      description: values["description of work/of defect/failure mode"],
-      causeOfFailure: editCauseText?.trim() || "",
-      notes: values["notes/further action required"],
-      partsUsed: cleanedPartsUsed,
-      signatures: {
-        technician: editSignatureTechnician,
-        manager: editSignatureManager,
-        customer: editSignatureCustomer,
-      },
-    };
-
-    generateEditPDF(pdfPayload, checkboxValues, cleanedPartsUsed);
-
-    // ✅ Reset
-    setEditModalOpen(false);
-    setIsEditTechnicianSignSaved(false);
-    setIsEditCustomerSignSaved(false);
-    setIsEditManagerSignSaved(false);
-    hasInitializedEditForm.current = false;
-    setIsEditImageMarkedForDeletion(false);
-
-    editSigTechnician.current?.clear();
-    editSigManager.current?.clear();
-    editSigCustomer.current?.clear();
-    setEditSignatureManager(null);
-    loadAllCustomerData();
-  } catch (err) {
-    message.error("Failed to submit update: " + err.message);
-  } finally {
-    setIsEditSubmitting(false);
-    setEditLoading(false);
-  }
-};
-
+  };
 
   const postUpdate = async (formData) => {
     const res = await fetch(
@@ -4042,8 +4038,6 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
     setEditCauseOfFailureImage(null);
     setEditPreviewUrl(null);
   };
-
-
 
   const styl = `.ant-modal-root .ant-modal {
     width: var(--ant-modal-xs-width);
@@ -4158,7 +4152,7 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                                 telephone: matched["Telephone"] || "",
                                 machineType: matched["Machine Type"] || "",
                                 serialNumber: matched["Serial Number"] || "",
-                            
+
                                 installationDate: parseDate(
                                   matched["Installation Date"]
                                 ),
@@ -4197,7 +4191,6 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                           { required: true, message: "Please enter address" },
                         ]}
                       >
-                
                         <TextArea
                           placeholder="Enter address"
                           value={address}
@@ -4353,38 +4346,37 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                     </div> */}
 
                     <div className="col-12 col-lg-4">
-                       <Form.Item
-      label="Service Technician"
-      name="serviceTechnician"
-      rules={[
-        {
-          required: true,
-          message: "Please select up to 3 service technicians",
-        },
-      ]}
-    >
-      <Select
-        mode="multiple"
-        placeholder="Select up to 3 technicians"
-        value={selectedTechnicians}
-        onChange={handleTechChange}
-      >
-        {technicianOptions.map((tech) => (
-          <Select.Option
-            key={tech}
-            value={tech}
-            disabled={
-              selectedTechnicians.length >= 3 &&
-              !selectedTechnicians.includes(tech)
-            }
-          >
-            {tech}
-          </Select.Option>
-        ))}
-      </Select>
-    </Form.Item>
-
-
+                      <Form.Item
+                        label="Service Technician"
+                        name="serviceTechnician"
+                        rules={[
+                          {
+                            required: true,
+                            message:
+                              "Please select up to 3 service technicians",
+                          },
+                        ]}
+                      >
+                        <Select
+                          mode="multiple"
+                          placeholder="Select up to 3 technicians"
+                          value={selectedTechnicians}
+                          onChange={handleTechChange}
+                        >
+                          {technicianOptions.map((tech) => (
+                            <Select.Option
+                              key={tech}
+                              value={tech}
+                              disabled={
+                                selectedTechnicians.length >= 3 &&
+                                !selectedTechnicians.includes(tech)
+                              }
+                            >
+                              {tech}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
                     </div>
 
                     <div className="col-12 col-lg-4">
@@ -4502,13 +4494,11 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                         rows={3}
                         placeholder="Describe the failure..."
                         value={causeOfFailureText}
-                   
                         onChange={handleCauseTextChange}
                         maxLength={500}
                         showCount
                       />
 
-                     
                       <div
                         style={{
                           marginTop: 8,
@@ -4542,7 +4532,6 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                           ></Button>
                         </div>
                       )}
-
                     </Form.Item>
 
                     <Form.Item
@@ -4626,27 +4615,24 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
 
                     <div className="col-12 col-lg-6 col-xl-4 mt-2 d-flex justify-content-center">
                       <div>
-                      
                         <Form.Item
                           label="Signature of Service Manager"
                           name="serviceManagerSignature"
                           required
-                       
                         >
                           <div
                             className="border rounded border-3 p-2 d-flex flex-column align-items-center"
                             style={{
-                              width: canvasSize.width, 
-                              height: canvasSize.height, 
+                              width: canvasSize.width,
+                              height: canvasSize.height,
                               display: "flex",
                               justifyContent: "center",
                               alignItems: "center",
                               backgroundColor: "#fff",
-                              overflow: "hidden", 
+                              overflow: "hidden",
                             }}
                           >
                             {signatureManager ? (
-                    
                               <Image
                                 src={signatureManager}
                                 alt="Manager Signature"
@@ -4655,13 +4641,12 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                                 style={{ objectFit: "contain" }}
                               />
                             ) : (
-                            
                               <Upload
-                                showUploadList={false} 
+                                showUploadList={false}
                                 accept="image/png, image/jpeg"
                                 beforeUpload={(file) => {
-                                  handleUpload({ file }); 
-                                  return false; 
+                                  handleUpload({ file });
+                                  return false;
                                 }}
                                 className="d-flex"
                               >
@@ -4719,8 +4704,6 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                         </div>
                       </Form.Item>
                     </div>
-
-                   
                   </div>
                   <div className="text-center mt-4 ">
                     <Button
@@ -4743,7 +4726,7 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
         <div className="container-fluid  border shadow rounded-5  mt-5  mb-3 pb-3">
           <div className="row d-flex align-items-center justify-content-center bg-light rounded-top-5 rounded-right-5">
             {/* <div className="col-12 col-lg-3"></div> */}
-            <div className="col-12 col-md-12 col-lg-12 col-xl-12  d-flex flex-column align-items-center justify-content-center ">
+            <div className="col-12 col-md-12 col-lg-12 col-xl-12  d-flex flex-column align-items-center justify-content-center p-2">
               <div className=" fw-bold text-center">
                 <img
                   src={HaitianLogo}
@@ -4753,13 +4736,13 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
               </div>
             </div>
           </div>
-          <div className="row mt-3 ">
-            <div className="col-12 col-md-6 col-lg-6">
+          <div className="row mt-2 ">
+            <div className="col-12 col-md-12 col-lg-6 d-flex justify-content-md-center justify-content-lg-start">
               <h3 className="fw-bold">
                 <DatabaseFilled className="mt-1" /> Service Report Form Data
               </h3>
             </div>
-            <div className="col-12 col-md-6 col-lg-6 d-flex justify-content-md-end">
+            <div className="col-12 col-md-12 col-lg-6 d-flex justify-content-md-center justify-content-lg-end mt-1 mt-lg-0">
               <Button
                 type="primary"
                 size="large"
@@ -4770,25 +4753,34 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                 {refreshing ? "Refreshing..." : "Refresh"}
               </Button>
               <Button
-               type="primary"
+                color="gold"
+                variant="solid"
                 size="large"
-  icon={<DatabaseFilled />}
-  onClick={handleExportToExcel}
-  style={{ marginLeft: 8 }}
->
-  Export
-</Button>
+                icon={<ExportOutlined />}
+                onClick={() => {
+                  handleExportToExcel();
+                  message.success("Data Exported Successfully");
+                }}
+                style={{ marginLeft: 8 }}
+              >
+                Export
+              </Button>
 
               <div>
                 <Button
                   color="danger"
                   variant="solid"
                   size="large"
+                  icon={<FilterOutlined />}
                   onClick={() => {
                     setSearchText("");
                     setSearchInstallationDate(null);
                     setSearchSRN("");
+                    if((searchText==="") && (searchInstallationDate===null) && (searchSRN==="")){
+                      message.info("Filter was not applied")
+                    }else{
                     message.success("All the filters cleared");
+                  }
                   }}
                   className="ms-2 "
                 >
@@ -4801,13 +4793,11 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                 placeholder="Search form data"
                 prefix={<SearchOutlined />}
                 allowClear
-               
                 value={searchText}
                 onChange={(e) => {
                   setSearchText(e.target.value);
                   handleSearchAndFilter();
                 }}
-              
                 style={{ width: "100%" }}
                 className="mt-md-3 mt-lg-0 ms-0 ms-md-2"
                 size="large"
@@ -4965,10 +4955,7 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                       />
                     </Form.Item>
 
-                 
-
                     <Form.Item label="Cause of Failure">
-                     
                       <TextArea
                         readOnly
                         autoSize={{ minRows: 3, maxRows: 3 }}
@@ -5070,7 +5057,6 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                         { required: true, message: "Please enter address" },
                       ]}
                     >
-                 
                       <TextArea
                         placeholder="Enter address"
                         value={address}
@@ -5222,38 +5208,42 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                       </Select>
                     </Form.Item> */}
                     <Form.Item
-  label="Service Technician"
-  name="serviceTechnician"
-  rules={[
-    {
-      required: true,
-      message: "Please select up to 3 service technicians",
-    },
-  ]}
->
-  <Select
-    mode="multiple"
-    placeholder="Select up to 3 technicians"
-    value={selectedEditTechnicians}
-    onChange={(value) => setSelectedEditTechnicians(value)}
-  >
-    {["Palani", "Sampath", "Karpagaraj", "Balaji", "Eshwar", "ShivaSundar"].map(
-      (tech) => (
-        <Select.Option
-          key={tech}
-          value={tech}
-          disabled={
-            selectedEditTechnicians.length >= 3 &&
-            !selectedEditTechnicians.includes(tech)
-          }
-        >
-          {tech}
-        </Select.Option>
-      )
-    )}
-  </Select>
-</Form.Item>
-
+                      label="Service Technician"
+                      name="serviceTechnician"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select up to 3 service technicians",
+                        },
+                      ]}
+                    >
+                      <Select
+                        mode="multiple"
+                        placeholder="Select up to 3 technicians"
+                        value={selectedEditTechnicians}
+                        onChange={(value) => setSelectedEditTechnicians(value)}
+                      >
+                        {[
+                          "Palani",
+                          "Sampath",
+                          "Karpagaraj",
+                          "Balaji",
+                          "Eshwar",
+                          "ShivaSundar",
+                        ].map((tech) => (
+                          <Select.Option
+                            key={tech}
+                            value={tech}
+                            disabled={
+                              selectedEditTechnicians.length >= 3 &&
+                              !selectedEditTechnicians.includes(tech)
+                            }
+                          >
+                            {tech}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
                   </div>
 
                   <div className="col-12 col-lg-4">
@@ -5269,7 +5259,6 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                     >
                       <DatePicker
                         className="w-100"
-                    
                         format="DD-MM-YYYY" // Dubai Time Format
                         value={
                           editForm.getFieldValue("departureDate")
@@ -5378,8 +5367,6 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                       maxLength={500}
                       showCount
                     />
-
-                   
 
                     {editPreviewUrl && (
                       <div
@@ -5509,7 +5496,7 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                           className: "border rounded border-3",
                         }}
                       />
-                    
+
                       <div className="d-flex justify-content-start justify-content-md-start justify-content-lg-start  gap-2 mt-1">
                         <Button
                           type="primary"
@@ -5542,17 +5529,16 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                         <div
                           className="border rounded border-3 p-2 d-flex flex-column align-items-center"
                           style={{
-                            width: canvasSize.width, 
-                            height: canvasSize.height, 
+                            width: canvasSize.width,
+                            height: canvasSize.height,
                             display: "flex",
                             justifyContent: "center",
                             alignItems: "center",
                             backgroundColor: "#fff",
-                            overflow: "hidden", 
+                            overflow: "hidden",
                           }}
                         >
                           {editSignatureManager ? (
-                       
                             <Image
                               src={editSignatureManager}
                               alt="Manager Signature"
@@ -5561,13 +5547,12 @@ if (isEditImageMarkedForDeletion && editViewUrl) {
                               style={{ objectFit: "contain" }}
                             />
                           ) : (
-                    
                             <Upload
-                              showUploadList={false} 
+                              showUploadList={false}
                               accept="image/png, image/jpeg"
                               beforeUpload={(file) => {
-                                handleEditManagerUpload({ file }); 
-                                return false; 
+                                handleEditManagerUpload({ file });
+                                return false;
                               }}
                               className="d-flex"
                             >
