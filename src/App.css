@@ -46,6 +46,10 @@ width:70% !important;
 width:30% !important;
 }
 
+.haitianViewEditFormLogo{
+width:30% !important;
+}
+
 .header_Service_Text{
 font-size: 22px;
 font-weight: bolder;
@@ -56,30 +60,90 @@ font-weight: bolder;
   width: 30%;
   font-size: 18px !important;
   color: white !important;
-  background-color: #1364AE !important;
-  border: 2px solid #1364AE !important; /* Ensures border visibility */
+  background-color: #0D3884 !important;
+  border: 2px solid #0D3884 !important; /* Ensures border visibility */
   transition: all 0.3s ease-in-out; /* Smooth transition */
 }
 
 .submitbutton:hover {
   background-color: white !important;
-  color: #1364AE !important;
-  border: 2px solid #1364AE !important; /* Keeps border on hover */
+  color: #0D3884 !important;
+  border: 2px solid #0D3884 !important; /* Keeps border on hover */
 }
 .editsubmitbutton {
   width: 30%;
   font-size: 18px !important;
   color: white !important;
-  background-color: #1364AE !important;
-  border: 2px solid #1364AE !important; /* Ensures border visibility */
+  background-color: #0D3884 !important;
+  border: 2px solid #0D3884 !important; /* Ensures border visibility */
   transition: all 0.3s ease-in-out; /* Smooth transition */
 }
 
 .editsubmitbutton:hover {
   background-color: white !important;
-  color: #1364AE !important;
-  border: 2px solid #1364AE !important; /* Keeps border on hover */
+  color: #0D3884 !important;
+  border: 2px solid #0D3884 !important; /* Keeps border on hover */
 }
+
+.haitianbutton {
+  color: white !important;
+  background-color: #0D3884 !important;
+  border: 2px solid #0D3884 !important; /* Ensures border visibility */
+  transition: all 0.3s ease-in-out; /* Smooth transition */
+}
+
+.haitianbutton:hover {
+  background-color: white !important;
+  color: #0D3884 !important;
+  border: 2px solid #0D3884 !important; /* Keeps border on hover */
+}
+
+.haitianuploadbutton {
+  background-color: white !important;
+  color: #0D3884 !important;
+  border: 2px solid #0D3884 !important; /* Keeps border on hover */
+}
+.haitianuploadbutton:hover {
+  color: white !important;
+  background-color: #0D3884 !important;
+  border: 2px solid #0D3884 !important; /* Ensures border visibility */
+  transition: all 0.3s ease-in-out; /* Smooth transition */
+}
+
+
+.dangerbutton {
+  color: white !important;
+  background-color: #ff4d4f !important;
+  border: 2px solid #ff4d4f !important; /* Ensures border visibility */
+  transition: all 0.3s ease-in-out; /* Smooth transition */
+}
+
+.dangerbutton:hover {
+  background-color: white !important;
+  color: #ff4d4f !important;
+  border: 2px solid #ff4d4f !important; /* Keeps border on hover */
+}
+
+.dangerbutton.ant-btn {
+  background-color: #ff4d4f;
+  color: white;
+  border-color: #ff4d4f;
+}
+
+.dangerbutton.ant-btn[disabled] {
+  background-color: #f5f5f5 !important; 
+  border-color: #bfbfbf !important;
+  color: #bfbfbf !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+}
+
+.signatureborder{
+  border: 3px solid #0D3884 !important;
+  border-radius: 10px;
+}
+
+
 
 /* Media Queries  Style */
 
@@ -88,6 +152,9 @@ font-weight: bolder;
     width:30% !important;
     }
      .haitianTableLogo{
+width:30% !important;
+}
+.haitianViewEditFormLogo{
 width:30% !important;
 }
 }
@@ -99,6 +166,9 @@ width:30% !important;
      .haitianTableLogo{
 width:30% !important;
 }
+.haitianViewEditFormLogo{
+width:30% !important;
+}
 }
 
 @media only screen and (max-width: 1026px) {
@@ -108,9 +178,15 @@ width:30% !important;
        .haitianTableLogo{
 width:30% !important;
 }
+.haitianViewEditFormLogo{
+width:30% !important;
+}
 }
 
 @media only screen and (max-width: 768px) {
+  .haitianViewEditFormLogo{
+width:30% !important;
+}
   .haitianLogo{
     width:50% !important;
     }

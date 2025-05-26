@@ -976,7 +976,7 @@ export default function FormComponent() {
 
     if (input !== limited) {
       message.warning(
-        "Address limited to 2 lines, 100 characters. Excess removed."
+        "Address limited to 2 lines, 95 characters. Excess removed."
       );
     }
 
@@ -990,7 +990,7 @@ export default function FormComponent() {
 
     if (input !== limited) {
       message.warning(
-        "Serial Number limited to 2 lines, 100 characters. Excess removed."
+        "Serial Number limited to 2 lines, 95 characters. Excess removed."
       );
     }
 
@@ -1004,7 +1004,7 @@ export default function FormComponent() {
 
     if (input !== limited) {
       message.warning(
-        "Description limited to 4 lines, 1000 characters. Excess removed."
+        "Description limited to 4 lines, 995 characters. Excess removed."
       );
     }
 
@@ -1021,7 +1021,7 @@ export default function FormComponent() {
 
     if (input !== limited) {
       message.warning(
-        "Cause of Failure limited to 2 lines, 500 characters. Excess removed."
+        "Cause of Failure limited to 2 lines, 495 characters. Excess removed."
       );
     }
 
@@ -1037,7 +1037,7 @@ export default function FormComponent() {
 
     if (input !== limited) {
       message.warning(
-        "Notes limited to 1 line, 200 characters. Excess removed."
+        "Notes limited to 1 line, 195 characters. Excess removed."
       );
     }
 
@@ -1051,7 +1051,7 @@ export default function FormComponent() {
 
     if (input !== limited) {
       message.warning(
-        "Serial Number limited to 2 lines, 100 characters. Excess removed."
+        "Serial Number limited to 2 lines, 95 characters. Excess removed."
       );
     }
 
@@ -1065,7 +1065,7 @@ export default function FormComponent() {
 
     if (input !== limited) {
       message.warning(
-        "Address limited to 2 lines, 100 characters. Excess removed."
+        "Address limited to 2 lines, 95 characters. Excess removed."
       );
     }
 
@@ -1079,7 +1079,7 @@ export default function FormComponent() {
 
     if (input !== limited) {
       message.warning(
-        "Description limited to 4 lines, 1000 characters. Excess removed."
+        "Description limited to 4 lines, 995 characters. Excess removed."
       );
     }
 
@@ -1095,7 +1095,7 @@ export default function FormComponent() {
 
     if (input !== limited) {
       message.warning(
-        "Cause of Failure limited to 2 lines, 500 characters. Excess removed."
+        "Cause of Failure limited to 2 lines, 495 characters. Excess removed."
       );
     }
 
@@ -1109,7 +1109,7 @@ export default function FormComponent() {
 
     if (input !== limited) {
       message.warning(
-        "Notes limited to 1 line, 200 characters. Excess removed."
+        "Notes limited to 1 line, 195 characters. Excess removed."
       );
     }
 
@@ -1501,12 +1501,11 @@ export default function FormComponent() {
       width: "13%", // Reduced size
       render: (_, record) => (
         <Space size="middle">
-          <Button type="primary" onClick={handleAddRow} disabled={isSubmitting}>
+          <Button onClick={handleAddRow} className="haitianbutton" disabled={isSubmitting}>
             Add
           </Button>
           <Button
-            type="primary"
-            danger
+          className="dangerbutton"
             onClick={() => handleDeleteRow(record.key)}
             disabled={isSubmitting || data.length === 1}
           >
@@ -4043,8 +4042,12 @@ export default function FormComponent() {
     width: var(--ant-modal-xs-width);
     width: 100% !important;
 }
+.ant-checkbox-checked .ant-checkbox-inner{
+    background-color: #0D3884;
+    border-color: #0D3884;
+}
+  
     `;
-
   return (
     <>
       <style>{styl}</style>
@@ -4061,11 +4064,11 @@ export default function FormComponent() {
               </div>
               {/* <div className="col-12 col-lg-3"></div> */}
               <div className="col-4 col-md-3 col-lg-3 col-xl-2 d-flex flex-column align-items-lg-start ">
-                <p className="header_Service_Text m-0 p-0 ms-xl-4">
+                <p className="header_Service_Text m-0 p-0 ms-xl-4" style={{color:"#0D3884"}}>
                   Service Report
                 </p>
                 <span className="ms-xl-4">
-                  <strong>No: {srn || "Loading..."}</strong>
+                  <strong style={{color:"#0D3884"}}>No: {srn || "Loading..."}</strong>
                 </span>
               </div>
             </div>
@@ -4196,7 +4199,7 @@ export default function FormComponent() {
                           value={address}
                           onChange={handleAddressChange}
                           autoSize={{ minRows: 3, maxRows: 3 }}
-                          maxLength={100}
+                          maxLength={95}
                           showCount
                         />
                       </Form.Item>
@@ -4266,7 +4269,7 @@ export default function FormComponent() {
                           value={serialNumber}
                           onChange={handleSerialNumberChange}
                           autoSize={{ minRows: 3, maxRows: 3 }}
-                          maxLength={100}
+                          maxLength={95}
                           showCount
                         />
                       </Form.Item>
@@ -4484,7 +4487,7 @@ export default function FormComponent() {
                         value={descriptionText}
                         onChange={handleDescriptionTextChange}
                         autoSize={{ minRows: 5, maxRows: 5 }}
-                        maxLength={1000}
+                        maxLength={995}
                         showCount
                       />
                     </Form.Item>
@@ -4495,7 +4498,7 @@ export default function FormComponent() {
                         placeholder="Describe the failure..."
                         value={causeOfFailureText}
                         onChange={handleCauseTextChange}
-                        maxLength={500}
+                        maxLength={495}
                         showCount
                       />
 
@@ -4550,7 +4553,7 @@ export default function FormComponent() {
                         value={notes}
                         onChange={handleNotesChange}
                         autoSize={{ minRows: 3, maxRows: 3 }}
-                        maxLength={200}
+                        maxLength={195}
                         showCount
                       />
                     </Form.Item>
@@ -4590,19 +4593,19 @@ export default function FormComponent() {
                           canvasProps={{
                             width: canvasSize.width,
                             height: canvasSize.height,
-                            className: "border rounded border-3",
+                            className: "signatureborder",
                           }}
                         />
-                        <div className="d-flex justify-content-start justify-content-md-start justify-content-lg-start  gap-2 mt-1">
+                        <div className="d-flex justify-content-start justify-content-md-start justify-content-lg-start gap-2 mt-1">
                           <Button
-                            type="primary"
+                            className="haitianbutton"
                             onClick={saveTechnicianSignature}
                             disabled={isSubmitting}
                           >
                             Save Signature
                           </Button>
                           <Button
-                            type="primary"
+                            className="dangerbutton"
                             danger
                             onClick={clearTechnicianSignature}
                             disabled={isSubmitting}
@@ -4621,7 +4624,7 @@ export default function FormComponent() {
                           required
                         >
                           <div
-                            className="border rounded border-3 p-2 d-flex flex-column align-items-center"
+                            className="signatureborder p-2 d-flex flex-column align-items-center"
                             style={{
                               width: canvasSize.width,
                               height: canvasSize.height,
@@ -4648,9 +4651,9 @@ export default function FormComponent() {
                                   handleUpload({ file });
                                   return false;
                                 }}
-                                className="d-flex"
+                                className="d-flex "
                               >
-                                <Button icon={<UploadOutlined />}>
+                                <Button icon={<UploadOutlined />} className="haitianuploadbutton">
                                   Upload Signature
                                 </Button>
                               </Upload>
@@ -4682,19 +4685,19 @@ export default function FormComponent() {
                           canvasProps={{
                             width: canvasSize.width,
                             height: canvasSize.height,
-                            className: "border rounded border-3",
+                            className: "signatureborder",
                           }}
                         />
                         <div className="d-flex justify-content-start  justify-content-md-start justify-content-lg-start gap-2 mt-1">
                           <Button
-                            type="primary"
+                            className="haitianbutton"
                             onClick={saveCustomerSignature}
                             disabled={isSubmitting}
                           >
                             Save Signature
                           </Button>
                           <Button
-                            type="primary"
+                            className="dangerbutton"
                             danger
                             onClick={clearCustomerSignature}
                             disabled={isSubmitting}
@@ -4727,7 +4730,7 @@ export default function FormComponent() {
           <div className="row d-flex align-items-center justify-content-center bg-light rounded-top-5 rounded-right-5">
             {/* <div className="col-12 col-lg-3"></div> */}
             <div className="col-12 col-md-12 col-lg-12 col-xl-12  d-flex flex-column align-items-center justify-content-center p-2">
-              <div className=" fw-bold text-center">
+              <div className="fw-bold text-center">
                 <img
                   src={HaitianLogo}
                   alt="HaitianLogo"
@@ -4738,38 +4741,38 @@ export default function FormComponent() {
           </div>
           <div className="row mt-2 ">
             <div className="col-12 col-md-12 col-lg-6 d-flex justify-content-md-center justify-content-lg-start">
-              <h3 className="fw-bold">
-                <DatabaseFilled className="mt-1" /> Service Report Form Data
+              <h3 className="fw-bold" style={{color:"#0D3884"}}>
+                <DatabaseFilled className="mt-3"  /> Service Report Form Data
               </h3>
             </div>
-            <div className="col-12 col-md-12 col-lg-6 d-flex justify-content-md-center justify-content-lg-end mt-1 mt-lg-0">
+            <div className="col-12 col-md-12 col-lg-6 d-flex justify-content-md-center justify-content-lg-end mt-2 mt-lg-3">
               <Button
-                type="primary"
+                className="haitianbutton"
                 size="large"
                 loading={refreshing}
                 onClick={handleRefresh}
                 icon={<ReloadOutlined />}
+                style={{backgroundColor:"#0D3884 !important"}}
               >
                 {refreshing ? "Refreshing..." : "Refresh"}
               </Button>
               <Button
-                color="gold"
-                variant="solid"
+               className="haitianbutton"
                 size="large"
                 icon={<ExportOutlined />}
                 onClick={() => {
                   handleExportToExcel();
                   message.success("Data Exported Successfully");
                 }}
-                style={{ marginLeft: 8 }}
+                style={{ marginLeft: 8, backgroundColor:"#0D3884 !important" }}                
+
               >
                 Export
               </Button>
 
               <div>
                 <Button
-                  color="danger"
-                  variant="solid"
+                  
                   size="large"
                   icon={<FilterOutlined />}
                   onClick={() => {
@@ -4782,13 +4785,14 @@ export default function FormComponent() {
                     message.success("All the filters cleared");
                   }
                   }}
-                  className="ms-2 "
+                  className="ms-2 dangerbutton"
+                  style={{backgroundColor:"#0D3884 !important"}}
                 >
                   Clear Filters
                 </Button>
               </div>
             </div>
-            <div className="col-12 col-md-6 col-lg-6">
+            <div className="col-12 col-md-6 col-lg-6 mt-4 mt-lg-3">
               <Input
                 placeholder="Search form data"
                 prefix={<SearchOutlined />}
@@ -4799,11 +4803,11 @@ export default function FormComponent() {
                   handleSearchAndFilter();
                 }}
                 style={{ width: "100%" }}
-                className="mt-md-3 mt-lg-0 ms-0 ms-md-2"
+                className="mt-md-2 mt-lg-0 ms-0 ms-md-2"
                 size="large"
               />
             </div>
-            <div className="col-12 col-md-3 col-lg-3 mt-3 mt-lg-0">
+            <div className="col-12 col-md-3 col-lg-3 mt-4 mt-lg-3">
               <DatePicker
                 placeholder="Search by Installation Date"
                 format="DD-MM-YYYY"
@@ -4814,10 +4818,11 @@ export default function FormComponent() {
                 }}
                 size="large"
                 style={{ width: "100%" }}
+                className="mt-md-2 mt-lg-0"
               />
             </div>
 
-            <div className="col-12 col-md-3 col-lg-3 mt-3 mt-lg-0">
+            <div className="col-12 col-md-3 col-lg-3 mt-4 mt-lg-3">
               <Input
                 type="number"
                 placeholder="Search by SRN"
@@ -4828,6 +4833,7 @@ export default function FormComponent() {
                   setSearchSRN(e.target.value);
                   handleSearchAndFilter();
                 }}
+                className="mt-md-2 mt-lg-0"
                 size="large"
                 style={{ width: "100%" }}
               />
@@ -4853,7 +4859,18 @@ export default function FormComponent() {
               onCancel={() => setViewModalOpen(false)}
               footer={null}
             >
-              <h3>View Service Form Record</h3>
+            
+             <div className="col-12 col-lg-8 text-center m-auto">
+                <img
+                  src={HaitianLogo}
+                  alt="HaitianLogo"
+                  className="img-fluid haitianViewEditFormLogo"
+                />
+              </div>
+              <div className="col-12 text-center">
+              <h3 style={{color:"#0D3884"}}>View Service Form Record</h3>
+              </div>
+              
               <Form form={viewForm} layout="vertical">
                 <div className="col-12">
                   <Form.Item label="Service Request Number" name="srn">
@@ -5004,10 +5021,8 @@ export default function FormComponent() {
                   </div>
                   <div className="text-center">
                     <Button
-                      color="danger"
-                      variant="solid"
                       size="large"
-                      className="text-center"
+                      className="text-center dangerbutton"
                       style={{ width: "35%" }}
                       onClick={() => setViewModalOpen(false)}
                     >
@@ -5023,7 +5038,17 @@ export default function FormComponent() {
               onCancel={handleEditModalclose}
               footer={null}
             >
-              <h3>Edit Service Form Record</h3>
+              {/* <h3>Edit Service Form Record</h3> */}
+                   <div className="col-12 col-lg-8 text-center m-auto">
+                <img
+                  src={HaitianLogo}
+                  alt="HaitianLogo"
+                  className="img-fluid haitianViewEditFormLogo"
+                />
+              </div>
+              <div className="col-12 text-center">
+              <h3 style={{color:"#0D3884"}}>Edit Service Form Record</h3>
+              </div>
               <Form
                 form={editForm}
                 layout="vertical"
@@ -5062,7 +5087,7 @@ export default function FormComponent() {
                         value={address}
                         onChange={handleEditAddressChange}
                         autoSize={{ minRows: 3, maxRows: 3 }}
-                        maxLength={100}
+                        maxLength={95}
                         showCount
                       />
                     </Form.Item>
@@ -5131,7 +5156,7 @@ export default function FormComponent() {
                         value={serialNumber}
                         onChange={handleEditSerialNumberChange}
                         autoSize={{ minRows: 3, maxRows: 3 }}
-                        maxLength={100}
+                        maxLength={95}
                         showCount
                       />
                     </Form.Item>
@@ -5352,7 +5377,7 @@ export default function FormComponent() {
                       // onChange={handleDescriptionTextChange}
                       onChange={handleEditDescriptionChange}
                       autoSize={{ minRows: 5, maxRows: 5 }}
-                      maxLength={1000}
+                      maxLength={995}
                       showCount
                     />
                   </Form.Item>
@@ -5364,7 +5389,7 @@ export default function FormComponent() {
                       onChange={handleEditCauseTextChange}
                       placeholder="Describe the failure"
                       autoSize={{ minRows: 3, maxRows: 3 }}
-                      maxLength={500}
+                      maxLength={495}
                       showCount
                     />
 
@@ -5456,7 +5481,7 @@ export default function FormComponent() {
                       // onChange={handleNotesChange}
                       onChange={handleEditNotesChange}
                       autoSize={{ minRows: 3, maxRows: 3 }}
-                      maxLength={200}
+                      maxLength={195}
                       showCount
                     />
                   </Form.Item>
@@ -5493,13 +5518,13 @@ export default function FormComponent() {
                         canvasProps={{
                           width: canvasSize.width,
                           height: canvasSize.height,
-                          className: "border rounded border-3",
+                          className: "signatureborder",
                         }}
                       />
 
                       <div className="d-flex justify-content-start justify-content-md-start justify-content-lg-start  gap-2 mt-1">
                         <Button
-                          type="primary"
+                          className="haitianbutton"
                           // onClick={saveTechnicianSignature}
                           onClick={saveEditTechnicianSignature}
                           disabled={isEditSubmitting}
@@ -5507,7 +5532,7 @@ export default function FormComponent() {
                           Save Signature
                         </Button>
                         <Button
-                          type="primary"
+                          className="dangerbutton"
                           danger
                           // onClick={clearTechnicianSignature}
                           onClick={clearEditTechnicianSignature}
@@ -5527,7 +5552,7 @@ export default function FormComponent() {
                         required
                       >
                         <div
-                          className="border rounded border-3 p-2 d-flex flex-column align-items-center"
+                          className="signatureborder p-2 d-flex flex-column align-items-center"
                           style={{
                             width: canvasSize.width,
                             height: canvasSize.height,
@@ -5556,7 +5581,7 @@ export default function FormComponent() {
                               }}
                               className="d-flex"
                             >
-                              <Button icon={<UploadOutlined />}>
+                              <Button icon={<UploadOutlined />} className="haitianuploadbutton">
                                 Upload Signature
                               </Button>
                             </Upload>
@@ -5569,7 +5594,7 @@ export default function FormComponent() {
                             danger
                             icon={<DeleteOutlined />}
                             onClick={clearEditManagerSignature}
-                            className="mt-2"
+                            className="mt-2 dangerbutton"
                           >
                             Clear Signature
                           </Button>
@@ -5587,20 +5612,19 @@ export default function FormComponent() {
                         canvasProps={{
                           width: canvasSize.width,
                           height: canvasSize.height,
-                          className: "border rounded border-3",
+                          className: "signatureborder",
                         }}
                       />
                       <div className="d-flex justify-content-start  justify-content-md-start justify-content-lg-start gap-2 mt-1">
                         <Button
-                          type="primary"
+                          className="haitianbutton"
                           onClick={saveEditCustomerSignature}
                           disabled={isEditSubmitting}
                         >
                           Save Signature
                         </Button>
                         <Button
-                          type="primary"
-                          danger
+                          className="dangerbutton"
                           onClick={clearEditCustomerSignature}
                           disabled={isEditSubmitting}
                         >
@@ -5623,11 +5647,9 @@ export default function FormComponent() {
                   </Button>
 
                   <Button
-                    color="danger"
-                    variant="solid"
                     size="large"
                     onClick={handleEditModalclose}
-                    className="ms-3"
+                    className="ms-3 dangerbutton"
                   >
                     Cancel
                   </Button>
