@@ -149,6 +149,9 @@ export default function FormComponent() {
   const handleTechChange = (value) => {
     setSelectedTechnicians(value);
   };
+  const [isTechnicianSignSaved, setIsTechnicianSignSaved] = useState(false);
+const [isCustomerSignSaved, setIsCustomerSignSaved] = useState(false);
+const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
   const [selectedEditTechnicians, setSelectedEditTechnicians] = useState([]);
   const [isEditImageMarkedForDeletion, setIsEditImageMarkedForDeletion] =
     useState(false);
@@ -496,7 +499,13 @@ export default function FormComponent() {
         return parsed.isValid() ? parsed : null;
       };
 
-      const fullCause = selectedRecord["Cause of Failure"] || "";
+      // const fullCause = selectedRecord["Cause of Failure"] || "";
+
+      const fullCause =
+      typeof selectedRecord["Cause of Failure"] === "string"
+    ? selectedRecord["Cause of Failure"]
+    : "";
+
 
       const { downloadUrl, filename } = extractFileInfoFromCauseText(fullCause);
 
@@ -703,7 +712,12 @@ export default function FormComponent() {
     });
 
     // Handle cause of failure image
-    const fullCause = selectedRecord["Cause of Failure"] || "";
+    // const fullCause = selectedRecord["Cause of Failure"] || "";
+    const fullCause =
+  typeof selectedRecord["Cause of Failure"] === "string"
+    ? selectedRecord["Cause of Failure"]
+    : "";
+
     const { viewUrl, downloadUrl, fileId, filename } =
       extractFileInfoFromCauseText(fullCause);
     setEditViewUrl(viewUrl);
@@ -727,7 +741,6 @@ export default function FormComponent() {
     const partRows = (selectedRecord.partsUsed || []).map((part, index) => ({
       // key: Date.now() + index,
       key: `${Date.now()}-${index}`,
-
       partNumber: part.partNumber ?? "",
       description: part.description ?? "",
       quantity: part.quantity ?? 1,
@@ -1746,6 +1759,7 @@ export default function FormComponent() {
     reader.onloadend = () => {
       // console.log("Uploaded Image (Base64):", reader.result); // Debugging
       setSignatureManager(reader.result);
+      setIsManagerSignUploaded(true);
       message.success("Manager Signature uploaded successfully!");
     };
 
@@ -1757,7 +1771,7 @@ export default function FormComponent() {
   const clearManagerSignature = () => {
     // setSignatureManager(""); // Remove signature
     setSignatureManager(null); // Remove signature
-
+    setIsManagerSignUploaded(false);
     message.success("Signature removed.");
   };
 
@@ -1777,6 +1791,7 @@ export default function FormComponent() {
       setSignatureTechnician(
         sigTechnician.current.getCanvas().toDataURL("image/png")
       );
+      setIsTechnicianSignSaved(true);
       message.success("Technician Signature saved successfully!");
     } else {
       message.error("Please draw a signature before saving.");
@@ -1785,6 +1800,8 @@ export default function FormComponent() {
   const clearTechnicianSignature = () => {
     sigTechnician.current.clear();
     setSignatureTechnician("");
+    setIsTechnicianSignSaved(false);
+
   };
 
   // Customer Signature
@@ -1793,6 +1810,7 @@ export default function FormComponent() {
       setSignatureCustomer(
         sigCustomer.current.getCanvas().toDataURL("image/png")
       );
+      setIsCustomerSignSaved(true);
       message.success("Customer Signature saved successfully!");
     } else {
       message.error("Please draw a signature before saving.");
@@ -1801,6 +1819,7 @@ export default function FormComponent() {
   const clearCustomerSignature = () => {
     sigCustomer.current.clear();
     setSignatureCustomer("");
+    setIsCustomerSignSaved(false);
   };
 
   const getBase64Image = (imgUrl, callback) => {
@@ -3386,10 +3405,18 @@ export default function FormComponent() {
         );
         return;
       }
-      if (!signatureTechnician || !signatureManager || !signatureCustomer)
-        return message.error(
-          "The manager's signature must be uploaded. The technician's and customer's signatures must be saved before submitting."
-        );
+      // if (!signatureTechnician || !signatureManager || !signatureCustomer){
+      //   return message.error(
+      //     "The manager's signature must be uploaded. The technician's and customer's signatures must be saved before submitting."
+      //   );
+      // }
+
+      if (!isTechnicianSignSaved || !isCustomerSignSaved || !isManagerSignUploaded) {
+  return message.error(
+    "Please ensure the manager's signature is uploaded, and the technician's and customer's signatures are saved before submitting."
+  );
+}
+
 
       const cleanedPartsUsed = data.map((row) => ({
         partNumber:
@@ -3546,6 +3573,9 @@ export default function FormComponent() {
       sigManager.current?.clear();
       sigCustomer.current?.clear();
       setSignatureManager(null);
+      setIsTechnicianSignSaved(false);
+setIsCustomerSignSaved(false);
+setIsManagerSignUploaded(false);
 
       await fetchSRN();
       loadAllCustomerData();
@@ -4046,7 +4076,10 @@ export default function FormComponent() {
     background-color: #0D3884;
     border-color: #0D3884;
 }
-  
+.ant-checkbox-disabled .ant-checkbox-inner {
+    background: rgba(0, 0, 0, 0.04) !important;
+    border-color: #d9d9d9 !important;
+}
     `;
   return (
     <>
@@ -4780,15 +4813,15 @@ export default function FormComponent() {
                     setSearchInstallationDate(null);
                     setSearchSRN("");
                     if((searchText==="") && (searchInstallationDate===null) && (searchSRN==="")){
-                      message.info("Filter was not applied")
+                      message.info("No search input found")
                     }else{
-                    message.success("All the filters cleared");
+                    message.success("Search inputs are cleared");
                   }
                   }}
                   className="ms-2 dangerbutton"
                   style={{backgroundColor:"#0D3884 !important"}}
                 >
-                  Clear Filters
+                  Clear Search
                 </Button>
               </div>
             </div>
