@@ -39,6 +39,7 @@ import jsPDF from "jspdf";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "antd/dist/reset.css";
 import HaitianLogo from "./Images/HaitianLogo.png";
+import HaitianMachine from "./Images/HaitianMachine.png";
 import "./App.css";
 import TextArea from "antd/es/input/TextArea";
 import moment from "moment-timezone";
@@ -1910,7 +1911,17 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
     let nextY = 25; // Starting Y position
 
     // Header
-    doc.addImage(HaitianLogo, "PNG", startX, 5, 40, 15);
+    // doc.addImage(HaitianMachine, "PNG", startX, 5, 40, 15);
+    // doc.addImage(HaitianLogo, "PNG", startX, 5, 60, 15);
+
+const machineLogoWidth = 65;
+const machineLogoHeight = 40;
+const haitianLogoWidth = 50;
+const haitianLogoHeight = 15;
+doc.addImage(HaitianMachine, "PNG", 0, -9, machineLogoWidth, machineLogoHeight);
+const centX = (pageWidth - haitianLogoWidth) / 2;
+doc.addImage(HaitianLogo, "PNG", centX, 5, 50, 15);
+
     doc.setFont("Emirates", "bold");
     doc.setFontSize(11);
     doc.setTextColor("#0C3C74");
@@ -2444,7 +2455,16 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
     let nextY = 25; // Starting Y position
 
     // Header
-    doc.addImage(HaitianLogo, "PNG", startX, 5, 40, 15);
+    // doc.addImage(HaitianLogo, "PNG", startX, 5, 40, 15);
+
+    const machineLogoWidth = 65;
+const machineLogoHeight = 40;
+const haitianLogoWidth = 50;
+const haitianLogoHeight = 15;
+doc.addImage(HaitianMachine, "PNG", 0, -9, machineLogoWidth, machineLogoHeight);
+const centX = (pageWidth - haitianLogoWidth) / 2;
+doc.addImage(HaitianLogo, "PNG", centX, 5, 50, 15);
+
     doc.setFont("Emirates", "bold");
     doc.setFontSize(11);
     doc.setTextColor("#0C3C74");
