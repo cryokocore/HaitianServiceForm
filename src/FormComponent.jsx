@@ -20,6 +20,7 @@ import {
   Descriptions,
   Popconfirm,
   Searc,
+  notification,
 } from "antd";
 import {
   UploadOutlined,
@@ -33,6 +34,7 @@ import {
   ReloadOutlined,
   ExportOutlined,
   FilterOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import SignatureCanvas from "react-signature-canvas";
 import jsPDF from "jspdf";
@@ -59,6 +61,12 @@ message.config({
   duration: 3,
   maxCount: 3,
 });
+
+notification.config({
+  duration: 3,
+  maxCount: 3,
+});
+
 const { Search } = Input;
 
 const reportOptions = [
@@ -151,8 +159,8 @@ export default function FormComponent() {
     setSelectedTechnicians(value);
   };
   const [isTechnicianSignSaved, setIsTechnicianSignSaved] = useState(false);
-const [isCustomerSignSaved, setIsCustomerSignSaved] = useState(false);
-const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
+  const [isCustomerSignSaved, setIsCustomerSignSaved] = useState(false);
+  const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
   const [selectedEditTechnicians, setSelectedEditTechnicians] = useState([]);
   const [isEditImageMarkedForDeletion, setIsEditImageMarkedForDeletion] =
     useState(false);
@@ -171,12 +179,22 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
     const isLtMaxSize = file.size / 1024 / 1024 < MAX_IMAGE_SIZE_MB;
 
     if (!isImage) {
-      message.error("Only image files are allowed.");
+      // message.error("Only image files are allowed.");
+         notification.error({
+        message: "Error",
+        description: "Only image files are allowed",
+        placement: "bottomRight", // Optional: can be 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'
+      });
       return Upload.LIST_IGNORE;
     }
 
     if (!isLtMaxSize) {
-      message.error(`Image must be smaller than ${MAX_IMAGE_SIZE_MB}MB!`);
+      // message.error(`Image must be smaller than ${MAX_IMAGE_SIZE_MB}MB!`);
+       notification.error({
+        message: "Error",
+        description: `Image must be smaller than ${MAX_IMAGE_SIZE_MB}MB!`,
+        placement: "bottomRight", // Optional: can be 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'
+      });
       return Upload.LIST_IGNORE;
     }
 
@@ -208,7 +226,7 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
       payload.append("originalFilename", file.name);
 
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
+        "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -328,6 +346,19 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
   //   );
   // };
 
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = ""; // Required for Chrome
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
   const handleEditImageDelete = () => {
     // message.info("Image marked for deletion. It will be removed after record is updated.");
     setIsEditImageMarkedForDeletion(true); // ✅ Mark only
@@ -354,15 +385,30 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
         editSigTechnician.current.getCanvas().toDataURL("image/png")
       );
       setIsEditTechnicianSignSaved(true);
-      message.success("Technician signature saved successfully (edit)");
+      // message.success("Technician signature saved successfully (edit)");
+        notification.success({
+        message: "Success",
+        description: "Technician signature saved successfully (edit).",
+        placement: "bottomRight", 
+      });
     } else {
-      message.warning("Please draw technician signature before saving.");
+      // message.warning("Please draw technician signature before saving.");
+          notification.warning({
+        message: "Warning",
+        description: "Please draw technician signature before saving.",
+        placement: "bottomRight", 
+      });
     }
   };
 
   const clearEditTechnicianSignature = () => {
     editSigTechnician.current?.clear();
     setEditSignatureTechnician("");
+        notification.success({
+        message: "Success",
+        description: "Technician signature was cleared (edit).",
+        placement: "bottomRight", 
+      });
     setIsEditTechnicianSignSaved(false);
   };
 
@@ -372,15 +418,30 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
         editSigCustomer.current.getCanvas().toDataURL("image/png")
       );
       setIsEditCustomerSignSaved(true);
-      message.success("Customer signature saved successfully (edit)");
+      // message.success("Customer signature saved successfully (edit)");
+        notification.success({
+        message: "Success",
+        description: "Customer signature saved successfully (edit).",
+        placement: "bottomRight", 
+      });
     } else {
-      message.warning("Please draw customer signature before saving.");
+      // message.warning("Please draw customer signature before saving.");
+         notification.warning({
+        message: "Warning",
+        description: "Please draw customer signature before saving",
+        placement: "bottomRight", 
+      });
     }
   };
 
   const clearEditCustomerSignature = () => {
     editSigCustomer.current?.clear();
     setEditSignatureCustomer("");
+         notification.success({
+        message: "Success",
+        description: "Customer signature was cleared (edit).",
+        placement: "bottomRight", 
+      });
     setIsEditCustomerSignSaved(false);
   };
 
@@ -389,7 +450,13 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
     reader.onloadend = () => {
       setEditSignatureManager(reader.result);
       setIsEditManagerSignSaved(true);
-      message.success("Manager signature uploaded successfully (edit)");
+      // message.success("Manager signature uploaded successfully (edit)");
+           notification.success({
+        message: "Success",
+        description: "Manager signature uploaded successfully (edit).",
+        placement: "bottomRight", 
+      });
+      
     };
     if (file) reader.readAsDataURL(file);
   };
@@ -397,6 +464,11 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
   const clearEditManagerSignature = () => {
     setEditSignatureManager(null);
     setIsEditManagerSignSaved(false);
+          notification.success({
+        message: "Success",
+        description: "Manager signature was cleared (edit).",
+        placement: "bottomRight", 
+      });
   };
 
   const handleCauseImageUpload = ({ file }) => {
@@ -436,7 +508,7 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
     formData.append("causeImage", causeOfFailureImage);
 
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
+      "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
       {
         method: "POST",
         body: formData,
@@ -503,10 +575,9 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
       // const fullCause = selectedRecord["Cause of Failure"] || "";
 
       const fullCause =
-      typeof selectedRecord["Cause of Failure"] === "string"
-    ? selectedRecord["Cause of Failure"]
-    : "";
-
+        typeof selectedRecord["Cause of Failure"] === "string"
+          ? selectedRecord["Cause of Failure"]
+          : "";
 
       const { downloadUrl, filename } = extractFileInfoFromCauseText(fullCause);
 
@@ -715,9 +786,9 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
     // Handle cause of failure image
     // const fullCause = selectedRecord["Cause of Failure"] || "";
     const fullCause =
-  typeof selectedRecord["Cause of Failure"] === "string"
-    ? selectedRecord["Cause of Failure"]
-    : "";
+      typeof selectedRecord["Cause of Failure"] === "string"
+        ? selectedRecord["Cause of Failure"]
+        : "";
 
     const { viewUrl, downloadUrl, fileId, filename } =
       extractFileInfoFromCauseText(fullCause);
@@ -767,7 +838,7 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
 
   const loadAllCustomerData = async () => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec?action=getAllCustomerData"
+      "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec?action=getAllCustomerData"
     );
     const result = await res.json();
 
@@ -867,7 +938,7 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
   const fetchCustomerNames = async () => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec?action=getAllCustomerData`
+        `https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec?action=getAllCustomerData`
       );
       const result = await res.json();
 
@@ -897,7 +968,7 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
   const handleCustomerSelect = async (selectedName) => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec?action=getCustomerData&name=${encodeURIComponent(
+        `https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec?action=getCustomerData&name=${encodeURIComponent(
           selectedName
         )}`
       );
@@ -926,7 +997,7 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
   const fetchSRN = async () => {
     try {
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec"
+        "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec"
       );
       const data = await response.json(); // ✅ Parse JSON directly
 
@@ -1515,11 +1586,15 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
       width: "13%", // Reduced size
       render: (_, record) => (
         <Space size="middle">
-          <Button onClick={handleAddRow} className="haitianbutton" disabled={isSubmitting}>
+          <Button
+            onClick={handleAddRow}
+            className="haitianbutton"
+            disabled={isSubmitting}
+          >
             Add
           </Button>
           <Button
-          className="dangerbutton"
+            className="dangerbutton"
             onClick={() => handleDeleteRow(record.key)}
             disabled={isSubmitting || data.length === 1}
           >
@@ -1802,7 +1877,6 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
     sigTechnician.current.clear();
     setSignatureTechnician("");
     setIsTechnicianSignSaved(false);
-
   };
 
   // Customer Signature
@@ -1838,7 +1912,40 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
     };
   };
 
-  const generatePDF = (formData, checkboxValues, partsUsed) => {
+  const uploadPdfToDrive = async (pdfBlob, filename) => {
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64 = reader.result.split(",")[1];
+
+      const payload = new URLSearchParams();
+      payload.append("action", "uploadPdf");
+      payload.append("pdfBase64", base64);
+      payload.append("filename", filename);
+
+      const response = await fetch(
+        "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: payload.toString(),
+        }
+      );
+
+      const result = await response.json();
+      if (result.success) {
+        message.success("PDF uploaded to Drive");
+        console.log("Drive Link:", result.url);
+      } else {
+        message.error("Failed to upload PDF: " + result.message);
+      }
+    };
+
+    reader.readAsDataURL(pdfBlob);
+  };
+
+  const generatePDF = async (formData, checkboxValues, partsUsed) => {
     const doc = new jsPDF();
     // const startX = 10;
     const pageWidth = doc.internal.pageSize.width;
@@ -1914,13 +2021,20 @@ const [isManagerSignUploaded, setIsManagerSignUploaded] = useState(false);
     // doc.addImage(HaitianMachine, "PNG", startX, 5, 40, 15);
     // doc.addImage(HaitianLogo, "PNG", startX, 5, 60, 15);
 
-const machineLogoWidth = 65;
-const machineLogoHeight = 40;
-const haitianLogoWidth = 50;
-const haitianLogoHeight = 15;
-doc.addImage(HaitianMachine, "PNG", 0, -9, machineLogoWidth, machineLogoHeight);
-const centX = (pageWidth - haitianLogoWidth) / 2;
-doc.addImage(HaitianLogo, "PNG", centX, 5, 50, 15);
+    const machineLogoWidth = 65;
+    const machineLogoHeight = 40;
+    const haitianLogoWidth = 50;
+    const haitianLogoHeight = 15;
+    doc.addImage(
+      HaitianMachine,
+      "PNG",
+      0,
+      -9,
+      machineLogoWidth,
+      machineLogoHeight
+    );
+    const centX = (pageWidth - haitianLogoWidth) / 2;
+    doc.addImage(HaitianLogo, "PNG", centX, 5, 50, 15);
 
     doc.setFont("Emirates", "bold");
     doc.setFontSize(11);
@@ -2381,8 +2495,10 @@ doc.addImage(HaitianLogo, "PNG", centX, 5, 50, 15);
 
     // doc.save("Service_Report.pdf");
     doc.save(fileName);
+    const pdfBlob = doc.output("blob");
+    await uploadPdfToDrive(pdfBlob, fileName);
   };
-  const generateEditPDF = (formData, checkboxValues, partsUsed) => {
+  const generateEditPDF = async (formData, checkboxValues, partsUsed) => {
     const doc = new jsPDF();
     // const startX = 10;
     const pageWidth = doc.internal.pageSize.width;
@@ -2458,12 +2574,19 @@ doc.addImage(HaitianLogo, "PNG", centX, 5, 50, 15);
     // doc.addImage(HaitianLogo, "PNG", startX, 5, 40, 15);
 
     const machineLogoWidth = 65;
-const machineLogoHeight = 40;
-const haitianLogoWidth = 50;
-const haitianLogoHeight = 15;
-doc.addImage(HaitianMachine, "PNG", 0, -9, machineLogoWidth, machineLogoHeight);
-const centX = (pageWidth - haitianLogoWidth) / 2;
-doc.addImage(HaitianLogo, "PNG", centX, 5, 50, 15);
+    const machineLogoHeight = 40;
+    const haitianLogoWidth = 50;
+    const haitianLogoHeight = 15;
+    doc.addImage(
+      HaitianMachine,
+      "PNG",
+      0,
+      -9,
+      machineLogoWidth,
+      machineLogoHeight
+    );
+    const centX = (pageWidth - haitianLogoWidth) / 2;
+    doc.addImage(HaitianLogo, "PNG", centX, 5, 50, 15);
 
     doc.setFont("Emirates", "bold");
     doc.setFontSize(11);
@@ -2923,6 +3046,8 @@ doc.addImage(HaitianLogo, "PNG", centX, 5, 50, 15);
 
     // doc.save("Service_Report.pdf");
     doc.save(fileName);
+    const editpdfBlob = doc.output("blob");
+    await uploadPdfToDrive(editpdfBlob, fileName);
   };
 
   useEffect(() => {
@@ -2942,7 +3067,7 @@ doc.addImage(HaitianLogo, "PNG", centX, 5, 50, 15);
 
     // Sending the file to the Google Apps Script for uploading to Drive
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
+      "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
       {
         method: "POST",
         headers: {
@@ -3395,9 +3520,19 @@ doc.addImage(HaitianLogo, "PNG", centX, 5, 50, 15);
     setRefreshing(true);
     try {
       await loadAllCustomerData(); // refetches and updates state
-      message.success("Table data refreshed. Showing updated data");
+      // message.success("Table data refreshed. Showing updated data");
+      notification.success({
+        message: "Success",
+        description: "Table data refreshed. Showing updated data",
+        placement: "bottomRight", // Optional: can be 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'
+      });
     } catch (err) {
-      message.error("Failed to refresh data");
+      // message.error("Failed to refresh data");
+      notification.error({
+        message: "Error",
+        description: "Table data refreshed. Showing updated data",
+        placement: "bottomRight", // Optional: can be 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'
+      });
       // console.error("Refresh error:", err);
     } finally {
       setRefreshing(false);
@@ -3431,12 +3566,15 @@ doc.addImage(HaitianLogo, "PNG", centX, 5, 50, 15);
       //   );
       // }
 
-      if (!isTechnicianSignSaved || !isCustomerSignSaved || !isManagerSignUploaded) {
-  return message.error(
-    "Please ensure the manager's signature is uploaded, and the technician's and customer's signatures are saved before submitting."
-  );
-}
-
+      if (
+        !isTechnicianSignSaved ||
+        !isCustomerSignSaved ||
+        !isManagerSignUploaded
+      ) {
+        return message.error(
+          "Please ensure the manager's signature is uploaded, and the technician's and customer's signatures are saved before submitting."
+        );
+      }
 
       const cleanedPartsUsed = data.map((row) => ({
         partNumber:
@@ -3512,7 +3650,7 @@ doc.addImage(HaitianLogo, "PNG", centX, 5, 50, 15);
       // setLoading(true);
 
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
+        "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
         {
           method: "POST",
           body: formData,
@@ -3566,7 +3704,7 @@ doc.addImage(HaitianLogo, "PNG", centX, 5, 50, 15);
         signatures,
       };
 
-      generatePDF(pdfPayload, checkboxValues, cleanedPartsUsed);
+      await generatePDF(pdfPayload, checkboxValues, cleanedPartsUsed);
 
       // ✅ 4. Reset form
       form.resetFields();
@@ -3594,8 +3732,8 @@ doc.addImage(HaitianLogo, "PNG", centX, 5, 50, 15);
       sigCustomer.current?.clear();
       setSignatureManager(null);
       setIsTechnicianSignSaved(false);
-setIsCustomerSignSaved(false);
-setIsManagerSignUploaded(false);
+      setIsCustomerSignSaved(false);
+      setIsManagerSignUploaded(false);
 
       await fetchSRN();
       loadAllCustomerData();
@@ -3872,7 +4010,7 @@ setIsManagerSignUploaded(false);
       if (isEditImageMarkedForDeletion && editViewUrl) {
         try {
           const deleteRes = await fetch(
-            "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
+            "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
             {
               method: "POST",
               headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -4002,7 +4140,7 @@ setIsManagerSignUploaded(false);
         },
       };
 
-      generateEditPDF(pdfPayload, checkboxValues, cleanedPartsUsed);
+      await generateEditPDF(pdfPayload, checkboxValues, cleanedPartsUsed);
 
       // ✅ Reset
       setEditModalOpen(false);
@@ -4027,7 +4165,7 @@ setIsManagerSignUploaded(false);
 
   const postUpdate = async (formData) => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
+      "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
       {
         method: "POST",
         body: formData,
@@ -4046,7 +4184,7 @@ setIsManagerSignUploaded(false);
 
   const submitUpdate = async (payload) => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
+      "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
       {
         method: "POST",
         body: new URLSearchParams(payload),
@@ -4071,7 +4209,7 @@ setIsManagerSignUploaded(false);
     payload.append("imageUrl", url);
 
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
+      "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
       {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -4081,6 +4219,35 @@ setIsManagerSignUploaded(false);
 
     const result = await res.json();
     return result.success;
+  };
+
+  const handleDownloadPDF = async (srn) => {
+    if (!srn) return message.error("SRN is missing.");
+
+    const payload = new URLSearchParams();
+    payload.append("action", "getPdfLink");
+    payload.append("srn", srn);
+
+    try {
+      const res = await fetch(
+        "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: payload.toString(),
+        }
+      );
+      const result = await res.json();
+      if (result.success && result.url) {
+        window.open(result.url, "_blank");
+      } else {
+        message.error(result.message || "Failed to retrieve PDF.");
+      }
+    } catch (error) {
+      message.error("Error fetching PDF link.");
+    }
   };
 
   const handleEditRemoveImage = () => {
@@ -4117,11 +4284,16 @@ setIsManagerSignUploaded(false);
               </div>
               {/* <div className="col-12 col-lg-3"></div> */}
               <div className="col-4 col-md-3 col-lg-3 col-xl-2 d-flex flex-column align-items-lg-start ">
-                <p className="header_Service_Text m-0 p-0 ms-xl-4" style={{color:"#0D3884"}}>
+                <p
+                  className="header_Service_Text m-0 p-0 ms-xl-4"
+                  style={{ color: "#0D3884" }}
+                >
                   Service Report
                 </p>
                 <span className="ms-xl-4">
-                  <strong style={{color:"#0D3884"}}>No: {srn || "Loading..."}</strong>
+                  <strong style={{ color: "#0D3884" }}>
+                    No: {srn || "Loading..."}
+                  </strong>
                 </span>
               </div>
             </div>
@@ -4706,7 +4878,10 @@ setIsManagerSignUploaded(false);
                                 }}
                                 className="d-flex "
                               >
-                                <Button icon={<UploadOutlined />} className="haitianuploadbutton">
+                                <Button
+                                  icon={<UploadOutlined />}
+                                  className="haitianuploadbutton"
+                                >
                                   Upload Signature
                                 </Button>
                               </Upload>
@@ -4794,8 +4969,8 @@ setIsManagerSignUploaded(false);
           </div>
           <div className="row mt-2 ">
             <div className="col-12 col-md-12 col-lg-6 d-flex justify-content-md-center justify-content-lg-start">
-              <h3 className="fw-bold" style={{color:"#0D3884"}}>
-                <DatabaseFilled className="mt-3"  /> Service Report Form Data
+              <h3 className="fw-bold" style={{ color: "#0D3884" }}>
+                <DatabaseFilled className="mt-3" /> Service Report Form Data
               </h3>
             </div>
             <div className="col-12 col-md-12 col-lg-6 d-flex justify-content-md-center justify-content-lg-end mt-2 mt-lg-3">
@@ -4805,41 +4980,48 @@ setIsManagerSignUploaded(false);
                 loading={refreshing}
                 onClick={handleRefresh}
                 icon={<ReloadOutlined />}
-                style={{backgroundColor:"#0D3884 !important"}}
+                style={{ backgroundColor: "#0D3884 !important" }}
               >
                 {refreshing ? "Refreshing..." : "Refresh"}
               </Button>
               <Button
-               className="haitianbutton"
+                className="haitianbutton"
                 size="large"
                 icon={<ExportOutlined />}
                 onClick={() => {
                   handleExportToExcel();
                   message.success("Data Exported Successfully");
                 }}
-                style={{ marginLeft: 8, backgroundColor:"#0D3884 !important" }}                
-
+                style={{ marginLeft: 8, backgroundColor: "#0D3884 !important" }}
               >
                 Export
               </Button>
 
               <div>
                 <Button
-                  
                   size="large"
                   icon={<FilterOutlined />}
                   onClick={() => {
                     setSearchText("");
                     setSearchInstallationDate(null);
                     setSearchSRN("");
-                    if((searchText==="") && (searchInstallationDate===null) && (searchSRN==="")){
-                      message.info("No search input found")
-                    }else{
-                    message.success("Search inputs are cleared");
-                  }
+                    if (
+                      searchText === "" &&
+                      searchInstallationDate === null &&
+                      searchSRN === ""
+                    ) {
+                      // message.info("No search input found");
+                            notification.info({
+                             message: 'No Input',
+                             description: 'No search input found',
+                              placement: 'bottomRight', 
+                            });
+                    } else {
+                      message.success("Search inputs are cleared");
+                    }
                   }}
                   className="ms-2 dangerbutton"
-                  style={{backgroundColor:"#0D3884 !important"}}
+                  style={{ backgroundColor: "#0D3884 !important" }}
                 >
                   Clear Search
                 </Button>
@@ -4912,8 +5094,7 @@ setIsManagerSignUploaded(false);
               onCancel={() => setViewModalOpen(false)}
               footer={null}
             >
-            
-             <div className="col-12 col-lg-8 text-center m-auto">
+              <div className="col-12 col-lg-8 text-center m-auto">
                 <img
                   src={HaitianLogo}
                   alt="HaitianLogo"
@@ -4921,9 +5102,9 @@ setIsManagerSignUploaded(false);
                 />
               </div>
               <div className="col-12 text-center">
-              <h3 style={{color:"#0D3884"}}>View Service Form Record</h3>
+                <h3 style={{ color: "#0D3884" }}>View Service Form Record</h3>
               </div>
-              
+
               <Form form={viewForm} layout="vertical">
                 <div className="col-12">
                   <Form.Item label="Service Request Number" name="srn">
@@ -5075,8 +5256,16 @@ setIsManagerSignUploaded(false);
                   <div className="text-center">
                     <Button
                       size="large"
+                      icon={<DownloadOutlined />}
+                      onClick={() => handleDownloadPDF(editsrn)}
+                      className="haitianbutton"
+                    >
+                      Download PDF
+                    </Button>
+                    <Button
+                      size="large"
                       className="text-center dangerbutton"
-                      style={{ width: "35%" }}
+                      style={{ width: "25%", marginLeft: "1rem" }}
                       onClick={() => setViewModalOpen(false)}
                     >
                       Close From
@@ -5092,7 +5281,7 @@ setIsManagerSignUploaded(false);
               footer={null}
             >
               {/* <h3>Edit Service Form Record</h3> */}
-                   <div className="col-12 col-lg-8 text-center m-auto">
+              <div className="col-12 col-lg-8 text-center m-auto">
                 <img
                   src={HaitianLogo}
                   alt="HaitianLogo"
@@ -5100,7 +5289,7 @@ setIsManagerSignUploaded(false);
                 />
               </div>
               <div className="col-12 text-center">
-              <h3 style={{color:"#0D3884"}}>Edit Service Form Record</h3>
+                <h3 style={{ color: "#0D3884" }}>Edit Service Form Record</h3>
               </div>
               <Form
                 form={editForm}
@@ -5634,7 +5823,10 @@ setIsManagerSignUploaded(false);
                               }}
                               className="d-flex"
                             >
-                              <Button icon={<UploadOutlined />} className="haitianuploadbutton">
+                              <Button
+                                icon={<UploadOutlined />}
+                                className="haitianuploadbutton"
+                              >
                                 Upload Signature
                               </Button>
                             </Upload>
