@@ -75,8 +75,8 @@ const technicianOptions = [
   "Sampath",
   "Karpagaraj",
   "Balaji",
-  "Eshwar",
-  "ShivaSundar",
+  "Eswar",
+  "SivaSundar",
 ];
 
 const serviceOptions = [
@@ -5306,8 +5306,8 @@ setIsManagerSignUploaded(false);
                           "Sampath",
                           "Karpagaraj",
                           "Balaji",
-                          "Eshwar",
-                          "ShivaSundar",
+                          "Eswar",
+                          "SivaSundar",
                         ].map((tech) => (
                           <Select.Option
                             key={tech}
