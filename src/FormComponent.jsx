@@ -118,6 +118,7 @@ export default function FormComponent() {
   const [editsrn, setEditSRN] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [tooltipVisibility, setTooltipVisibility] = useState({});
+
   const isSubmittingRef = useRef(false);
   const [customerOptions, setCustomerOptions] = useState([]);
   const [customerDataList, setCustomerDataList] = useState([]); // full objects
@@ -180,7 +181,7 @@ export default function FormComponent() {
 
     if (!isImage) {
       // message.error("Only image files are allowed.");
-         notification.error({
+      notification.error({
         message: "Error",
         description: "Only image files are allowed",
         placement: "bottomRight", // Optional: can be 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'
@@ -190,7 +191,7 @@ export default function FormComponent() {
 
     if (!isLtMaxSize) {
       // message.error(`Image must be smaller than ${MAX_IMAGE_SIZE_MB}MB!`);
-       notification.error({
+      notification.error({
         message: "Error",
         description: `Image must be smaller than ${MAX_IMAGE_SIZE_MB}MB!`,
         placement: "bottomRight", // Optional: can be 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'
@@ -386,31 +387,53 @@ export default function FormComponent() {
       );
       setIsEditTechnicianSignSaved(true);
       // message.success("Technician signature saved successfully (edit)");
-        notification.success({
+      notification.success({
         message: "Success",
         description: "Technician signature saved successfully (edit).",
-        placement: "bottomRight", 
+        placement: "bottomRight",
       });
     } else {
       // message.warning("Please draw technician signature before saving.");
-          notification.warning({
+      notification.warning({
         message: "Warning",
-        description: "Please draw technician signature before saving.",
-        placement: "bottomRight", 
+        description: "Please draw technician signature (edit) before saving.",
+        placement: "bottomRight",
       });
     }
   };
 
+  // const clearEditTechnicianSignature = () => {
+  //   editSigTechnician.current?.clear();
+  //   setEditSignatureTechnician("");
+  //   notification.success({
+  //     message: "Success",
+  //     description: "Technician signature was cleared (edit).",
+  //     placement: "bottomRight",
+  //   });
+  //   setIsEditTechnicianSignSaved(false);
+  // };
+
   const clearEditTechnicianSignature = () => {
-    editSigTechnician.current?.clear();
+   if (editSigTechnician.current && !editSigTechnician.current.isEmpty()) {
+        editSigTechnician.current?.clear();
     setEditSignatureTechnician("");
-        notification.success({
+     setIsEditTechnicianSignSaved(false);
+
+      notification.success({
         message: "Success",
-        description: "Technician signature was cleared (edit).",
-        placement: "bottomRight", 
+        description: "Technician signature was cleared (edit) successfully!",
+        placement: "bottomRight",
       });
-    setIsEditTechnicianSignSaved(false);
+    } else {
+      notification.warning({
+        message: "Warning",
+        description: "No technician signature (edit) found to clear.",
+        placement: "bottomRight",
+      });
+    }
+
   };
+
 
   const saveEditCustomerSignature = () => {
     if (editSigCustomer.current && !editSigCustomer.current.isEmpty()) {
@@ -419,31 +442,53 @@ export default function FormComponent() {
       );
       setIsEditCustomerSignSaved(true);
       // message.success("Customer signature saved successfully (edit)");
-        notification.success({
+      notification.success({
         message: "Success",
         description: "Customer signature saved successfully (edit).",
-        placement: "bottomRight", 
+        placement: "bottomRight",
       });
     } else {
       // message.warning("Please draw customer signature before saving.");
-         notification.warning({
+      notification.warning({
         message: "Warning",
-        description: "Please draw customer signature before saving",
-        placement: "bottomRight", 
+        description: "Please draw customer signature (edit) before saving",
+        placement: "bottomRight",
       });
     }
   };
 
-  const clearEditCustomerSignature = () => {
-    editSigCustomer.current?.clear();
-    setEditSignatureCustomer("");
-         notification.success({
+  // const clearEditCustomerSignature = () => {
+  //   editSigCustomer.current?.clear();
+  //   setEditSignatureCustomer("");
+  //   notification.success({
+  //     message: "Success",
+  //     description: "Customer signature was cleared (edit).",
+  //     placement: "bottomRight",
+  //   });
+  //   setIsEditCustomerSignSaved(false);
+  // };
+
+const clearEditCustomerSignature = () => {
+   if (editSigCustomer.current && !editSigCustomer.current.isEmpty()) {
+      editSigCustomer.current.clear();
+      setEditSignatureCustomer("");
+      setIsEditCustomerSignSaved(false);
+
+      notification.success({
         message: "Success",
-        description: "Customer signature was cleared (edit).",
-        placement: "bottomRight", 
+        description: "Customer signature was cleared (edit) successfully!",
+        placement: "bottomRight",
       });
-    setIsEditCustomerSignSaved(false);
+    } else {
+      notification.warning({
+        message: "Warning",
+        description: "No customer signature (edit) found to clear.",
+        placement: "bottomRight",
+      });
+    }
+
   };
+
 
   const handleEditManagerUpload = ({ file }) => {
     const reader = new FileReader();
@@ -451,12 +496,11 @@ export default function FormComponent() {
       setEditSignatureManager(reader.result);
       setIsEditManagerSignSaved(true);
       // message.success("Manager signature uploaded successfully (edit)");
-           notification.success({
+      notification.success({
         message: "Success",
         description: "Manager signature uploaded successfully (edit).",
-        placement: "bottomRight", 
+        placement: "bottomRight",
       });
-      
     };
     if (file) reader.readAsDataURL(file);
   };
@@ -464,17 +508,22 @@ export default function FormComponent() {
   const clearEditManagerSignature = () => {
     setEditSignatureManager(null);
     setIsEditManagerSignSaved(false);
-          notification.success({
-        message: "Success",
-        description: "Manager signature was cleared (edit).",
-        placement: "bottomRight", 
-      });
+    notification.success({
+      message: "Success",
+      description: "Manager signature was cleared (edit).",
+      placement: "bottomRight",
+    });
   };
 
   const handleCauseImageUpload = ({ file }) => {
     // ✅ Reject files over 3MB
     if (file.size > 3 * 1024 * 1024) {
-      message.error("File too large. Please upload images smaller than 3MB.");
+      // message.error("File too large. Please upload images smaller than 3MB.");
+      notification.error({
+        message: "Error",
+        description: "File too large. Please upload images smaller than 3MB.",
+        placement: "bottomRight",
+      });
       return false;
     }
 
@@ -489,7 +538,12 @@ export default function FormComponent() {
 
   const handleEditCauseImageUpload = ({ file }) => {
     if (file.size > 3 * 1024 * 1024) {
-      message.error("File too large.");
+      // message.error("File too large.");
+      notification.error({
+        message: "Error",
+        description: "File too large.",
+        placement: "bottomRight", // Optional: can be 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'
+      });
       return false;
     }
 
@@ -519,7 +573,12 @@ export default function FormComponent() {
     if (result.success && result.imageUrl) {
       return result.imageUrl;
     } else {
-      message.error("Image upload failed");
+      // message.error("Image upload failed");
+      notification.error({
+        message: "Error",
+        description: "Image upload failed.",
+        placement: "bottomRight",
+      });
       return "";
     }
   };
@@ -1060,9 +1119,15 @@ export default function FormComponent() {
     const limited = enforceTextLimit(input, 2, 100);
 
     if (input !== limited) {
-      message.warning(
-        "Address limited to 2 lines, 95 characters. Excess removed."
-      );
+      // message.warning(
+      //   "Address limited to 2 lines, 95 characters. Excess removed."
+      // );
+      notification.warning({
+        message: "Warning",
+        description:
+          "Address limited to 2 lines, 95 characters. Excess removed.",
+        placement: "bottomRight",
+      });
     }
 
     setAddress(limited);
@@ -1074,9 +1139,15 @@ export default function FormComponent() {
     const limited = enforceTextLimit(input, 2, 100);
 
     if (input !== limited) {
-      message.warning(
-        "Serial Number limited to 2 lines, 95 characters. Excess removed."
-      );
+      // message.warning(
+      //   "Serial Number limited to 2 lines, 95 characters. Excess removed."
+      // );
+      notification.warning({
+        message: "Warning",
+        description:
+          "Serial Number limited to 2 lines, 95 characters. Excess removed.",
+        placement: "bottomRight",
+      });
     }
 
     setSerialNumber(limited);
@@ -1088,9 +1159,15 @@ export default function FormComponent() {
     const limited = enforceTextLimit(input, 4, 1000);
 
     if (input !== limited) {
-      message.warning(
-        "Description limited to 4 lines, 995 characters. Excess removed."
-      );
+      // message.warning(
+      //   "Description limited to 4 lines, 995 characters. Excess removed."
+      // );
+      notification.warning({
+        message: "Warning",
+        description:
+          "Description limited to 4 lines, 995 characters. Excess removed.",
+        placement: "bottomRight",
+      });
     }
 
     setDescriptionText(limited);
@@ -1105,9 +1182,15 @@ export default function FormComponent() {
     const limited = enforceTextLimit(input, 2, 500);
 
     if (input !== limited) {
-      message.warning(
-        "Cause of Failure limited to 2 lines, 495 characters. Excess removed."
-      );
+      // message.warning(
+      //   "Cause of Failure limited to 2 lines, 495 characters. Excess removed."
+      // );
+      notification.warning({
+        message: "Warning",
+        description:
+          "Cause of Failure limited to 2 lines, 495 characters. Excess removed.",
+        placement: "bottomRight",
+      });
     }
 
     // setcauseOfFailure(limited);
@@ -1121,9 +1204,14 @@ export default function FormComponent() {
     const limited = enforceTextLimit(input, 1, 200);
 
     if (input !== limited) {
-      message.warning(
-        "Notes limited to 1 line, 195 characters. Excess removed."
-      );
+      // message.warning(
+      //   "Notes limited to 1 line, 195 characters. Excess removed."
+      // );
+      notification.warning({
+        message: "Warning",
+        description: "Notes limited to 1 line, 195 characters. Excess removed.",
+        placement: "bottomRight",
+      });
     }
 
     setNotes(limited);
@@ -1135,9 +1223,15 @@ export default function FormComponent() {
     const limited = enforceTextLimit(input, 2, 100);
 
     if (input !== limited) {
-      message.warning(
-        "Serial Number limited to 2 lines, 95 characters. Excess removed."
-      );
+      // message.warning(
+      //   "Serial Number limited to 2 lines, 95 characters. Excess removed."
+      // );
+      notification.warning({
+        message: "Warning",
+        description:
+          "Serial Number limited to 2 lines, 95 characters. Excess removed.",
+        placement: "bottomRight",
+      });
     }
 
     setSerialNumber(limited); // or setEditSerialNumber if you use a separate state
@@ -1149,9 +1243,15 @@ export default function FormComponent() {
     const limited = enforceTextLimit(input, 2, 100);
 
     if (input !== limited) {
-      message.warning(
-        "Address limited to 2 lines, 95 characters. Excess removed."
-      );
+      // message.warning(
+      //   "Address limited to 2 lines, 95 characters. Excess removed."
+      // );
+      notification.warning({
+        message: "Warning",
+        description:
+          "Address limited to 2 lines, 95 characters. Excess removed.",
+        placement: "bottomRight",
+      });
     }
 
     setAddress(limited); // or setEditAddress
@@ -1163,9 +1263,15 @@ export default function FormComponent() {
     const limited = enforceTextLimit(input, 4, 1000);
 
     if (input !== limited) {
-      message.warning(
-        "Description limited to 4 lines, 995 characters. Excess removed."
-      );
+      // message.warning(
+      //   "Description limited to 4 lines, 995 characters. Excess removed."
+      // );
+      notification.warning({
+        message: "Warning",
+        description:
+          "Description limited to 4 lines, 995 characters. Excess removed.",
+        placement: "bottomRight",
+      });
     }
 
     setDescriptionText(limited); // or setEditDescriptionText
@@ -1179,9 +1285,15 @@ export default function FormComponent() {
     const limited = enforceTextLimit(input, 2, 500);
 
     if (input !== limited) {
-      message.warning(
-        "Cause of Failure limited to 2 lines, 495 characters. Excess removed."
-      );
+      // message.warning(
+      //   "Cause of Failure limited to 2 lines, 495 characters. Excess removed."
+      // );
+      notification.warning({
+        message: "Warning",
+        description:
+          "Cause of Failure limited to 2 lines, 495 characters. Excess removed.",
+        placement: "bottomRight",
+      });
     }
 
     setEditCauseText(limited);
@@ -1193,9 +1305,14 @@ export default function FormComponent() {
     const limited = enforceTextLimit(input, 1, 200);
 
     if (input !== limited) {
-      message.warning(
-        "Notes limited to 1 line, 195 characters. Excess removed."
-      );
+      // message.warning(
+      //   "Notes limited to 1 line, 195 characters. Excess removed."
+      // );
+      notification.warning({
+        message: "Warning",
+        description: "Notes limited to 1 line, 195 characters. Excess removed.",
+        placement: "bottomRight",
+      });
     }
 
     setNotes(limited); // or setEditNotes
@@ -1217,9 +1334,9 @@ export default function FormComponent() {
       typeof value === "string" ? value : value?.toString() || "";
 
     const maxLengths = {
-      partNumber: 30,
-      description: 60,
-      note: 60,
+      partNumber: 19,
+      description: 30,
+      note: 30,
     };
 
     const maxRows = {
@@ -1230,23 +1347,59 @@ export default function FormComponent() {
 
     const fieldMessages = {
       partNumber:
-        "Input limited to 1 line, 30 characters. Excess text won't be included.",
+        "Part Number field input limited to 1 line, 19 characters. Excess text won't be included.",
       description:
-        "Input limited to 1 line, 60 characters. Excess text won't be included.",
-      note: "Input limited to 1 line, 60 characters. Excess text won't be included.",
+        "Description field input limited to 1 line, 30 characters. Excess text won't be included.",
+      note: "Note field input limited to 1 line, 30 characters. Excess text won't be included.",
     };
-
+    console.log(
+      "Checking field:",
+      field,
+      "value:",
+      JSON.stringify(stringValue)
+    );
     let lines = stringValue.split("\n");
 
     // Enforce row limits
     if (lines.length > maxRows[field]) {
-      message.warning(fieldMessages[field]);
+      console.log("Too many lines for", field);
+
+      // message.warning(fieldMessages[field]);
+      notification.warning({
+        message: "Warning",
+        description: fieldMessages[field],
+        placement: "bottomRight",
+      });
       stringValue = lines.slice(0, maxRows[field]).join("\n");
     }
 
     // Enforce character limits
-    if (stringValue.length > maxLengths[field]) {
-      message.warning(fieldMessages[field]);
+    // if (stringValue.length > maxLengths[field]) {
+    //     console.log("Too many characters for", field);
+
+    //   // message.warning(fieldMessages[field]);
+    //      notification.warning({
+    //     message: "Warning",
+    //     description: fieldMessages[field],
+    //     placement: "bottomRight",
+    //   });
+    //   stringValue = stringValue.substring(0, maxLengths[field]);
+    // }
+
+    // Enforce character limits
+    if (stringValue.length >= maxLengths[field]) {
+      // Show warning only when the user hits the limit exactly (not less)
+      if (stringValue.length === maxLengths[field]) {
+        console.log("Limit reached for", field);
+
+        notification.warning({
+          message: "Warning",
+          description: fieldMessages[field],
+          placement: "bottomRight",
+        });
+      }
+
+      // Trim text if it somehow exceeded (like via paste)
       stringValue = stringValue.substring(0, maxLengths[field]);
     }
 
@@ -1274,9 +1427,9 @@ export default function FormComponent() {
       typeof value === "string" ? value : value?.toString() || "";
 
     const maxLengths = {
-      partNumber: 30,
-      description: 60,
-      note: 60,
+      partNumber: 19,
+      description: 30,
+      note: 30,
     };
 
     const maxRows = {
@@ -1287,23 +1440,53 @@ export default function FormComponent() {
 
     const fieldMessages = {
       partNumber:
-        "Input limited to 1 line, 30 characters. Excess text won't be included.",
+        "Part Number field input limited to 1 line, 19 characters. Excess text won't be included.",
       description:
-        "Input limited to 1 line, 60 characters. Excess text won't be included.",
-      note: "Input limited to 1 line, 60 characters. Excess text won't be included.",
+        "Description field input limited to 1 line, 30 characters. Excess text won't be included.",
+      note: "Note field input limited to 1 line, 30 characters. Excess text won't be included.",
     };
 
     let lines = stringValue.split("\n");
 
     if (lines.length > maxRows[field]) {
-      message.warning(fieldMessages[field]);
+      // message.warning(fieldMessages[field]);
+      notification.warning({
+        message: "Warning",
+        description: fieldMessages[field],
+        placement: "bottomRight",
+      });
       stringValue = lines.slice(0, maxRows[field]).join("\n");
     }
 
-    if (stringValue.length > maxLengths[field]) {
-      message.warning(fieldMessages[field]);
+    // if (stringValue.length > maxLengths[field]) {
+    //   // message.warning(fieldMessages[field]);
+    //      notification.warning({
+    //     message: "Warning",
+    //     description: fieldMessages[field],
+    //     placement: "bottomRight",
+    //   });
+    //   stringValue = stringValue.substring(0, maxLengths[field]);
+    // }
+
+    if (stringValue.length >= maxLengths[field]) {
+      // Show warning only when the user hits the limit exactly (not less)
+      if (stringValue.length === maxLengths[field]) {
+        console.log("Limit reached for", field);
+
+        notification.warning({
+          message: "Warning",
+          description: fieldMessages[field],
+          placement: "bottomRight",
+        });
+      }
+
+      // Trim text if it somehow exceeded (like via paste)
       stringValue = stringValue.substring(0, maxLengths[field]);
     }
+    setTooltipVisibility((prev) => ({
+      ...prev,
+      [key]: { ...prev[key], [field]: true }, // Show tooltip
+    }));
 
     const updatedData = editTabledata.map((row) =>
       row.key === key ? { ...row, [field]: stringValue } : row
@@ -1329,7 +1512,12 @@ export default function FormComponent() {
       };
       setData([...data, newRow]);
     } else {
-      message.warning("Rows cannot exceed more than 2!");
+      // message.warning("Rows cannot exceed more than 2!");
+      notification.warning({
+        message: "Warning",
+        description: "Rows cannot exceed more than 2!",
+        placement: "bottomRight",
+      });
     }
   };
 
@@ -1350,7 +1538,12 @@ export default function FormComponent() {
       };
       setEditTableData([...editTabledata, newRow]);
     } else {
-      message.warning("Rows cannot exceed more than 2!");
+      // message.warning("Rows cannot exceed more than 2!");
+      notification.warning({
+        message: "Warning",
+        description: "Rows cannot exceed more than 2!",
+        placement: "bottomRight",
+      });
     }
   };
 
@@ -1836,7 +2029,12 @@ export default function FormComponent() {
       // console.log("Uploaded Image (Base64):", reader.result); // Debugging
       setSignatureManager(reader.result);
       setIsManagerSignUploaded(true);
-      message.success("Manager Signature uploaded successfully!");
+      // message.success("Manager Signature uploaded successfully!");
+      notification.success({
+        message: "Success",
+        description: "Manager Signature uploaded successfully!",
+        placement: "bottomRight",
+      });
     };
 
     if (file) {
@@ -1848,7 +2046,12 @@ export default function FormComponent() {
     // setSignatureManager(""); // Remove signature
     setSignatureManager(null); // Remove signature
     setIsManagerSignUploaded(false);
-    message.success("Signature removed.");
+    // message.success("Signature removed.");
+    notification.success({
+      message: "Success",
+      description: "Manager signature removed successfully!",
+      placement: "bottomRight",
+    });
   };
 
   const updateCanvasSize = () => {
@@ -1868,15 +2071,61 @@ export default function FormComponent() {
         sigTechnician.current.getCanvas().toDataURL("image/png")
       );
       setIsTechnicianSignSaved(true);
-      message.success("Technician Signature saved successfully!");
+      // message.success("Technician Signature saved successfully!");
+      notification.success({
+        message: "Success",
+        description: "Technician signature saved successfully!",
+        placement: "bottomRight",
+      });
     } else {
-      message.error("Please draw a signature before saving.");
+      // message.error("Please draw a signature before saving.");
+      notification.error({
+        message: "Error",
+        description: "Please draw the technician signature before saving.",
+        placement: "bottomRight",
+      });
     }
   };
+  // const clearTechnicianSignature = () => {
+  //       if (sigTechnician.current && !sigTechnician.current.isEmpty()) {
+  //     // message.success("Technician Signature saved successfully!");
+  //     notification.success({
+  //       message: "Success",
+  //       description: "Technician signature cleared successfully!",
+  //       placement: "bottomRight",
+  //     });
+  //   } else {
+  //     // message.error("Please draw a signature before saving.");
+  //       notification.error({
+  //       message: "Error",
+  //       description: "Please draw the technician signature before clearning.",
+  //       placement: "bottomRight",
+  //     });
+  //   }
+  //   sigTechnician.current.clear();
+  //   setSignatureTechnician("");
+  //   setIsTechnicianSignSaved(false);
+
+  // };
+
   const clearTechnicianSignature = () => {
-    sigTechnician.current.clear();
-    setSignatureTechnician("");
-    setIsTechnicianSignSaved(false);
+    if (sigTechnician.current && !sigTechnician.current.isEmpty()) {
+      sigTechnician.current.clear();
+      setSignatureTechnician("");
+      setIsTechnicianSignSaved(false);
+
+      notification.success({
+        message: "Success",
+        description: "Technician signature cleared successfully!",
+        placement: "bottomRight",
+      });
+    } else {
+      notification.warning({
+        message: "Warning",
+        description: "No technician signature found to clear.",
+        placement: "bottomRight",
+      });
+    }
   };
 
   // Customer Signature
@@ -1886,15 +2135,44 @@ export default function FormComponent() {
         sigCustomer.current.getCanvas().toDataURL("image/png")
       );
       setIsCustomerSignSaved(true);
-      message.success("Customer Signature saved successfully!");
+      // message.success("Customer Signature saved successfully!");
+      notification.success({
+        message: "Success",
+        description: "Customer signature saved successfully!",
+        placement: "bottomRight",
+      });
     } else {
-      message.error("Please draw a signature before saving.");
+      // message.error("Please draw customer signature before saving.");
+      notification.error({
+        message: "Error",
+        description: "Please draw the customer signature before saving.",
+        placement: "bottomRight",
+      });
     }
   };
+  // const clearCustomerSignature = () => {
+  //   sigCustomer.current.clear();
+  //   setSignatureCustomer("");
+  //   setIsCustomerSignSaved(false);
+  // };
   const clearCustomerSignature = () => {
-    sigCustomer.current.clear();
-    setSignatureCustomer("");
-    setIsCustomerSignSaved(false);
+    if (sigCustomer.current && !sigCustomer.current.isEmpty()) {
+      sigCustomer.current.clear();
+      setSignatureCustomer("");
+      setIsCustomerSignSaved(false);
+
+      notification.success({
+        message: "Success",
+        description: "Customer signature  cleared successfully!",
+        placement: "bottomRight",
+      });
+    } else {
+      notification.warning({
+        message: "Warning",
+        description: "No customer signature found to clear.",
+        placement: "bottomRight",
+      });
+    }
   };
 
   const getBase64Image = (imgUrl, callback) => {
@@ -1935,10 +2213,20 @@ export default function FormComponent() {
 
       const result = await response.json();
       if (result.success) {
-        message.success("PDF uploaded to Drive");
-        console.log("Drive Link:", result.url);
+        // message.success("PDF uploaded to Drive");
+        notification.success({
+          message: "Success",
+          description: "PDF uploaded to Drive!",
+          placement: "bottomRight",
+        });
+        // console.log("Drive Link:", result.url);
       } else {
-        message.error("Failed to upload PDF: " + result.message);
+        // message.error("Failed to upload PDF: " + result.message);
+        notification.error({
+          message: "Error",
+          description: "Failed to upload PDF: " + result.message,
+          placement: "bottomRight",
+        });
       }
     };
 
@@ -3370,7 +3658,12 @@ export default function FormComponent() {
 
   const handleExportToExcel = () => {
     if (!customerDataList.length) {
-      message.warning("No data to export.");
+      // message.warning("No data to export.");
+      notification.warning({
+        message: "Warning",
+        description: "No data was found to export.",
+        placement: "bottomRight",
+      });
       return;
     }
 
@@ -3546,7 +3839,18 @@ export default function FormComponent() {
     setLoading(true);
 
     try {
-      if (!srn) return message.error("SRN missing.");
+      // if (!srn) return message.error("SRN missing.");
+
+      if (!srn) {
+        // message.error("SRN missing.");
+        notification.error({
+          message: "Error",
+          description: "Service Request Number is missing.",
+          placement: "bottomRight",
+        });
+        return;
+      }
+
       const isTooLong =
         serialNumber.length > 100 ||
         address.length > 100 ||
@@ -3555,9 +3859,17 @@ export default function FormComponent() {
         notes.length > 200;
 
       if (isTooLong) {
-        message.error(
-          "Some inputs exceed allowed limits. Please fix them before submitting."
-        );
+        // message.error(
+        //   "Some inputs exceed allowed limits. Please fix them before submitting."
+        // );
+
+        notification.error({
+          message: "Error",
+          description:
+            "Some inputs exceed allowed limits. Please fix them before submitting.",
+          placement: "bottomRight", // Optional: can be 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'
+        });
+
         return;
       }
       // if (!signatureTechnician || !signatureManager || !signatureCustomer){
@@ -3566,14 +3878,28 @@ export default function FormComponent() {
       //   );
       // }
 
+      // if (
+      //   !isTechnicianSignSaved ||
+      //   !isCustomerSignSaved ||
+      //   !isManagerSignUploaded
+      // ) {
+      //   return message.error(
+      //     "Please ensure the manager's signature is uploaded, and the technician's and customer's signatures are saved before submitting."
+      //   );
+      // }
+
       if (
         !isTechnicianSignSaved ||
         !isCustomerSignSaved ||
         !isManagerSignUploaded
       ) {
-        return message.error(
-          "Please ensure the manager's signature is uploaded, and the technician's and customer's signatures are saved before submitting."
-        );
+        notification.error({
+          message: "Error",
+          description:
+            "Please ensure the manager's signature is uploaded, and the technician's and customer's signatures are saved before submitting.",
+          placement: "bottomRight",
+        });
+        return;
       }
 
       const cleanedPartsUsed = data.map((row) => ({
@@ -3594,7 +3920,13 @@ export default function FormComponent() {
         const uploadResult = await uploadImageBase64(causeOfFailureImage);
 
         if (!uploadResult.success) {
-          message.error("Image upload failed: " + uploadResult.message);
+          // message.error("Image upload failed: " + uploadResult.message);
+          notification.error({
+            message: "Error",
+            // description: "Image upload failed: " + uploadResult.message,
+            description: `Image upload failed: ${uploadResult.message}`,
+            placement: "bottomRight",
+          });
           setIsSubmitting(false);
           return;
         }
@@ -3660,12 +3992,24 @@ export default function FormComponent() {
       const result = await res.json();
 
       if (!result.success) {
-        message.error(result.message || "Submission failed.");
+        // message.error(result.message || "Submission failed.");
+        notification.error({
+          message: "Error",
+          description: result.message || "Submission failed.",
+          placement: "bottomRight",
+        });
         // alert("Error: " + result.message);
         return;
       }
 
-      message.success("Form submitted successfully!");
+      // message.success("Form submitted successfully!");
+
+      notification.success({
+        message: "Success",
+        description: "Form submitted successfully!",
+        placement: "bottomRight",
+      });
+
       if (causeImageUrl) {
         // message.success("Upload successful!\nImage URL:\n" + causeImageUrl);
       }
@@ -3739,7 +4083,13 @@ export default function FormComponent() {
       loadAllCustomerData();
     } catch (err) {
       // console.error("Submission error:", err);
-      message.error("Something went wrong.");
+      // message.error("Something went wrong.");
+
+      notification.error({
+        message: "Error",
+        description: "Oops, something went wrong!",
+        placement: "bottomRight",
+      });
     } finally {
       setLoading(false);
       setIsSubmitting(false);
@@ -3963,9 +4313,17 @@ export default function FormComponent() {
         (values["notes/further action required"]?.length || 0) > 200;
 
       if (isTooLong) {
-        message.error(
-          "Some inputs exceed allowed limits. Please fix them before submitting."
-        );
+        // message.error(
+        //   "Some inputs exceed allowed limits. Please fix them before submitting."
+        // );
+
+        notification.error({
+          message: "Error",
+          description:
+            "Some inputs exceed allowed limits. Please fix them before submitting.",
+          placement: "bottomRight",
+        });
+
         setIsEditSubmitting(false);
         setEditLoading(false);
         return;
@@ -3983,9 +4341,17 @@ export default function FormComponent() {
         !isEditManagerSignSaved ||
         managerEmpty
       ) {
-        message.error(
-          "The manager's signature must be uploaded. The technician's and customer's signatures must be saved before submitting."
-        );
+        // message.error(
+        //   "The manager's signature must be uploaded. The technician's and customer's signatures must be saved before submitting."
+        // );
+
+        notification.error({
+          message: "Error",
+          description:
+            "The manager's signature must be uploaded. The technician's and customer's signatures must be saved before submitting.",
+          placement: "bottomRight",
+        });
+
         setIsEditSubmitting(false);
         setEditLoading(false);
         return;
@@ -4025,13 +4391,29 @@ export default function FormComponent() {
           // console.log("Image deletion result:", result);
 
           if (result.success) {
-            message.success("Image deleted from Drive.");
+            // message.success("Image deleted from Drive.");
+            notification.success({
+              message: "Success",
+              description: "Image deleted from Drive.",
+              placement: "bottomRight",
+            });
           } else {
-            message.warning("Image deletion failed: " + result.message);
+            // message.warning("Image deletion failed: " + result.message);
+            notification.warning({
+              message: "Warning",
+              description: `Image deletion failed: ${result.message}`,
+              placement: "bottomRight",
+            });
           }
         } catch (err) {
           // console.error("Image deletion request failed:", err);
-          message.error("Failed to delete image from Drive.");
+          // message.error("Failed to delete image from Drive.");
+
+          notification.error({
+            message: "Error",
+            description: "Failed to delete image from Drive.",
+            placement: "bottomRight",
+          });
         }
       }
 
@@ -4051,7 +4433,13 @@ export default function FormComponent() {
           const newImageUrl = result.imageUrl;
           updatedCauseText += `\nImage: ${newImageUrl}\nFilename: ${fileToUpload.name}`;
         } else {
-          message.error("Image upload failed, submission aborted.");
+          // message.error("Image upload failed, submission aborted.");
+
+          notification.error({
+            message: "Error",
+            description: "Image upload failed, submission aborted.",
+            placement: "bottomRight",
+          });
           setIsEditSubmitting(false);
           return;
         }
@@ -4156,7 +4544,12 @@ export default function FormComponent() {
       setEditSignatureManager(null);
       loadAllCustomerData();
     } catch (err) {
-      message.error("Failed to submit update: " + err.message);
+      // message.error("Failed to submit update: " + err.message);
+      notification.error({
+        message: "Error",
+        description: "Failed to submit update: " + err.message,
+        placement: "bottomRight",
+      });
     } finally {
       setIsEditSubmitting(false);
       setEditLoading(false);
@@ -4174,11 +4567,22 @@ export default function FormComponent() {
     const result = await res.json();
     if (result.success) {
       await loadAllCustomerData();
-      message.success("Form updated successfully!");
+      // message.success("Form updated successfully!");
+      notification.success({
+        message: "Success",
+        description: "Form updated successfully!",
+        placement: "bottomRight",
+      });
+
       setEditModalOpen(false);
       hasInitializedEditForm.current = false;
     } else {
-      message.error("Update failed: " + result.message);
+      // message.error("Update failed: " + result.message);
+      notification.error({
+        message: "Error",
+        description: "Update failed: " + result.message,
+        placement: "bottomRight",
+      });
     }
   };
 
@@ -4193,7 +4597,12 @@ export default function FormComponent() {
 
     const result = await res.json();
     if (result.success) {
-      message.success("Record updated.");
+      // message.success("Record updated.");
+      notification.success({
+        message: "Success",
+        description: "Record updated successfully!",
+        placement: "bottomRight",
+      });
       setEditModalOpen(false);
       hasInitializedEditForm.current = false;
 
@@ -4222,7 +4631,15 @@ export default function FormComponent() {
   };
 
   const handleDownloadPDF = async (srn) => {
-    if (!srn) return message.error("SRN is missing.");
+    // if (!srn) return message.error("SRN is missing.");
+    if (!srn) {
+      notification.error({
+        message: "Error",
+        description: "Service Request Number is missing.",
+        placement: "bottomRight",
+      });
+      return;
+    }
 
     const payload = new URLSearchParams();
     payload.append("action", "getPdfLink");
@@ -4243,10 +4660,20 @@ export default function FormComponent() {
       if (result.success && result.url) {
         window.open(result.url, "_blank");
       } else {
-        message.error(result.message || "Failed to retrieve PDF.");
+        // message.error(result.message || "Failed to retrieve PDF.");
+        notification.error({
+          message: "Error",
+          description: result.message || "Failed to retrieve PDF.",
+          placement: "bottomRight",
+        });
       }
     } catch (error) {
-      message.error("Error fetching PDF link.");
+      // message.error("Error fetching PDF link.");
+      notification.error({
+        message: "Error",
+        description: "Error fetching PDF link.",
+        placement: "bottomRight",
+      });
     }
   };
 
@@ -4990,7 +5417,12 @@ export default function FormComponent() {
                 icon={<ExportOutlined />}
                 onClick={() => {
                   handleExportToExcel();
-                  message.success("Data Exported Successfully");
+                  // message.success("Data Exported Successfully");
+                  notification.success({
+                    message: "Success",
+                    description: "Data Exported Successfully",
+                    placement: "bottomRight",
+                  });
                 }}
                 style={{ marginLeft: 8, backgroundColor: "#0D3884 !important" }}
               >
@@ -5011,13 +5443,18 @@ export default function FormComponent() {
                       searchSRN === ""
                     ) {
                       // message.info("No search input found");
-                            notification.info({
-                             message: 'No Input',
-                             description: 'No search input found',
-                              placement: 'bottomRight', 
-                            });
+                      notification.info({
+                        message: "No Input",
+                        description: "No search input found",
+                        placement: "bottomRight",
+                      });
                     } else {
-                      message.success("Search inputs are cleared");
+                      // message.success("Search inputs are cleared");
+                      notification.success({
+                        message: "Success",
+                        description: "Search inputs are cleared",
+                        placement: "bottomRight",
+                      });
                     }
                   }}
                   className="ms-2 dangerbutton"
@@ -5673,11 +6110,23 @@ export default function FormComponent() {
                           const isLtMaxSize = file.size / 1024 / 1024 < 5;
 
                           if (!isImage) {
-                            message.error("Only image files are allowed.");
+                            // message.error("Only image files are allowed.");
+                            notification.error({
+                              message: "Error",
+                              description: "Only image files are allowed.",
+                              placement: "bottomRight",
+                            });
+
                             return Upload.LIST_IGNORE;
                           }
                           if (!isLtMaxSize) {
-                            message.error("Image must be smaller than 5MB!");
+                            // message.error("Image must be smaller than 5MB!");
+                            notification.error({
+                              message: "Error",
+                              description: "Image must be smaller than 5MB!",
+                              placement: "bottomRight",
+                            });
+
                             return Upload.LIST_IGNORE;
                           }
 
