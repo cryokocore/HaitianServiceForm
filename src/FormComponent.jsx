@@ -57,13 +57,13 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(isBetween);
 
-message.config({
-  duration: 3,
-  maxCount: 3,
-});
+// message.config({
+//   duration: 3,
+//   maxCount: 3,
+// });
 
 notification.config({
-  duration: 3,
+  duration: 4,
   maxCount: 3,
 });
 
@@ -227,7 +227,7 @@ export default function FormComponent() {
       payload.append("originalFilename", file.name);
 
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
+        "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -415,7 +415,7 @@ export default function FormComponent() {
 
   const clearEditTechnicianSignature = () => {
    if (editSigTechnician.current && !editSigTechnician.current.isEmpty()) {
-        editSigTechnician.current?.clear();
+      editSigTechnician.current?.clear();
     setEditSignatureTechnician("");
      setIsEditTechnicianSignSaved(false);
 
@@ -562,7 +562,7 @@ const clearEditCustomerSignature = () => {
     formData.append("causeImage", causeOfFailureImage);
 
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
+      "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
       {
         method: "POST",
         body: formData,
@@ -897,7 +897,7 @@ const clearEditCustomerSignature = () => {
 
   const loadAllCustomerData = async () => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec?action=getAllCustomerData"
+      "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec?action=getAllCustomerData"
     );
     const result = await res.json();
 
@@ -997,7 +997,7 @@ const clearEditCustomerSignature = () => {
   const fetchCustomerNames = async () => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec?action=getAllCustomerData`
+        `https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec?action=getAllCustomerData`
       );
       const result = await res.json();
 
@@ -1027,7 +1027,7 @@ const clearEditCustomerSignature = () => {
   const handleCustomerSelect = async (selectedName) => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec?action=getCustomerData&name=${encodeURIComponent(
+        `https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec?action=getCustomerData&name=${encodeURIComponent(
           selectedName
         )}`
       );
@@ -1056,7 +1056,7 @@ const clearEditCustomerSignature = () => {
   const fetchSRN = async () => {
     try {
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec"
+        "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec"
       );
       const data = await response.json(); // ✅ Parse JSON directly
 
@@ -1125,7 +1125,7 @@ const clearEditCustomerSignature = () => {
       notification.warning({
         message: "Warning",
         description:
-          "Address limited to 2 lines, 95 characters. Excess removed.",
+          "Address input was limited to 2 lines, 95 characters. Excess removed.",
         placement: "bottomRight",
       });
     }
@@ -1145,7 +1145,7 @@ const clearEditCustomerSignature = () => {
       notification.warning({
         message: "Warning",
         description:
-          "Serial Number limited to 2 lines, 95 characters. Excess removed.",
+          "Serial Number input was limited to 2 lines, 95 characters. Excess removed.",
         placement: "bottomRight",
       });
     }
@@ -1165,7 +1165,7 @@ const clearEditCustomerSignature = () => {
       notification.warning({
         message: "Warning",
         description:
-          "Description limited to 4 lines, 995 characters. Excess removed.",
+          "Description input was limited to 4 lines, 995 characters. Excess removed.",
         placement: "bottomRight",
       });
     }
@@ -1188,7 +1188,7 @@ const clearEditCustomerSignature = () => {
       notification.warning({
         message: "Warning",
         description:
-          "Cause of Failure limited to 2 lines, 495 characters. Excess removed.",
+          "Cause of Failure input was limited to 2 lines, 495 characters. Excess removed.",
         placement: "bottomRight",
       });
     }
@@ -1209,7 +1209,7 @@ const clearEditCustomerSignature = () => {
       // );
       notification.warning({
         message: "Warning",
-        description: "Notes limited to 1 line, 195 characters. Excess removed.",
+        description: "Notes input was limited to 1 line, 195 characters. Excess removed.",
         placement: "bottomRight",
       });
     }
@@ -1229,7 +1229,7 @@ const clearEditCustomerSignature = () => {
       notification.warning({
         message: "Warning",
         description:
-          "Serial Number limited to 2 lines, 95 characters. Excess removed.",
+          "Serial Number input was limited to 2 lines, 95 characters. Excess removed.",
         placement: "bottomRight",
       });
     }
@@ -1249,7 +1249,7 @@ const clearEditCustomerSignature = () => {
       notification.warning({
         message: "Warning",
         description:
-          "Address limited to 2 lines, 95 characters. Excess removed.",
+          "Address input was limited to 2 lines, 95 characters. Excess removed.",
         placement: "bottomRight",
       });
     }
@@ -1269,7 +1269,7 @@ const clearEditCustomerSignature = () => {
       notification.warning({
         message: "Warning",
         description:
-          "Description limited to 4 lines, 995 characters. Excess removed.",
+          "Description input was limited to 4 lines, 995 characters. Excess removed.",
         placement: "bottomRight",
       });
     }
@@ -1291,7 +1291,7 @@ const clearEditCustomerSignature = () => {
       notification.warning({
         message: "Warning",
         description:
-          "Cause of Failure limited to 2 lines, 495 characters. Excess removed.",
+          "Cause of Failure input was limited to 2 lines, 495 characters. Excess removed.",
         placement: "bottomRight",
       });
     }
@@ -1310,7 +1310,7 @@ const clearEditCustomerSignature = () => {
       // );
       notification.warning({
         message: "Warning",
-        description: "Notes limited to 1 line, 195 characters. Excess removed.",
+        description: "Notes input was limited to 1 line, 195 characters. Excess removed.",
         placement: "bottomRight",
       });
     }
@@ -2163,7 +2163,7 @@ const clearEditCustomerSignature = () => {
 
       notification.success({
         message: "Success",
-        description: "Customer signature  cleared successfully!",
+        description: "Customer signature cleared successfully!",
         placement: "bottomRight",
       });
     } else {
@@ -2191,6 +2191,7 @@ const clearEditCustomerSignature = () => {
   };
 
   const uploadPdfToDrive = async (pdfBlob, filename) => {
+      const customerName = formData.customerName || "";
     const reader = new FileReader();
     reader.onloadend = async () => {
       const base64 = reader.result.split(",")[1];
@@ -2199,9 +2200,10 @@ const clearEditCustomerSignature = () => {
       payload.append("action", "uploadPdf");
       payload.append("pdfBase64", base64);
       payload.append("filename", filename);
+      payload.append("customerName", customerName);
 
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
+        "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
         {
           method: "POST",
           headers: {
@@ -2216,7 +2218,7 @@ const clearEditCustomerSignature = () => {
         // message.success("PDF uploaded to Drive");
         notification.success({
           message: "Success",
-          description: "PDF uploaded to Drive!",
+          description: "PDF uploaded to Drive successfully!",
           placement: "bottomRight",
         });
         // console.log("Drive Link:", result.url);
@@ -2224,7 +2226,7 @@ const clearEditCustomerSignature = () => {
         // message.error("Failed to upload PDF: " + result.message);
         notification.error({
           message: "Error",
-          description: "Failed to upload PDF: " + result.message,
+          description: "Failed to upload PDF in Drive: " + result.message,
           placement: "bottomRight",
         });
       }
@@ -2779,7 +2781,12 @@ const clearEditCustomerSignature = () => {
       { align: "center" }
     );
 
-    const fileName = `HT_Service_Report_${srn || "N/A"}.pdf`;
+    // const fileName = `HT_Service_Report_${srn || "N/A"}.pdf`;
+
+       const sanitizedCustomerName = formData.customerName.replace(/[^a-zA-Z0-9- ]/g, "").trim();
+
+    const fileName = `HT Service Report ${sanitizedCustomerName} ${srn|| "N/A"}.pdf`;
+
 
     // doc.save("Service_Report.pdf");
     doc.save(fileName);
@@ -3330,7 +3337,12 @@ const clearEditCustomerSignature = () => {
       { align: "center" }
     );
 
-    const fileName = `HT_Service_Report_${editsrn || "N/A"}.pdf`;
+    // const fileName = `HT_Service_Report_${editsrn || "N/A"}.pdf`;
+
+    // const sanitizedCustomerName = formData.customerName.replace(/[^a-zA-Z0-9-_ ]/g, "").replace(/\s+/g, "_");
+    const sanitizedEditCustomerName = formData.customerName.replace(/[^a-zA-Z0-9- ]/g, "").trim();
+
+const fileName = `HT Service Report ${sanitizedEditCustomerName} ${editsrn || "N/A"}.pdf`;
 
     // doc.save("Service_Report.pdf");
     doc.save(fileName);
@@ -3355,7 +3367,7 @@ const clearEditCustomerSignature = () => {
 
     // Sending the file to the Google Apps Script for uploading to Drive
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
+      "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
       {
         method: "POST",
         headers: {
@@ -3819,11 +3831,14 @@ const clearEditCustomerSignature = () => {
         description: "Table data refreshed. Showing updated data",
         placement: "bottomRight", // Optional: can be 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'
       });
+          setSearchText("");
+                    setSearchInstallationDate(null);
+                    setSearchSRN("");
     } catch (err) {
       // message.error("Failed to refresh data");
       notification.error({
         message: "Error",
-        description: "Table data refreshed. Showing updated data",
+        description: "Failed to refresh data",
         placement: "bottomRight", // Optional: can be 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'
       });
       // console.error("Refresh error:", err);
@@ -3866,7 +3881,7 @@ const clearEditCustomerSignature = () => {
         notification.error({
           message: "Error",
           description:
-            "Some inputs exceed allowed limits. Please fix them before submitting.",
+            "Some inputs exceed allowed limits. Please check and fix them before submitting.",
           placement: "bottomRight", // Optional: can be 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'
         });
 
@@ -3982,7 +3997,7 @@ const clearEditCustomerSignature = () => {
       // setLoading(true);
 
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
+        "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
         {
           method: "POST",
           body: formData,
@@ -3995,7 +4010,7 @@ const clearEditCustomerSignature = () => {
         // message.error(result.message || "Submission failed.");
         notification.error({
           message: "Error",
-          description: result.message || "Submission failed.",
+          description: result.message || "Form Submission failed.",
           placement: "bottomRight",
         });
         // alert("Error: " + result.message);
@@ -4078,7 +4093,6 @@ const clearEditCustomerSignature = () => {
       setIsTechnicianSignSaved(false);
       setIsCustomerSignSaved(false);
       setIsManagerSignUploaded(false);
-
       await fetchSRN();
       loadAllCustomerData();
     } catch (err) {
@@ -4320,7 +4334,7 @@ const clearEditCustomerSignature = () => {
         notification.error({
           message: "Error",
           description:
-            "Some inputs exceed allowed limits. Please fix them before submitting.",
+            "Some inputs exceed allowed limits. Please check and fix them before submitting.",
           placement: "bottomRight",
         });
 
@@ -4376,7 +4390,7 @@ const clearEditCustomerSignature = () => {
       if (isEditImageMarkedForDeletion && editViewUrl) {
         try {
           const deleteRes = await fetch(
-            "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
+            "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
             {
               method: "POST",
               headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -4558,7 +4572,7 @@ const clearEditCustomerSignature = () => {
 
   const postUpdate = async (formData) => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
+      "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
       {
         method: "POST",
         body: formData,
@@ -4588,7 +4602,7 @@ const clearEditCustomerSignature = () => {
 
   const submitUpdate = async (payload) => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
+      "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
       {
         method: "POST",
         body: new URLSearchParams(payload),
@@ -4618,7 +4632,7 @@ const clearEditCustomerSignature = () => {
     payload.append("imageUrl", url);
 
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
+      "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
       {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -4647,7 +4661,7 @@ const clearEditCustomerSignature = () => {
 
     try {
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbzO5XQjeJdPPZPzpTx91GyOKvrylyo03jEZHmXEskmCHGXvDYDXQQGudLuVUQvIsPZEww/exec",
+        "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
         {
           method: "POST",
           headers: {
@@ -5659,7 +5673,7 @@ const clearEditCustomerSignature = () => {
                           }}
                         >
                           <PaperClipOutlined />
-                          <a href={viewPreviewUrl} download>
+                          <a href={viewPreviewUrl} download target="_blank">
                             {viewCauseOfFailureFile.name}
                           </a>
                         </div>
@@ -6082,7 +6096,7 @@ const clearEditCustomerSignature = () => {
                         }}
                       >
                         <PaperClipOutlined />
-                        <a href={downloadUrl} download>
+                        <a href={downloadUrl} download target="_blank">
                           {editCauseOfFailureImage?.name || "Uploaded Image"}
                         </a>
                         <Popconfirm
@@ -6353,7 +6367,11 @@ const clearEditCustomerSignature = () => {
           </div>
         </div>
         <div className="text-center mt-2">
-          <p className="text-center " style={{ fontSize: "14px" }}>
+            <p className="text-center m-0 p-0" style={{ fontSize: "14px", color:"#0D3884" }}>
+            Haitian Service Report Form Version: 2.00
+            
+          </p>
+          <p className="text-center m-0 p-0 mt-1" style={{ fontSize: "14px", color:"#0D3884"  }}>
             Crafted and Maintained by{" "}
             <a
               href="https://www.stratifytechno.com/"
