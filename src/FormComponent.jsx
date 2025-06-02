@@ -227,7 +227,7 @@ export default function FormComponent() {
       payload.append("originalFilename", file.name);
 
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
+        "https://script.google.com/macros/s/AKfycbwYvP76g3eK_AdvEtm3Yn22EVyMfRggjESP7yQqMLrObh5cXcLLvoih8Q6rjVaGjhWdVA/exec",
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -285,67 +285,6 @@ export default function FormComponent() {
         .trim()
     );
   };
-
-  // const handleEditImageDelete = async () => {
-  //   const isDriveLink = editViewUrl?.includes("drive.google.com/file/d/");
-
-  //   if (!isDriveLink) {
-  //     // ✅ If not from Drive, just clear locally
-  //     message.success("Image removed from form");
-  //     setEditCauseOfFailureImage(null);
-  //     setEditPreviewUrl(null);
-  //     setEditViewUrl(null);
-  //     setDownloadUrl(null);
-  //     setEditCauseText((prev) =>
-  //       prev
-  //         .split("\n")
-  //         .filter(
-  //           (line) =>
-  //             !line.startsWith("Image:") && !line.startsWith("Filename:")
-  //         )
-  //         .join("\n")
-  //         .trim()
-  //     );
-  //     return;
-  //   }
-
-  //   // Otherwise, call backend
-  //   const res = await fetch(
-  //     "https://script.google.com/macros/s/AKfycbw0j2PZ-2z0YeUYeTCt5ebb-qPinKpUmvLQPxTSEcMPPyQRu7JgQiVvm6RV-8pUfwVXOg/exec",
-  //     {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/x-www-form-urlencoded",
-  //       },
-  //       body: new URLSearchParams({
-  //         action: "deleteCauseImage",
-  //         imageUrl: editViewUrl,
-  //       }),
-  //     }
-  //   );
-
-  //   const result = await res.json();
-  //   if (result.success) {
-  //     message.success("Image deleted successfully");
-  //   } else {
-  //     message.warning("Image not found in Drive, removed from form");
-  //   }
-
-  //   // In both cases, clear local state
-  //   setEditCauseOfFailureImage(null);
-  //   setEditPreviewUrl(null);
-  //   setEditViewUrl(null);
-  //   setDownloadUrl(null);
-  //   setEditCauseText((prev) =>
-  //     prev
-  //       .split("\n")
-  //       .filter(
-  //         (line) => !line.startsWith("Image:") && !line.startsWith("Filename:")
-  //       )
-  //       .join("\n")
-  //       .trim()
-  //   );
-  // };
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -562,7 +501,7 @@ const clearEditCustomerSignature = () => {
     formData.append("causeImage", causeOfFailureImage);
 
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
+      "https://script.google.com/macros/s/AKfycbwYvP76g3eK_AdvEtm3Yn22EVyMfRggjESP7yQqMLrObh5cXcLLvoih8Q6rjVaGjhWdVA/exec",
       {
         method: "POST",
         body: formData,
@@ -897,7 +836,7 @@ const clearEditCustomerSignature = () => {
 
   const loadAllCustomerData = async () => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec?action=getAllCustomerData"
+      "https://script.google.com/macros/s/AKfycbwYvP76g3eK_AdvEtm3Yn22EVyMfRggjESP7yQqMLrObh5cXcLLvoih8Q6rjVaGjhWdVA/exec?action=getAllCustomerData"
     );
     const result = await res.json();
 
@@ -997,7 +936,7 @@ const clearEditCustomerSignature = () => {
   const fetchCustomerNames = async () => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec?action=getAllCustomerData`
+        `https://script.google.com/macros/s/AKfycbwYvP76g3eK_AdvEtm3Yn22EVyMfRggjESP7yQqMLrObh5cXcLLvoih8Q6rjVaGjhWdVA/exec?action=getAllCustomerData`
       );
       const result = await res.json();
 
@@ -1027,7 +966,7 @@ const clearEditCustomerSignature = () => {
   const handleCustomerSelect = async (selectedName) => {
     try {
       const res = await fetch(
-        `https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec?action=getCustomerData&name=${encodeURIComponent(
+        `https://script.google.com/macros/s/AKfycbwYvP76g3eK_AdvEtm3Yn22EVyMfRggjESP7yQqMLrObh5cXcLLvoih8Q6rjVaGjhWdVA/exec?action=getCustomerData&name=${encodeURIComponent(
           selectedName
         )}`
       );
@@ -1056,7 +995,7 @@ const clearEditCustomerSignature = () => {
   const fetchSRN = async () => {
     try {
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec"
+        "https://script.google.com/macros/s/AKfycbwYvP76g3eK_AdvEtm3Yn22EVyMfRggjESP7yQqMLrObh5cXcLLvoih8Q6rjVaGjhWdVA/exec"
       );
       const data = await response.json(); // ✅ Parse JSON directly
 
@@ -1352,12 +1291,12 @@ const clearEditCustomerSignature = () => {
         "Description field input limited to 1 line, 30 characters. Excess text won't be included.",
       note: "Note field input limited to 1 line, 30 characters. Excess text won't be included.",
     };
-    console.log(
-      "Checking field:",
-      field,
-      "value:",
-      JSON.stringify(stringValue)
-    );
+    // console.log(
+    //   "Checking field:",
+    //   field,
+    //   "value:",
+    //   JSON.stringify(stringValue)
+    // );
     let lines = stringValue.split("\n");
 
     // Enforce row limits
@@ -1373,24 +1312,12 @@ const clearEditCustomerSignature = () => {
       stringValue = lines.slice(0, maxRows[field]).join("\n");
     }
 
-    // Enforce character limits
-    // if (stringValue.length > maxLengths[field]) {
-    //     console.log("Too many characters for", field);
-
-    //   // message.warning(fieldMessages[field]);
-    //      notification.warning({
-    //     message: "Warning",
-    //     description: fieldMessages[field],
-    //     placement: "bottomRight",
-    //   });
-    //   stringValue = stringValue.substring(0, maxLengths[field]);
-    // }
 
     // Enforce character limits
     if (stringValue.length >= maxLengths[field]) {
       // Show warning only when the user hits the limit exactly (not less)
       if (stringValue.length === maxLengths[field]) {
-        console.log("Limit reached for", field);
+        // console.log("Limit reached for", field);
 
         notification.warning({
           message: "Warning",
@@ -1458,20 +1385,11 @@ const clearEditCustomerSignature = () => {
       stringValue = lines.slice(0, maxRows[field]).join("\n");
     }
 
-    // if (stringValue.length > maxLengths[field]) {
-    //   // message.warning(fieldMessages[field]);
-    //      notification.warning({
-    //     message: "Warning",
-    //     description: fieldMessages[field],
-    //     placement: "bottomRight",
-    //   });
-    //   stringValue = stringValue.substring(0, maxLengths[field]);
-    // }
 
     if (stringValue.length >= maxLengths[field]) {
       // Show warning only when the user hits the limit exactly (not less)
       if (stringValue.length === maxLengths[field]) {
-        console.log("Limit reached for", field);
+        // console.log("Limit reached for", field);
 
         notification.warning({
           message: "Warning",
@@ -2086,27 +2004,7 @@ const clearEditCustomerSignature = () => {
       });
     }
   };
-  // const clearTechnicianSignature = () => {
-  //       if (sigTechnician.current && !sigTechnician.current.isEmpty()) {
-  //     // message.success("Technician Signature saved successfully!");
-  //     notification.success({
-  //       message: "Success",
-  //       description: "Technician signature cleared successfully!",
-  //       placement: "bottomRight",
-  //     });
-  //   } else {
-  //     // message.error("Please draw a signature before saving.");
-  //       notification.error({
-  //       message: "Error",
-  //       description: "Please draw the technician signature before clearning.",
-  //       placement: "bottomRight",
-  //     });
-  //   }
-  //   sigTechnician.current.clear();
-  //   setSignatureTechnician("");
-  //   setIsTechnicianSignSaved(false);
-
-  // };
+  
 
   const clearTechnicianSignature = () => {
     if (sigTechnician.current && !sigTechnician.current.isEmpty()) {
@@ -2150,11 +2048,7 @@ const clearEditCustomerSignature = () => {
       });
     }
   };
-  // const clearCustomerSignature = () => {
-  //   sigCustomer.current.clear();
-  //   setSignatureCustomer("");
-  //   setIsCustomerSignSaved(false);
-  // };
+
   const clearCustomerSignature = () => {
     if (sigCustomer.current && !sigCustomer.current.isEmpty()) {
       sigCustomer.current.clear();
@@ -2203,7 +2097,7 @@ const clearEditCustomerSignature = () => {
       payload.append("customerName", customerName);
 
       const response = await fetch(
-        "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
+        "https://script.google.com/macros/s/AKfycbwYvP76g3eK_AdvEtm3Yn22EVyMfRggjESP7yQqMLrObh5cXcLLvoih8Q6rjVaGjhWdVA/exec",
         {
           method: "POST",
           headers: {
@@ -3367,7 +3261,7 @@ const fileName = `HT Service Report ${sanitizedEditCustomerName} ${editsrn || "N
 
     // Sending the file to the Google Apps Script for uploading to Drive
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
+      "https://script.google.com/macros/s/AKfycbwYvP76g3eK_AdvEtm3Yn22EVyMfRggjESP7yQqMLrObh5cXcLLvoih8Q6rjVaGjhWdVA/exec",
       {
         method: "POST",
         headers: {
@@ -3414,259 +3308,8 @@ const fileName = `HT Service Report ${sanitizedEditCustomerName} ${editsrn || "N
     "Goodwill",
   ];
 
-  //   const handleExportToExcel = () => {
-  //   if (!customerDataList.length) {
-  //     message.warning("No data to export.");
-  //     return;
-  //   }
-
-  //   const flatData = customerDataList.map((record) => ({
-  //     "Service Request Number": record["Service Request Number"],
-  //     "Customer Name": record["Customer Name"],
-  //     "Machine Type": record["Machine Type"],
-  //     "Address": record["Address"],
-  //     "Serial Number": record["Serial Number"],
-  //     "Contact": record["Contact"],
-  //     "Telephone": record["Telephone"],
-  //     "Installation Date": formatDate(record["Installation Date"]),
-  //     "Departure Date": formatDate(record["Departure Date"]),
-  //     "Return Date": formatDate(record["Return Date"]),
-  //     "Work Time": record["Work Time"],
-  //     "Service Technician": record["Service Technician"],
-  //     "Description": record["Description of work/of defect/failure mode"],
-  //     "Cause of Failure": record["Cause of Failure"],
-  //     "Notes": record["Notes/Further action required"],
-  //   }));
-
-  //   const worksheet = XLSX.utils.json_to_sheet(flatData);
-  //   const workbook = XLSX.utils.book_new();
-  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Customer Data");
-
-  //   const excelBuffer = XLSX.write(workbook, {
-  //     bookType: "xlsx",
-  //     type: "array",
-  //   });
-
-  //   const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-  //   saveAs(blob, `CustomerData_${dayjs().format("YYYY-MM-DD_HH-mm-ss")}.xlsx`);
-  // };
-
-  // const handleExportToExcel = () => {
-  //   if (!customerDataList.length) {
-  //     message.warning("No data to export.");
-  //     return;
-  //   }
-
-  //   const flatData = customerDataList.map((record) => {
-  //     const row = {};
-
-  //     EXPORT_COLUMNS.forEach((key) => {
-  //       let value = record[key];
-
-  //       // Convert boolean-like fields to "Yes"/"No"
-  //       if (typeof value === "boolean") {
-  //         value = value ? "Yes" : "No";
-  //       }
-
-  //       // Convert date to string
-  //       if (key.toLowerCase().includes("date")) {
-  //         value = formatDate(value);
-  //       }
-
-  //       // Clean up cause of failure
-  //       if (key === "Cause of Failure") {
-  //         value = (value ?? "")
-  //           .toString()
-  //           .split("\n")
-  //           .filter((line) => !line.trim().startsWith("Image:") && !line.trim().startsWith("Filename:"))
-  //           .join(" ")
-  //           .trim();
-  //       }
-
-  //       row[key] = value ?? ""; // Default to empty string
-  //     });
-
-  //     return row;
-  //   });
-
-  //   const worksheet = XLSX.utils.json_to_sheet(flatData);
-  //   const workbook = XLSX.utils.book_new();
-  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Service Report");
-
-  //   const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-  //   const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-
-  //   saveAs(blob, `Haitian_Service_Report_${dayjs().format("YYYY-MM-DD_HH-mm-ss")}.xlsx`);
-  // };
-
-  // const handleExportToExcel = () => {
-  //   if (!customerDataList.length) {
-  //     message.warning("No data to export.");
-  //     return;
-  //   }
-
-  //   // Sort by SRN in ascending order (numeric comparison)
-  //   const sortedData = [...customerDataList].sort((a, b) => {
-  //     const aSRN = parseInt(a["Service Request Number"], 10);
-  //     const bSRN = parseInt(b["Service Request Number"], 10);
-  //     return aSRN - bSRN;
-  //   });
-
-  //   const flatData = sortedData.map((record) => {
-  //     const row = {};
-
-  //     EXPORT_COLUMNS.forEach((key) => {
-  //       let value = record[key];
-
-  //       // Convert boolean-like fields to "Yes"/"No"
-  //       if (typeof value === "boolean") {
-  //         value = value ? "Yes" : "No";
-  //       }
-
-  //       // Format date values
-  //       if (key.toLowerCase().includes("date")) {
-  //         value = formatDate(value);
-  //       }
-
-  //       // Handle Cause of Failure with image link & filename
-  //       if (key === "Cause of Failure") {
-  //         const fullText = value ?? "";
-  //         const { downloadUrl, filename } = extractFileInfoFromCauseText(fullText);
-
-  //         const cleanedText = fullText
-  //           .toString()
-  //           .split("\n")
-  //           .filter(
-  //             (line) =>
-  //               !line.trim().startsWith("Image:") &&
-  //               !line.trim().startsWith("Filename:")
-  //           )
-  //           .join(" ")
-  //           .trim();
-
-  //         value = cleanedText;
-  //         if (filename || downloadUrl) {
-  //           value += `\nFilename: ${filename || "N/A"}\nImage: ${downloadUrl || "N/A"}`;
-  //         }
-  //       }
-
-  //       row[key] = value ?? "";
-  //     });
-
-  //     return row;
-  //   });
-
-  //   const worksheet = XLSX.utils.json_to_sheet(flatData);
-  //   const workbook = XLSX.utils.book_new();
-  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Service Report");
-
-  //   const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-  //   const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-
-  //   saveAs(blob, `Haitian_Service_Report_${dayjs().format("YYYY-MM-DD_HH-mm-ss")}.xlsx`);
-  // };
-
-  // const handleExportToExcel = () => {
-  //   if (!customerDataList.length) {
-  //     message.warning("No data to export.");
-  //     return;
-  //   }
-
-  //   const sortedData = [...customerDataList].sort((a, b) => {
-  //     const aSRN = parseInt(a["Service Request Number"], 10);
-  //     const bSRN = parseInt(b["Service Request Number"], 10);
-  //     return aSRN - bSRN;
-  //   });
-
-  //   const flatData = sortedData.map((record) => {
-  //     const row = {};
-
-  //     EXPORT_COLUMNS.forEach((key) => {
-  //       let value = record[key];
-
-  //       if (typeof value === "boolean") value = value ? "Yes" : "No";
-
-  //       if (key.toLowerCase().includes("date")) {
-  //         value = formatDate(value);
-  //       }
-
-  //       if (key === "Cause of Failure") {
-  //         const fullText = value ?? "";
-  //         const { downloadUrl, filename } = extractFileInfoFromCauseText(fullText);
-
-  //         const cleanedText = fullText
-  //           .toString()
-  //           .split("\n")
-  //           .filter(
-  //             (line) =>
-  //               !line.trim().startsWith("Image:") &&
-  //               !line.trim().startsWith("Filename:")
-  //           )
-  //           .join(" ")
-  //           .trim();
-
-  //         value = cleanedText;
-  //         if (filename || downloadUrl) {
-  //           value += `\nFilename: ${filename || "N/A"}\nImage: ${downloadUrl || "N/A"}`;
-  //         }
-  //       }
-
-  //       row[key] = value ?? "";
-  //     });
-
-  //     return row;
-  //   });
-
-  //   // Create worksheet and workbook
-  //   const worksheet = XLSX.utils.json_to_sheet(flatData, { header: EXPORT_COLUMNS });
-
-  //   // Apply styles manually
-  //   const range = XLSX.utils.decode_range(worksheet['!ref']);
-  //   for (let R = range.s.r; R <= range.e.r; ++R) {
-  //     for (let C = range.s.c; C <= range.e.c; ++C) {
-  //       const cellAddress = { c: C, r: R };
-  //       const cellRef = XLSX.utils.encode_cell(cellAddress);
-  //       if (!worksheet[cellRef]) continue;
-
-  //       worksheet[cellRef].s = {
-  //         font: {
-  //           bold: R === 0, // bold headers
-  //           sz: R === 0 ? 14 : 12,
-  //         },
-  //         alignment: {
-  //           wrapText: true,
-  //           vertical: "center",
-  //           horizontal: "left",
-  //         },
-  //         fill: R === 0 ? { fgColor: { rgb: "FFFF00" } } : undefined, // yellow background for headers
-  //         border: {
-  //           top: { style: "thin", color: { rgb: "000000" } },
-  //           bottom: { style: "thin", color: { rgb: "000000" } },
-  //           left: { style: "thin", color: { rgb: "000000" } },
-  //           right: { style: "thin", color: { rgb: "000000" } },
-  //         },
-  //       };
-  //     }
-  //   }
-
-  //   // Adjust column widths
-  //   worksheet["!cols"] = EXPORT_COLUMNS.map(() => ({ wch: 25 }));
-
-  //   const workbook = XLSX.utils.book_new();
-  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Service Report");
-
-  //   const excelBuffer = XLSX.write(workbook, {
-  //     bookType: "xlsx",
-  //     type: "array",
-  //     cellStyles: true, // enables style support
-  //   });
-
-  //   const blob = new Blob([excelBuffer], {
-  //     type: "application/octet-stream",
-  //   });
-
-  //   saveAs(blob, `Haitian_Service_Report_${dayjs().format("YYYY-MM-DD_HH-mm-ss")}.xlsx`);
-  // };
+ 
+ 
 
   const handleExportToExcel = () => {
     if (!customerDataList.length) {
@@ -3887,21 +3530,7 @@ const fileName = `HT Service Report ${sanitizedEditCustomerName} ${editsrn || "N
 
         return;
       }
-      // if (!signatureTechnician || !signatureManager || !signatureCustomer){
-      //   return message.error(
-      //     "The manager's signature must be uploaded. The technician's and customer's signatures must be saved before submitting."
-      //   );
-      // }
-
-      // if (
-      //   !isTechnicianSignSaved ||
-      //   !isCustomerSignSaved ||
-      //   !isManagerSignUploaded
-      // ) {
-      //   return message.error(
-      //     "Please ensure the manager's signature is uploaded, and the technician's and customer's signatures are saved before submitting."
-      //   );
-      // }
+      
 
       if (
         !isTechnicianSignSaved ||
@@ -3997,7 +3626,7 @@ const fileName = `HT Service Report ${sanitizedEditCustomerName} ${editsrn || "N
       // setLoading(true);
 
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
+        "https://script.google.com/macros/s/AKfycbwYvP76g3eK_AdvEtm3Yn22EVyMfRggjESP7yQqMLrObh5cXcLLvoih8Q6rjVaGjhWdVA/exec",
         {
           method: "POST",
           body: formData,
@@ -4125,193 +3754,7 @@ const fileName = `HT Service Report ${sanitizedEditCustomerName} ${editsrn || "N
     loadAllCustomerData();
   };
 
-  // const handleEditSubmit = async () => {
-  //   try {
-  //     setIsEditSubmitting(true);
-  //     setEditLoading(true);
-  //     const values = await editForm.validateFields();
-  //     const isTooLong =
-  // (values.serialNumber?.length || 0) > 100 ||
-  // (values.address?.length || 0) > 100 ||
-  // (values["description of work/of defect/failure mode"]?.length || 0) > 1000 ||
-  // (values["cause of failure"]?.length || 0) > 500 ||
-  // (values["notes/further action required"]?.length || 0) > 200;
-
-  //     if (isTooLong) {
-  //       message.error(
-  //         "Some inputs exceed allowed limits. Please fix them before submitting."
-  //       );
-  //       setIsEditSubmitting(false);
-  //       setEditLoading(false);
-  //       return;
-  //     }
-  //     const technicianCanvasEmpty = editSigTechnician.current?.isEmpty?.();
-  //     const customerCanvasEmpty = editSigCustomer.current?.isEmpty?.();
-  //     const managerEmpty = !editSignatureManager;
-  //     if (
-  //       !isEditTechnicianSignSaved ||
-  //       technicianCanvasEmpty ||
-  //       !isEditCustomerSignSaved ||
-  //       customerCanvasEmpty ||
-  //       !isEditManagerSignSaved ||
-  //       managerEmpty
-  //     ) {
-  //       message.error(
-  //         "The manager's signature must be uploaded. The technician's and customer's signatures must be saved before submitting."
-  //       );
-
-  //       setIsEditSubmitting(false);
-  //       setEditLoading(false);
-  //       return;
-  //     }
-  //     // Convert dates to proper string format
-  //     const convertToDubaiTime = (date) =>
-  //       date ? dayjs(date).tz("Asia/Dubai").format("DD-MM-YYYY") : "N/A";
-
-  //     const installationDate = convertToDubaiTime(values.installationDate);
-  //     const departureDate = convertToDubaiTime(values.departureDate);
-  //     const returnDate = convertToDubaiTime(values.returnDate);
-
-  //     const cleanedPartsUsed = (editTabledata || []).map((row) => ({
-  //       partNumber: row?.partNumber?.toString().trim() || "",
-  //       description: row?.description?.toString().trim() || "",
-  //       quantity: row?.quantity ? Number(row.quantity) : "",
-  //       note: row?.note?.toString().trim() || "",
-  //     }));
-
-  //     // Don’t over-filter — let empty rows go if necessary
-  //     const partsUsed = cleanedPartsUsed.length > 0 ? cleanedPartsUsed : [{}];
-
-  //     // Prepare causeOfFailure text (initial)
-  //     let updatedCauseText = editCauseText?.trim() || "";
-
-  //     if (
-  //       editCauseOfFailureImage &&
-  //       (editCauseOfFailureImage.originFileObj ||
-  //         editCauseOfFailureImage instanceof File)
-  //     ) {
-  //       // A new image is being uploaded
-  //       const fileToUpload =
-  //         editCauseOfFailureImage.originFileObj || editCauseOfFailureImage;
-  //       const result = await uploadImageBase64(fileToUpload);
-
-  //       if (result.success) {
-  //         const newImageUrl = result.imageUrl;
-  //         updatedCauseText += `\nImage: ${newImageUrl}\nFilename: ${fileToUpload.name}`;
-  //       } else {
-  //         message.error("Image upload failed, submission aborted.");
-  //         setIsEditSubmitting(false);
-  //         return;
-  //       }
-  //     } else if (editPreviewUrl && editCauseOfFailureImage?.name) {
-  //       // No new upload, but existing image still in preview — re-attach it
-  //       updatedCauseText += `\nImage: ${editViewUrl}\nFilename: ${editCauseOfFailureImage.name}`;
-  //     }
-
-  //     // Build form data
-  //     const formData = new FormData();
-  //     formData.append("action", "updateData");
-  //     formData.append("srn", selectedRecord?.["Service Request Number"]);
-  //     formData.append("customerName", values.customerName);
-  //     formData.append("machineType", values.machineType);
-  //     formData.append("address", values.address);
-  //     formData.append("serialNumber", values.serialNumber);
-  //     formData.append("contact", values.contact);
-  //     formData.append("installationDate", installationDate);
-  //     formData.append("telephone", values.telephone);
-  //     formData.append("workTime", values.workTime);
-  //     // formData.append("serviceTechnician", values.serviceTechnician);
-  //     formData.append("serviceTechnician", values.serviceTechnician.join(", "));
-  //     formData.append("departureDate", departureDate);
-  //     formData.append("returnDate", returnDate);
-  //     formData.append(
-  //       "description",
-  //       values["description of work/of defect/failure mode"]
-  //     );
-  //     formData.append("notes", values["notes/further action required"]);
-  //     formData.append("causeOfFailure", updatedCauseText);
-  //     // formData.append("partsUsed", JSON.stringify(cleanedPartsUsed));
-  //     partsUsed.forEach((part, index) => {
-  //       formData.append(`Part Number[${index}]`, part.partNumber);
-  //       formData.append(`Description[${index}]`, part.description);
-  //       formData.append(`Quantity[${index}]`, part.quantity);
-  //       formData.append(`Note[${index}]`, part.note);
-  //     });
-
-  //     reportOptions.forEach((option) => {
-  //       formData.append(
-  //         option,
-  //         values.report?.includes(option) ? "true" : "false"
-  //       );
-  //     });
-
-  //     serviceOptions.forEach((option) => {
-  //       formData.append(
-  //         option,
-  //         values.serviceType?.includes(option) ? "true" : "false"
-  //       );
-  //     });
-
-  //     // ✅ Submit
-  //     // console.log("Submitting partsUsed", cleanedPartsUsed);
-  //     // formData.forEach((value, key) => console.log(`${key}: ${value}`));
-
-  //     // console.log("Parts used about to be submitted:", cleanedPartsUsed);
-
-  //     await postUpdate(formData);
-
-  //     const checkboxValues = {};
-  //     [...reportOptions, ...serviceOptions].forEach((option) => {
-  //       checkboxValues[option] = false;
-  //     });
-  //     values.report?.forEach((option) => (checkboxValues[option] = true));
-  //     values.serviceType?.forEach((option) => (checkboxValues[option] = true));
-
-  //     const pdfPayload = {
-  //       srn: selectedRecord?.["Service Request Number"] || "N/A",
-  //       customerName: values.customerName,
-  //       machineType: values.machineType,
-  //       address: values.address,
-  //       serialNumber: values.serialNumber,
-  //       contact: values.contact,
-  //       installationDate,
-  //       telephone: values.telephone,
-  //       workTime: values.workTime,
-  //       serviceTechnician: values.serviceTechnician,
-  //       departureDate,
-  //       returnDate,
-  //       description: values["description of work/of defect/failure mode"],
-  //       // causeOfFailure: updatedCauseText,
-  //       causeOfFailure: editCauseText?.trim() || "",
-  //       notes: values["notes/further action required"],
-  //       partsUsed: cleanedPartsUsed,
-  //       signatures: {
-  //         technician: editSignatureTechnician,
-  //         manager: editSignatureManager,
-  //         customer: editSignatureCustomer,
-  //       },
-  //     };
-
-  //     generateEditPDF(pdfPayload, checkboxValues, cleanedPartsUsed);
-  //     setEditModalOpen(false);
-  //     setIsEditTechnicianSignSaved(false);
-  //     setIsEditCustomerSignSaved(false);
-  //     setIsEditManagerSignSaved(false);
-  //     hasInitializedEditForm.current = false;
-
-  //     editSigTechnician.current?.clear();
-  //     editSigManager.current?.clear();
-  //     editSigCustomer.current?.clear();
-  //     setEditSignatureManager(null);
-  //     loadAllCustomerData();
-  //   } catch (err) {
-  //     message.error("Failed to submit update: " + err.message);
-  //   } finally {
-  //     setIsEditSubmitting(false);
-  //     setEditLoading(false);
-  //   }
-  // };
-
+  
   const handleEditSubmit = async () => {
     try {
       setIsEditSubmitting(true);
@@ -4390,7 +3833,7 @@ const fileName = `HT Service Report ${sanitizedEditCustomerName} ${editsrn || "N
       if (isEditImageMarkedForDeletion && editViewUrl) {
         try {
           const deleteRes = await fetch(
-            "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
+            "https://script.google.com/macros/s/AKfycbwYvP76g3eK_AdvEtm3Yn22EVyMfRggjESP7yQqMLrObh5cXcLLvoih8Q6rjVaGjhWdVA/exec",
             {
               method: "POST",
               headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -4572,7 +4015,7 @@ const fileName = `HT Service Report ${sanitizedEditCustomerName} ${editsrn || "N
 
   const postUpdate = async (formData) => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
+      "https://script.google.com/macros/s/AKfycbwYvP76g3eK_AdvEtm3Yn22EVyMfRggjESP7yQqMLrObh5cXcLLvoih8Q6rjVaGjhWdVA/exec",
       {
         method: "POST",
         body: formData,
@@ -4602,7 +4045,7 @@ const fileName = `HT Service Report ${sanitizedEditCustomerName} ${editsrn || "N
 
   const submitUpdate = async (payload) => {
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
+      "https://script.google.com/macros/s/AKfycbwYvP76g3eK_AdvEtm3Yn22EVyMfRggjESP7yQqMLrObh5cXcLLvoih8Q6rjVaGjhWdVA/exec",
       {
         method: "POST",
         body: new URLSearchParams(payload),
@@ -4632,7 +4075,7 @@ const fileName = `HT Service Report ${sanitizedEditCustomerName} ${editsrn || "N
     payload.append("imageUrl", url);
 
     const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
+      "https://script.google.com/macros/s/AKfycbwYvP76g3eK_AdvEtm3Yn22EVyMfRggjESP7yQqMLrObh5cXcLLvoih8Q6rjVaGjhWdVA/exec",
       {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -4661,7 +4104,7 @@ const fileName = `HT Service Report ${sanitizedEditCustomerName} ${editsrn || "N
 
     try {
       const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbxHh2gKZgkLbkQsOjmdOtf6UkDUwgOwmrQcknwR6H6QJuJ9Yjsb7yuSXJh7DK26Fi0Z/exec",
+        "https://script.google.com/macros/s/AKfycbwYvP76g3eK_AdvEtm3Yn22EVyMfRggjESP7yQqMLrObh5cXcLLvoih8Q6rjVaGjhWdVA/exec",
         {
           method: "POST",
           headers: {
@@ -4987,33 +4430,7 @@ const fileName = `HT Service Report ${sanitizedEditCustomerName} ${editsrn || "N
                       </Form.Item>
                     </div>
 
-                    {/* <div className="col-12 col-lg-4">
-                      <Form.Item
-                        label="Service Technician"
-                        name="serviceTechnician"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please select a service technician",
-                          },
-                   
-                        ]}
-                      >
-                        <Select placeholder="Select a service technician">
-                          <Select.Option value="Palani">Palani</Select.Option>
-                          <Select.Option value="Sampath">Sampath</Select.Option>
-                          <Select.Option value="Karpagaraj">
-                            Karpagaraj
-                          </Select.Option>
-                          <Select.Option value="Balaji">Balaji</Select.Option>
-                          <Select.Option value="Eshwar">Eshwar</Select.Option>
-                          <Select.Option value="ShivaSundar">
-                            ShivaSundar
-                          </Select.Option>
-                        </Select>
-                      </Form.Item>
-                    </div> */}
-
+                    
                     <div className="col-12 col-lg-4">
                       <Form.Item
                         label="Service Technician"
@@ -5901,30 +5318,7 @@ const fileName = `HT Service Report ${sanitizedEditCustomerName} ${editsrn || "N
                   </div>
 
                   <div className="col-12 col-lg-4">
-                    {/* <Form.Item
-                      label="Service Technician"
-                      name="serviceTechnician"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please select a service technician",
-                        },
-                 
-                      ]}
-                    >
-                      <Select placeholder="Select a service technician">
-                        <Select.Option value="Palani">Palani</Select.Option>
-                        <Select.Option value="Sampath">Sampath</Select.Option>
-                        <Select.Option value="Karpagaraj">
-                          Karpagaraj
-                        </Select.Option>
-                        <Select.Option value="Balaji">Balaji</Select.Option>
-                        <Select.Option value="Eshwar">Eshwar</Select.Option>
-                        <Select.Option value="ShivaSundar">
-                          ShivaSundar
-                        </Select.Option>
-                      </Select>
-                    </Form.Item> */}
+                    
                     <Form.Item
                       label="Service Technician"
                       name="serviceTechnician"
