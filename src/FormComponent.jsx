@@ -1301,7 +1301,7 @@ const clearEditCustomerSignature = () => {
 
     // Enforce row limits
     if (lines.length > maxRows[field]) {
-      console.log("Too many lines for", field);
+      // console.log("Too many lines for", field);
 
       // message.warning(fieldMessages[field]);
       notification.warning({
