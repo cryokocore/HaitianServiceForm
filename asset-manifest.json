@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/HaitianServiceForm/static/css/main.da12db77.css",
-    "main.js": "/HaitianServiceForm/static/js/main.dcc531f8.js",
+    "main.js": "/HaitianServiceForm/static/js/main.cfa4ca89.js",
     "static/js/239.81f2280a.chunk.js": "/HaitianServiceForm/static/js/239.81f2280a.chunk.js",
     "static/js/977.2c90715d.chunk.js": "/HaitianServiceForm/static/js/977.2c90715d.chunk.js",
     "static/js/667.de57f5ca.chunk.js": "/HaitianServiceForm/static/js/667.de57f5ca.chunk.js",
@@ -11,13 +11,13 @@
     "static/media/logo.svg": "/HaitianServiceForm/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
     "index.html": "/HaitianServiceForm/index.html",
     "main.da12db77.css.map": "/HaitianServiceForm/static/css/main.da12db77.css.map",
-    "main.dcc531f8.js.map": "/HaitianServiceForm/static/js/main.dcc531f8.js.map",
+    "main.cfa4ca89.js.map": "/HaitianServiceForm/static/js/main.cfa4ca89.js.map",
     "239.81f2280a.chunk.js.map": "/HaitianServiceForm/static/js/239.81f2280a.chunk.js.map",
     "667.de57f5ca.chunk.js.map": "/HaitianServiceForm/static/js/667.de57f5ca.chunk.js.map",
     "453.49b82efc.chunk.js.map": "/HaitianServiceForm/static/js/453.49b82efc.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.da12db77.css",
-    "static/js/main.dcc531f8.js"
+    "static/js/main.cfa4ca89.js"
   ]
 }
