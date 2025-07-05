@@ -1301,7 +1301,7 @@ const clearEditCustomerSignature = () => {
 
     // Enforce row limits
     if (lines.length > maxRows[field]) {
-      // console.log("Too many lines for", field);
+      console.log("Too many lines for", field);
 
       // message.warning(fieldMessages[field]);
       notification.warning({
@@ -2661,7 +2661,8 @@ const clearEditCustomerSignature = () => {
 
     doc.setFontSize(9);
     doc.text(
-      "PO BOX: 49648, Phase 1, Hamriya Free Zone Sharjah, United Arab Emirates",
+      // "PO BOX: 49648, Phase 1, Hamriya Free Zone Sharjah, United Arab Emirates",
+      "Umm El Thoub, Umm Al Quwain, United Arab Emirates",
       centerX, // Proper centering
       footerY + 6,
       { align: "center" }
@@ -3217,7 +3218,8 @@ const clearEditCustomerSignature = () => {
 
     doc.setFontSize(9);
     doc.text(
-      "PO BOX: 49648, Phase 1, Hamriya Free Zone Sharjah, United Arab Emirates",
+      // "PO BOX: 49648, Phase 1, Hamriya Free Zone Sharjah, United Arab Emirates",
+      "Umm El Thoub, Umm Al Quwain, United Arab Emirates",
       centerX, // Proper centering
       footerY + 6,
       { align: "center" }
